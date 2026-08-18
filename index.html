@@ -1,899 +1,1150 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meerkeuze Trainer IT-Organisation</title>
-    <style>
-        :root {
-            --bg: #04142c;
-            --panel-bg: #0c2b4d;
-            --card-front: #103c6e;
-            --card-back: #175294;
-            --btn-bg: #0a2540;
-            --btn-border: #206ab0;
-            --btn-hover: #1e5a96;
-            --text: #e0f2fe;
-            --text-muted: #7dd3fc;
-            --correct-bg: #065f46;
-            --correct-border: #10b981;
-            --wrong-bg: #7f1d1d;
-            --wrong-border: #ef4444;
-            --primary: #38bdf8;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT-Organisation — Meerkeuze Trainer</title>
+<style>
+    :root {
+        --bg: #0b0f17;
+        --bg-grad: radial-gradient(circle at 20% -10%, #16233a 0%, #0b0f17 45%), radial-gradient(circle at 100% 0%, #1a1030 0%, #0b0f17 50%);
+        --surface: #121826;
+        --surface-2: #171f30;
+        --border: #262f45;
+        --border-soft: #1d2536;
+        --text: #e7ecf5;
+        --text-dim: #97a2ba;
+        --text-faint: #616d87;
+        --accent: #7c9dff;
+        --accent-2: #a78bfa;
+        --accent-soft: rgba(124, 157, 255, 0.12);
+        --correct: #34d399;
+        --correct-bg: rgba(52, 211, 153, 0.14);
+        --correct-border: #2fae82;
+        --wrong: #fb7185;
+        --wrong-bg: rgba(251, 113, 133, 0.14);
+        --wrong-border: #e35d72;
+        --radius: 18px;
+        --radius-sm: 12px;
+        --shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+        --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-        }
+    html, body { height: 100%; }
 
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+    body {
+        font-family: var(--font);
+        background: var(--bg-grad), var(--bg);
+        background-attachment: fixed;
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2.5rem 1.25rem 3.5rem;
+        -webkit-font-smoothing: antialiased;
+    }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
+    .wrap { width: 100%; max-width: 720px; display: flex; flex-direction: column; align-items: center; }
 
-        .controls {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
+    header { text-align: center; margin-bottom: 1.75rem; }
 
-        select, button.control-btn {
-            background: var(--panel-bg);
-            color: var(--text);
-            border: 1px solid var(--btn-border);
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+    .eyebrow {
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
 
-        select:focus, button.control-btn:hover {
-            border-color: var(--primary);
-            background: var(--btn-hover);
-            outline: none;
-        }
+    h1 {
+        font-size: 1.9rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        background: linear-gradient(120deg, #f2f5fb, #b9c6e6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
 
-        .card-container {
-            perspective: 1000px;
-            width: 100%;
-            max-width: 600px;
-            height: 250px;
-            margin-bottom: 1.5rem;
-        }
+    .subtitle { color: var(--text-dim); font-size: 0.95rem; margin-top: 0.4rem; }
 
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        }
+    /* ---------- Chapter picker ---------- */
+    .chapter-panel {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+    }
 
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
+    .chapter-panel-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-bottom: 0.7rem;
+        font-weight: 600;
+    }
 
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid var(--btn-border);
-        }
+    .chapter-list { display: flex; flex-direction: column; gap: 0.5rem; }
 
-        .card-front {
-            background-color: var(--card-front);
-            overflow-y: auto;
-        }
+    .chapter-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.55rem 0.7rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: background 0.15s, border-color 0.15s;
+        background: transparent;
+    }
 
-        .card-back {
-            background-color: var(--card-back);
-            transform: rotateY(180deg);
-        }
+    .chapter-row:hover { background: var(--surface-2); }
 
-        .badge {
-            position: absolute;
-            top: 1rem;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-        }
+    .chapter-row.active {
+        background: var(--accent-soft);
+        border-color: rgba(124, 157, 255, 0.4);
+    }
 
-        .content {
-            font-size: 1.2rem;
-            font-weight: 400;
-            line-height: 1.5;
-        }
+    .chapter-row input { display: none; }
 
-        .card-back .content {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: white;
-        }
+    .chapter-radio {
+        width: 16px; height: 16px; border-radius: 50%;
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+        position: relative;
+        transition: border-color 0.15s;
+    }
 
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 2rem;
-        }
+    .chapter-row.active .chapter-radio { border-color: var(--accent); }
 
-        .option-btn {
-            background: var(--btn-bg);
-            color: var(--text);
-            border: 2px solid var(--btn-border);
-            padding: 1rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
+    .chapter-row.active .chapter-radio::after {
+        content: "";
+        position: absolute; inset: 3px;
+        border-radius: 50%;
+        background: var(--accent);
+    }
 
-        .option-btn:hover:not(:disabled) {
-            background: var(--btn-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
+    .chapter-info { flex: 1; min-width: 0; }
 
-        .option-btn.correct {
-            background: var(--correct-bg) !important;
-            border-color: var(--correct-border) !important;
-            color: white;
-        }
+    .chapter-name {
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-        .option-btn.wrong {
-            background: var(--wrong-bg) !important;
-            border-color: var(--wrong-border) !important;
-            opacity: 0.7;
-        }
+    .chapter-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+    }
 
-        .option-btn:disabled {
-            cursor: default;
-        }
+    .chapter-bar-track {
+        flex: 1;
+        height: 6px;
+        border-radius: 4px;
+        background: var(--border-soft);
+        overflow: hidden;
+    }
 
-        .nav-buttons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            width: 100%;
-            max-width: 600px;
-        }
+    .chapter-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
 
-        .progress {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
+    .chapter-count {
+        font-size: 0.72rem;
+        color: var(--text-faint);
+        font-variant-numeric: tabular-nums;
+        min-width: 3.4em;
+        text-align: right;
+    }
 
-        #nextBtn {
-            width: 100%;
-            background: var(--primary);
-            color: #020617;
-            font-weight: bold;
-            font-size: 1.1rem;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            display: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+    /* ---------- Card ---------- */
+    .card-container {
+        perspective: 1400px;
+        width: 100%;
+        min-height: 190px;
+        margin-bottom: 1.3rem;
+    }
 
-        #nextBtn:hover {
-            background: #7dd3fc;
-        }
+    .card {
+        width: 100%;
+        min-height: 190px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        @media (max-width: 500px) {
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
-            .card-container {
-                height: 200px;
-            }
-        }
-    </style>
+    .card.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1.9rem 1.8rem;
+        border-radius: var(--radius);
+        text-align: center;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+    }
+
+    .card-front {
+        background: linear-gradient(160deg, #151c2c, #10151f);
+        min-height: 190px;
+        height: auto;
+        position: relative;
+    }
+
+    .card-back {
+        background: linear-gradient(160deg, #171f30, #10151f);
+        transform: rotateY(180deg);
+        min-height: 190px;
+        height: auto;
+    }
+
+    .card-back.is-correct { background: linear-gradient(160deg, #12261f, #0f1a16); border-color: var(--correct-border); }
+    .card-back.is-wrong { background: linear-gradient(160deg, #291418, #180f12); border-color: var(--wrong-border); }
+
+    .badge-row {
+        position: absolute;
+        top: 0.9rem;
+        left: 0.9rem;
+        right: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-faint);
+        background: var(--surface-2);
+        border: 1px solid var(--border-soft);
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .badge.qtype { color: var(--accent); border-color: rgba(124,157,255,0.35); }
+
+    .content {
+        font-size: 1.12rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--text);
+        margin-top: 1.1rem;
+    }
+
+    .card-back .content {
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: white;
+        margin-top: 1.1rem;
+    }
+
+    .card-back .content.long { font-size: 1.05rem; font-weight: 500; line-height: 1.5; }
+
+    .result-badge {
+        position: absolute;
+        top: 0.9rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+        padding: 0.3rem 0.8rem;
+        border-radius: 999px;
+    }
+
+    .result-badge.is-correct { color: #86efc3; background: rgba(52,211,153,0.15); }
+    .result-badge.is-wrong { color: #ffb1bd; background: rgba(251,113,133,0.15); }
+
+    /* ---------- Options ---------- */
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+        width: 100%;
+        margin-bottom: 1.6rem;
+    }
+
+    .option-btn {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 0.85rem 0.9rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.96rem;
+        font-weight: 450;
+        line-height: 1.35;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s, transform 0.1s;
+        min-height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .option-btn .num {
+        font-size: 0.66rem;
+        color: var(--text-faint);
+        margin-right: 0.45rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: var(--surface-2);
+        transform: translateY(-1px);
+    }
+
+    .option-btn.correct {
+        background: var(--correct-bg) !important;
+        border-color: var(--correct-border) !important;
+        color: #d6fdea;
+    }
+
+    .option-btn.wrong {
+        background: var(--wrong-bg) !important;
+        border-color: var(--wrong-border) !important;
+        color: #ffd9de;
+    }
+
+    .option-btn:disabled { cursor: default; }
+    .option-btn:disabled:not(.correct):not(.wrong) { opacity: 0.45; }
+
+    /* ---------- Nav ---------- */
+    .nav-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.85rem;
+        width: 100%;
+    }
+
+    .progress {
+        color: var(--text-faint);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .score-pill {
+        font-size: 0.75rem;
+        color: var(--correct);
+        background: var(--correct-bg);
+        border-radius: 999px;
+        padding: 0.15rem 0.55rem;
+    }
+
+    #nextBtn {
+        width: 100%;
+        background: linear-gradient(120deg, var(--accent), var(--accent-2));
+        color: #0a0d16;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.95rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        display: none;
+        cursor: pointer;
+        transition: filter 0.15s, transform 0.1s;
+    }
+
+    #nextBtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+    footer {
+        margin-top: 2rem;
+        color: var(--text-faint);
+        font-size: 0.75rem;
+        text-align: center;
+    }
+
+    kbd {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.05rem 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    @media (max-width: 560px) {
+        .options-grid { grid-template-columns: 1fr; }
+        h1 { font-size: 1.5rem; }
+    }
+</style>
 </head>
 <body>
 
-<header>
-    <h1>Meerkeuze Trainer</h1>
-    <p style="color: var(--text-muted)">Lees de uitleg en kies het juiste begrip</p>
-</header>
+<div class="wrap">
+    <header>
+        <div class="eyebrow">PXL · 41DVO1050</div>
+        <h1>IT-Organisation Trainer</h1>
+        <p class="subtitle">Herexamen-training — begrippen, rollen &amp; onderscheid scherp krijgen</p>
+    </header>
 
-<div class="controls">
-    <select id="chapterSelect"></select>
-</div>
+    <div class="chapter-panel">
+        <div class="chapter-panel-title">Hoofdstuk</div>
+        <div class="chapter-list" id="chapterList"></div>
+    </div>
 
-<div class="card-container" id="cardContainer">
-    <div class="card" id="card">
-        <div class="card-face card-front">
-            <span class="badge" id="frontChapter"></span>
-            <div class="content" id="frontText">Laden...</div>
-        </div>
-        <div class="card-face card-back">
-            <span class="badge" id="resultBadge" style="font-weight: bold; font-size: 1rem;"></span>
-            <div class="content" id="backText"></div>
+    <div class="card-container" id="cardContainer">
+        <div class="card" id="card">
+            <div class="card-face card-front">
+                <div class="badge-row">
+                    <span class="badge" id="frontChapter"></span>
+                    <span class="badge qtype" id="frontType"></span>
+                </div>
+                <div class="content" id="frontText">Laden...</div>
+            </div>
+            <div class="card-face card-back" id="cardBack">
+                <span class="result-badge" id="resultBadge"></span>
+                <div class="content" id="backText"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="options-grid" id="optionsContainer">
-    <!-- Buttons via JS -->
-</div>
+    <div class="options-grid" id="optionsContainer"></div>
 
-<div class="nav-buttons">
-    <span class="progress" id="progress"></span>
-    <button id="nextBtn">Volgende Vraag &rarr;</button>
+    <div class="nav-buttons">
+        <span class="progress"><span id="progress"></span><span class="score-pill" id="scorePill"></span></span>
+        <button id="nextBtn">Volgende vraag &rarr;</button>
+    </div>
+
+    <footer>
+        Kies met <kbd>1</kbd>–<kbd>4</kbd> · <kbd>Enter</kbd> / <kbd>Spatie</kbd> voor volgende
+    </footer>
 </div>
 
 <script>
-    const flashcardsData = [
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Core business",
-            "def": "De kernactiviteit/reden van bestaan van een bedrijf; levert de belangrijkste waarde aan klanten."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "KMO",
-            "def": "Verzamelnaam voor micro-, kleine en middelgrote ondernemingen."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Multinational",
-            "def": "Zeer grote onderneming met vestigingen in meerdere landen."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Afdeling",
-            "def": "Eenheid met eigen taken/verantwoordelijkheden binnen een organisatie."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Operationele afdelingen",
-            "def": "Doen het bedrijf draaien: maken producten/leveren kern-diensten; meestal geen klantcontact."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Commerciële afdelingen",
-            "def": "Doen het bedrijf groeien: naar de markt brengen en verkopen; veel klantcontact."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Ondersteunende afdelingen",
-            "def": "Faciliteren de werking achter de schermen, geen contact met klanten."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Outsourcing",
-            "def": "Afdelingen/activiteiten door een extern bedrijf laten uitvoeren om kosten/risico’s te beperken of middelen te delen (shared services)."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Proces",
-            "def": "Reeks activiteiten in vaste volgorde om een specifiek resultaat te bereiken."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Automatisch proces",
-            "def": "Processtappen verlopen volledig door systemen zonder menselijke tussenkomst."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Semiautomatisch proces",
-            "def": "Deel automatisch, deel manueel; mens en systeem werken samen."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Manueel proces",
-            "def": "Alle stappen worden door mensen uitgevoerd."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "CIO / CTO",
-            "def": "IT-functies (Chief Information Officer / Chief Technology Officer) in grote organisaties."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "ICT-manager / ICT-directeur",
-            "def": "Leidinggevenden van de IT-afdeling in middelgrote/kleinere organisaties."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Software",
-            "def": "Alle computerprogramma’s (van OS tot games en tools)."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Bedrijfsapplicatie",
-            "def": "Software gericht op bedrijfsactiviteiten (klantenbeheer, facturatie, documentbeheer, websites, opleidingen)."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "ERP",
-            "def": "Enterprise Resource Planning"
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "CRM",
-            "def": "Customer Relationship Management"
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "DMS",
-            "def": "Document Management System"
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "CMS",
-            "def": "Content Management System: beheer van websites en digitale content."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "LMS",
-            "def": "Learning Management System"
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Embedded software",
-            "def": "Software in toestellen anders dan pc/laptop/server (bv. tv, digibox, spelconsole)."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Configuratie",
-            "def": "Functie uitbreiden door instellingen aan te passen."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Customisatie",
-            "def": "Functies inrichten/uitbreiden zonder code (bv. modules/plugins)."
-        },
-        {
-            "chapter": "Hoofdstuk 1: IT Landschap",
-            "term": "Development",
-            "def": "Uitbreiden/integreren met code (bv. koppelingen, maatwerk-thema’s)."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Centralisatie",
-            "def": "Beslissingsbevoegdheden geconcentreerd aan de top van de organisatie."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Decentralisatie",
-            "def": "Beslissingsbevoegdheden verdeeld over meerdere niveaus in de organisatie."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Delegeren",
-            "def": "Overdragen van taken, bevoegdheden en verantwoordelijkheden aan een lager niveau."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Divisionele organisatie",
-            "def": "Indeling op basis van producten, markten of regio’s, waarbij elke divisie min of meer zelfstandig werkt."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Ententestructuur",
-            "def": "Beslissingen worden gezamenlijk genomen in overleg, zonder duidelijke baas."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Escaleren",
-            "def": "Een probleem of conflict doorgeven naar een hoger hiërarchisch niveau wanneer je het zelf niet kan oplossen."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Formele organisatie",
-            "def": "Officiële verdeling van taken, functies en verantwoordelijkheden."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Functie",
-            "def": "Een geheel van samenhangende taken uitgevoerd door één persoon of rol."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Functionele organisatie",
-            "def": "Indeling op basis van functies, zoals marketing, HR of productie."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Informele organisatie",
-            "def": "Feitelijke samenwerking en relaties buiten de formele structuur."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Lijn-staforganisatie",
-            "def": "Lijnstructuur aangevuld met specialisten die adviseren en ondersteunen, maar geen bevelsbevoegdheid hebben."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Lijnorganisatie",
-            "def": "Klassieke piramidestructuur waarbij elke medewerker één leidinggevende heeft."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Matrixorganisatie",
-            "def": "Structuur waarin medewerkers rapporteren aan meerdere leidinggevenden, bijvoorbeeld project én functie."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Organisatie",
-            "def": "Samenwerkingsverband van mensen en middelen om een doel te bereiken."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Organisatiestructuur",
-            "def": "De manier waarop taken, verantwoordelijkheden en bevoegdheden verdeeld zijn."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Organogram",
-            "def": "Schematische weergave van de formele structuur en gezagsverhoudingen."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Platte structuur",
-            "def": "Structuur met weinig hiërarchische lagen tussen top en werkvloer."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Spanwijdte",
-            "def": "Het aantal medewerkers waaraan een leidinggevende direct leiding geeft."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Steile structuur",
-            "def": "Structuur met veel hiërarchische lagen tussen top en werkvloer."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Taak",
-            "def": "Een afgebakende verzameling activiteiten met één doel."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Verantwoordelijkheid",
-            "def": "De plicht om toegewezen taken uit te voeren en de gevolgen te dragen."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Verticale differentiatie",
-            "def": "Verdelen van taken over verschillende hiërarchische niveaus."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Horizontale differentiatie",
-            "def": "Verdelen van taken binnen hetzelfde niveau, bijvoorbeeld op basis van functie, product, markt of regio."
-        },
-        {
-            "chapter": "Hoofdstuk 2: Organisatiestructuren",
-            "term": "Bevoegdheid",
-            "def": "Het recht om bepaalde taken uit te voeren of beslissingen te nemen."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Project",
-            "def": "Het gepland ondernemen van onderling gerelateerde activiteiten voor het bereiken van een doel met een begin en een einde."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Projectmatig werken",
-            "def": "Een verwacht doel realiseren op een gestructureerde manier, met duidelijke afspraken over de manier van werken en het resultaat en waarbij we dat resultaat gaan bereiken binnen een afgesproken periode."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Stakeholders",
-            "def": "Belanghebbenden in het project, betrokken partijen."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Doel",
-            "def": "WAAROM we een project doen, wat we willen bereiken bij het beëindigen van het project."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Scope",
-            "def": "WAT er gedaan moet worden om het doel te bereiken, geeft de grenzen aan van wat er wel en niet gaat gebeuren in een project."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Doorlooptijd",
-            "def": "De tijd die nodig is om het hele project van begin tot eind af te ronden."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Mijlpaal",
-            "def": "Een belangrijk meetpunt of een cruciale gebeurtenis binnen een project."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Project kickoff",
-            "def": "Startmeeting voor het project met alle leden van het projectteam (en eventueel de klant)."
-        },
-        {
-            "chapter": "Hoofdstuk 3: Projectwerking",
-            "term": "Garantieperiode",
-            "def": "Periode tijdens dewelke problemen gratis opgelost worden."
-        },
-        {
-            "chapter": "Hoofdstuk 4: RACI",
-            "term": "RACI-model",
-            "def": "Een model om de verantwoordelijkheden van iedereen binnen een proces of project op een eenvoudige manier duidelijk te maken."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Agile",
-            "def": "Wendbaar, lenig, flexibel, veerkrachtig."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Scrum",
-            "def": "Een manier van werken die de agile principes volgt."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Sprint",
-            "def": "Korte periode met een vaste lengte waarin een scrumteam een werkend en waardevol stukje werkende software of een werkend product maakt."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Product Backlog",
-            "def": "Lijst van geprioritiseerde punten die moeten ontwikkeld worden in het project. Deze punten worden opgeleverd in meerdere sprints."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Product Backlog Item (PBI)",
-            "def": "Elk puntje op de product backlog dat moet gerealiseerd worden in het project, en dat waarde toevoegt aan het product voor de klant."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Sprint Backlog",
-            "def": "Verzameling van taken die moeten gerealiseerd worden in één sprint."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Sprint Planning",
-            "def": "Meeting aan de start van de sprint, waarbij het team vastlegt wat er in de sprint geleverd zal worden op basis van de prioriteiten in de product backlog. Het resultaat van de sprintplanning is de planning voor de volgende sprint, genoteerd in de sprint backlog."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Daily Stand-up/Daily Scrum",
-            "def": "Dagelijks kort (max. 10 min) met het team overlopen waar we staan."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Sprint Review",
-            "def": "De meeting op het einde van de sprint waar je nakijkt of het sprintdoel behaald is, waar je het werk dat klaar is toont en feedback krijgt van de klant."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Sprint Retrospective",
-            "def": "De meeting op het einde van de sprint waar je bespreekt met het team wat jullie geleerd hebben over het verloop en hoe het is gegaan."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Visueel management",
-            "def": "Het visueel maken van taken: wat je nog moet doen, waarmee je bezig bent, wat klaar is en welke punten je later opneemt."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Multidisciplinair",
-            "def": "Mensen met verschillende kennis werken samen (vanuit verschillende disciplines) om een activiteit te voltooien."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "User story",
-            "def": "Een korte, eenvoudige beschrijving van een kenmerk, vertelt vanuit het perspectief van een gebruiker die de nieuwe vaardigheid wenst."
-        },
-        {
-            "chapter": "Hoofdstuk 5: Aanpak van projecten",
-            "term": "Burndown chart",
-            "def": "Grafische weergave van resterende werk t.o.v. de beschikbare tijd."
-        },
-        {
-            "chapter": "Hoofdstuk 6: Beroepsprofielen",
-            "term": "Hard skills",
-            "def": "Meetbare, technische vaardigheden die je kunt aanleren via opleidingen en trainingen."
-        },
-        {
-            "chapter": "Hoofdstuk 6: Beroepsprofielen",
-            "term": "Soft skills",
-            "def": "Persoonlijke, gedragsmatige vaardigheden die bepalen hoe je samenwerkt en omgaat met anderen."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Kosten",
-            "def": "Alle uitgaven die je doet om je project te realiseren."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Baten",
-            "def": "Alle voordelen of opbrengsten die een project oplevert."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Financiële baten",
-            "def": "Opbrengsten die rechtstreeks in geld kunnen worden uitgedrukt, zoals meer verkoop of lagere personeelskosten."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Niet-financiële baten",
-            "def": "Voordelen die niet meteen financieel meetbaar zijn, zoals tevreden klanten, betere reputatie of toegang tot nieuwe markten."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Eenmalige kosten/baten",
-            "def": "Kosten of baten die slechts één keer voorkomen, bijvoorbeeld bij aankoop of implementatie van een systeem."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Recurrente kosten/baten",
-            "def": "Kosten of baten die regelmatig terugkeren, zoals onderhoud, licenties of terugkerende inkomsten."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Total Cost of Ownership (TCO)",
-            "def": "Het totaal van alle kosten over de volledige levensduur van een systeem, inclusief aanschaf, implementatie, onderhoud en support."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Kosten-batenanalyse (KBA)",
-            "def": "Een methode om te bepalen of een project de moeite waard is door kosten en baten met elkaar te vergelijken."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Haalbaarheid",
-            "def": "De mate waarin een project uitvoerbaar en zinvol is op financieel, operationeel, technisch en tijdsgebonden vlak."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Make-or-buy-beslissing",
-            "def": "De keuze tussen het zelf ontwikkelen of uitvoeren van een product/dienst (make) of het aankopen of uitbesteden ervan (buy)."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Standaardsoftware",
-            "def": "Een kant-en-klaar softwarepakket dat door een externe leverancier wordt aangeboden en onmiddellijk inzetbaar is."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Outsourcing",
-            "def": "Het uitbesteden van werk of processen aan een externe partij die de uitvoering op zich neemt."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Onshore outsourcing",
-            "def": "Uitbesteden aan een externe partij binnen hetzelfde land."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Nearshore outsourcing",
-            "def": "Uitbesteden aan een partij in een buurland, vaak goedkoper maar cultureel dichterbij."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Offshore outsourcing",
-            "def": "Uitbesteden aan een partij in een ver land, vaak om kosten te besparen."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Lock-in",
-            "def": "Situatie waarin een organisatie sterk afhankelijk wordt van één leverancier, waardoor overstappen moeilijk of duur wordt."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "Cloud computing",
-            "def": "Het leveren van IT-diensten via het internet, zoals opslag, software en rekenkracht, zonder dat je deze zelf lokaal beheert."
-        },
-        {
-            "chapter": "Hoofdstuk 7: Kosten en baten",
-            "term": "On-premise",
-            "def": "Het lokaal installeren en beheren van software en hardware binnen de eigen organisatie."
-        }
-    ];
+/* =========================================================================
+   DATA: hoofdstukken + begrippenclusters
+   Elke cluster bundelt begrippen die conceptueel dicht bij elkaar liggen,
+   zodat de gegenereerde afleiders (distractors) altijd uit hetzelfde
+   begrippencluster komen i.p.v. willekeurig uit de volledige lijst.
+   ========================================================================= */
 
-    let currentList = [];
-    let currentIndex = 0;
-    let answered = false;
+const CHAPTERS = [
+    { id: 1, name: "Hoofdstuk 1: IT-landschap" },
+    { id: 2, name: "Hoofdstuk 2: Organisatiestructuren" },
+    { id: 3, name: "Hoofdstuk 3: Projectwerking" },
+    { id: 4, name: "Hoofdstuk 4: RACI" },
+    { id: 5, name: "Hoofdstuk 5: Aanpak van projecten" },
+    { id: 6, name: "Hoofdstuk 6: Beroepsprofielen" },
+    { id: 7, name: "Hoofdstuk 7: Kosten en baten" }
+];
 
-    const chapterSelect = document.getElementById("chapterSelect");
-    const card = document.getElementById("card");
-    const frontText = document.getElementById("frontText");
-    const backText = document.getElementById("backText");
-    const frontChapter = document.getElementById("frontChapter");
-    const resultBadge = document.getElementById("resultBadge");
-    const progress = document.getElementById("progress");
-    const nextBtn = document.getElementById("nextBtn");
-    const optionsContainer = document.getElementById("optionsContainer");
+const CLUSTERS = [
+/* ============================== HOOFDSTUK 1 ============================== */
+{ chapterId: 1, name: "Type bedrijf", items: [
+    { term: "Publiek (overheid)", def: "Gemeenschappelijk nut staat voorop, winst maken is geen doel." },
+    { term: "Privaat (commercieel)", def: "Privaat nut staat voorop, winst maken is een belangrijk doel." },
+    { term: "Non-profit (NGO, vereniging)", def: "Maatschappelijk nut staat voorop, winst maken is geen doel." }
+], extra: ["Coöperatieve organisatie", "Multinational", "KMO"] },
 
-    // Fisher-Yates shuffle voor altijd random volgorde
-    function shuffle(array) {
-        let curr = array.length, rand;
-        while (curr !== 0) {
-            rand = Math.floor(Math.random() * curr);
-            curr--;
-            [array[curr], array[rand]] = [array[rand], array[curr]];
-        }
-        return array;
+{ chapterId: 1, name: "Omvang van bedrijven", items: [
+    { term: "Micro-onderneming", def: "Minder dan 10 werknemers en een jaaromzet onder 2 miljoen euro." },
+    { term: "Kleine onderneming", def: "Minder dan 50 werknemers en een jaaromzet onder 10 miljoen euro." },
+    { term: "Middelgrote onderneming", def: "Minder dan 250 werknemers en een jaaromzet onder 50 miljoen euro." },
+    { term: "Grote onderneming", def: "Meer dan 250 werknemers en een jaaromzet boven 50 miljoen euro." },
+    { term: "KMO", def: "Verzamelnaam voor micro-, kleine en middelgrote ondernemingen." },
+    { term: "Multinational", def: "Zeer grote onderneming met vestigingen in meerdere landen." }
+] },
+
+{ chapterId: 1, name: "Soorten afdelingen", items: [
+    { term: "Operationele afdelingen", def: "Doen het bedrijf draaien: maken de producten en leveren de diensten van de core business, meestal geen klantcontact." },
+    { term: "Commerciële afdelingen", def: "Doen het bedrijf groeien: zorgen dat producten en diensten op de markt komen en verkocht worden, veel klantcontact." },
+    { term: "Ondersteunende afdelingen", def: "Faciliteren de werking van het bedrijf achter de schermen, geen contact met klanten." }
+], extra: ["Strategische afdelingen", "Productieafdelingen enkel", "Transitieafdelingen"] },
+
+{ chapterId: 1, name: "Soorten processen", items: [
+    { term: "Automatisch proces", def: "Processtappen verlopen volledig door systemen, zonder menselijke tussenkomst." },
+    { term: "Semiautomatisch proces", def: "Een deel van het proces verloopt automatisch, een deel manueel; mens en systeem werken samen." },
+    { term: "Manueel proces", def: "Alle stappen van het proces worden door mensen uitgevoerd." }
+], extra: ["Robotic Process Automation (RPA)", "Geoptimaliseerd proces", "Gedigitaliseerd proces"] },
+
+{ chapterId: 1, name: "Hoofd van de ICT-afdeling", items: [
+    { term: "Vice President ICT", def: "Benaming voor het ICT-afdelingshoofd in heel grote bedrijven en multinationals." },
+    { term: "CTO – Chief Technology Officer", def: "IT-functie aan het hoofd van ICT in heel grote organisaties, gericht op technologiekeuzes." },
+    { term: "CIO – Chief Information Officer", def: "IT-functie aan het hoofd van ICT in heel grote organisaties, gericht op informatiebeleid." },
+    { term: "ICT Directeur", def: "Benaming voor het ICT-afdelingshoofd in grote tot middelgrote bedrijven." },
+    { term: "ICT Manager", def: "Benaming voor het ICT-afdelingshoofd in middelgrote tot kleinere bedrijven." }
+] },
+
+{ chapterId: 1, name: "Bedrijfsapplicaties (afkortingen)", items: [
+    { term: "ERP", def: "Enterprise Resource Planning: bundelt bedrijfsprocessen zoals voorraad, bestellingen, facturatie en contracten (bv. SAP)." },
+    { term: "CRM", def: "Customer Relationship Management: beheert klanten, leads, offertes en marketingcampagnes (bv. Salesforce)." },
+    { term: "DMS", def: "Document Management System: documentbeheer met organisatie, versiecontrole en toegangsrechten (bv. SharePoint)." },
+    { term: "CMS", def: "Content Management System: beheer van websites en digitale content (bv. WordPress, Shopify)." },
+    { term: "LMS", def: "Learning Management System: training- en kennisbeheer, opvolging, examens en certificaten (bv. Blackboard)." }
+] },
+
+{ chapterId: 1, name: "Software uitbreiden", items: [
+    { term: "Configuratie", def: "Instellingen aanpassen binnen bestaande software, bv. de huisstijl instellen in WordPress." },
+    { term: "Customisatie", def: "Nieuwe functies inrichten zonder code, met bestaande modules/plugins, bv. een webshopplugin installeren." },
+    { term: "Development", def: "Software uitbreiden of integreren met eigen code, bv. een koppeling programmeren met Bancontact." }
+], extra: ["Standaardsoftware aankopen", "Outsourcen van development", "Implementatie zonder aanpassing"] },
+
+{ chapterId: 1, name: "Positie van ICT in het bedrijf", items: [
+    { term: "Model 1 – ICT zijn de handen", def: "Core business is geen software; ICT volgt enkel wat de business vraagt en heeft alleen adviserende/uitvoerende macht." },
+    { term: "Model 2 – ICT is het hart", def: "Core business is wel software (product, dienst of embedded software); ICT heeft veel beslissingsmacht en grote invloed op het beleid." },
+    { term: "Model 3 – ICT is het gezicht", def: "Core business is geen software, maar de software naar de klant toe is onmisbaar voor het succes; ICT beïnvloedt beleid, verkoop en marketing." }
+], extra: ["ICT als zuiver ondersteunende afdeling zonder invloed", "ICT volledig uitbesteed aan een extern bedrijf", "ICT is gelijk aan de commerciële afdeling"] },
+
+{ chapterId: 1, name: "Taken van de ICT-afdeling", items: [
+    { term: "Infrastructuurbeheer", def: "Beheren van servers, netwerken en opslag; hardware installeren en onderhouden; betrouwbare verbindingen garanderen." },
+    { term: "Applicatie- en softwarebeheer", def: "Software installeren, updaten en onderhouden; licenties en toegangsrechten beheren; maatwerkapplicaties ontwikkelen of configureren." },
+    { term: "Gebruikersondersteuning (helpdesk)", def: "Helpen bij technische problemen, storingen en incidenten oplossen, medewerkers trainen en begeleiden." },
+    { term: "Beveiliging en databeheer", def: "Gegevens en systemen beschermen tegen virussen en hacking, back-ups en herstelplannen beheren, toezien op GDPR." },
+    { term: "Architectuur", def: "Adviseren over nieuwe technologieën, keuze van IT-tools maken, overzicht bewaken van alle applicaties en systemen." }
+] },
+
+{ chapterId: 1, name: "Basisbegrippen IT-landschap", items: [
+    { term: "Core business", def: "De kernactiviteit van een bedrijf; de reden van bestaan die de belangrijkste toegevoegde waarde levert aan klanten." },
+    { term: "Industrie", def: "Een verzameling bedrijven die gelijkaardige activiteiten uitvoeren en soortgelijke producten of diensten aanbieden." },
+    { term: "Afdeling", def: "Een specifieke eenheid binnen de onderneming met een eigen set aan taken en verantwoordelijkheden." },
+    { term: "Outsourcing (algemeen)", def: "Afdelingen of activiteiten door een extern bedrijf laten uitvoeren om kosten, complexiteit of risico's te beperken." },
+    { term: "Embedded software", def: "Software geprogrammeerd voor andere toestellen dan computers/laptops/servers, bv. software in een tv of spelconsole." },
+    { term: "Bedrijfsapplicatie", def: "Software gericht op bedrijfsactiviteiten zoals klantenbeheer, facturatie, documentbeheer, websites of opleidingen." }
+] },
+
+/* ============================== HOOFDSTUK 2 ============================== */
+{ chapterId: 2, name: "Taak, functie, bevoegdheid, verantwoordelijkheid", items: [
+    { term: "Taak", def: "Een afgebakende verzameling activiteiten met één doel, bv. het ontwerpen van de homepage in Figma." },
+    { term: "Functie", def: "Een samenhangend geheel van taken dat door één persoon wordt uitgevoerd, bv. grafisch ontwerper." },
+    { term: "Bevoegdheid", def: "Het recht of mandaat om bepaalde taken uit te voeren of beslissingen te nemen — wat mag je doen?" },
+    { term: "Verantwoordelijkheid", def: "De plicht om toegewezen taken naar behoren uit te voeren en de gevolgen ervan te dragen — wat moet je doen?" }
+] },
+
+{ chapterId: 2, name: "Verticale differentiatie", items: [
+    { term: "Centralisatie", def: "Beslissingsbevoegdheden zijn geconcentreerd op één plaats, meestal aan de top van de organisatie." },
+    { term: "Decentralisatie", def: "Beslissingsbevoegdheden zijn verdeeld over meerdere plaatsen, ook lager in de organisatie." },
+    { term: "Delegeren", def: "Taken, bevoegdheden en verantwoordelijkheden overdragen aan een lager hiërarchisch niveau." },
+    { term: "Spanwijdte", def: "Het aantal mensen waaraan een leidinggevende direct leiding geeft." }
+], extra: ["Escaleren", "Horizontale differentiatie"] },
+
+{ chapterId: 2, name: "Platte versus steile structuur", items: [
+    { term: "Platte structuur", def: "Structuur met weinig hiërarchische niveaus tussen de hoogste en de laagste managers." },
+    { term: "Steile structuur", def: "Structuur met veel hiërarchische niveaus tussen de hoogste en de laagste managers." }
+], extra: ["Matrixstructuur", "Lijnstructuur", "Divisiestructuur", "Netwerkstructuur"] },
+
+{ chapterId: 2, name: "Horizontale differentiatie", items: [
+    { term: "Indeling naar functie", def: "Taken verdelen op basis van functie, bv. installatie van servers of helpdesk, webdevelopment." },
+    { term: "Indeling naar product", def: "Taken verdelen op basis van product, bv. autoverzekeringen of levensverzekeringen." },
+    { term: "Indeling naar geografisch gebied", def: "Taken verdelen op basis van regio, bv. Vlaams-Brabant en Limburg." },
+    { term: "Indeling naar markt", def: "Taken verdelen op basis van markt, bv. supermarkten of restaurants." }
+] },
+
+{ chapterId: 2, name: "Formeel versus informeel", items: [
+    { term: "Formele organisatie", def: "De officiële verdeling van taken, functies en verantwoordelijkheden." },
+    { term: "Informele organisatie", def: "De feitelijke samenwerking en relaties, gebaseerd op contacten, buiten de formele structuur om." },
+    { term: "Organogram", def: "Schematische voorstelling van hoe formeel taken verdeeld zijn over personen en afdelingen." },
+    { term: "Organisatiestructuur", def: "De manier waarop taken, bevoegdheden en verantwoordelijkheden verdeeld zijn over personen en afdelingen." }
+], extra: ["Organisatiecultuur"] },
+
+{ chapterId: 2, name: "De 6 organisatiestructuren", items: [
+    { term: "Lijnorganisatie", def: "Klassieke piramidestructuur waarbij elke werknemer één leidinggevende heeft en besluitvorming gecentraliseerd is." },
+    { term: "Lijnorganisatie", def: "Voordeel: iedereen weet duidelijk wie de baas is en beslissingen worden snel genomen door de leidinggevende." },
+    { term: "Lijnorganisatie", def: "Valkuil: weinig flexibiliteit om in te spelen op veranderingen of creativiteit; communicatie verloopt vooral met de leidinggevende." },
+    { term: "Lijn-staforganisatie", def: "Vorm van lijnorganisatie met een staf van deskundigen (bv. accountant, advocaat) die de directie adviseert, zonder bevelsbevoegdheid." },
+    { term: "Lijn-staforganisatie", def: "Voordeel: specialisten/experten worden ingeschakeld, wat de lijnmanagers ontlast." },
+    { term: "Lijn-staforganisatie", def: "Valkuil: het kan onduidelijk worden wie beslist, de lijn of de staf, waardoor verantwoordelijkheid vervaagt." },
+    { term: "Functionele organisatie", def: "Indeling naar functie (F-indeling): afdelingen met elk hun eigen specialisatie zoals aankoop, verkoop, productie of HR." },
+    { term: "Divisionele organisatie", def: "Indeling naar product, markt of regio, waarbij elke divisie als een min of meer zelfstandige eenheid werkt." },
+    { term: "Matrixorganisatie", def: "Structuur waarin medewerkers rapporteren aan meerdere leidinggevenden tegelijk, bv. project én functie." },
+    { term: "Matrixorganisatie", def: "Voordeel: middelen worden hergebruikt over afdelingen en projecten heen, kennis en expertise worden samengebracht." },
+    { term: "Matrixorganisatie", def: "Valkuil: medewerkers hebben twee bazen, de eenheid van bevel ontbreekt en er ontstaan soms tegenstrijdige belangen." },
+    { term: "Ententestructuur", def: "Structuur zonder duidelijke baas waarbij iedereen samen beslist, met gelijke rechten en plichten, bv. een groepspraktijk." },
+    { term: "Ententestructuur", def: "Voordeel: iedereen is betrokken bij de besluitvorming en er wordt optimaal gebruikgemaakt van kennis en expertise." },
+    { term: "Ententestructuur", def: "Valkuil: de besluitvorming verloopt traag door veel overleg en de structuur is niet geschikt voor grote organisaties." }
+] },
+
+{ chapterId: 2, name: "Escaleren", items: [
+    { term: "Escaleren", def: "Een probleem of conflict doorsturen naar een hoger niveau in de hiërarchie, eerst naar de rechtstreeks leidinggevende (N+1)." },
+    { term: "Rechtstreeks oplossen", def: "Eerst met de persoon in kwestie zelf bekijken of je er samen kan uitkomen, met open en juiste feedback." }
+], extra: ["Escaleren via social media of de krant", "Het conflict gewoon negeren", "Escaleren zonder de leidinggevende te betrekken"] },
+
+/* ============================== HOOFDSTUK 3 ============================== */
+{ chapterId: 3, name: "Kernbegrippen project", items: [
+    { term: "Project", def: "Het gepland ondernemen van onderling gerelateerde activiteiten voor het bereiken van een doel, met een begin en een einde." },
+    { term: "Operations", def: "Het dagelijkse, terugkerende werk in een bedrijf of afdeling dat zorgt voor stabiliteit, bv. het onderhouden van servers." },
+    { term: "Projectmatig werken", def: "Een verwacht doel realiseren op een gestructureerde manier, met duidelijke afspraken, binnen een afgesproken periode." },
+    { term: "Stakeholders", def: "Belanghebbenden in het project, betrokken partijen." }
+] },
+
+{ chapterId: 3, name: "Doel versus scope", items: [
+    { term: "Doel", def: "WAAROM een project wordt uitgevoerd; wat je wil bereiken bij het beëindigen van het project." },
+    { term: "Scope", def: "WAT er gedaan moet worden om het doel te bereiken; geeft de grenzen aan van wat je wel en niet gaat doen." },
+    { term: "Out of scope", def: "Wat expliciet NIET gerealiseerd wordt binnen het project, ook al ligt het dicht bij het doel." },
+    { term: "Projecttaken/projectactiviteiten", def: "Beschrijven nog gedetailleerder wat er precies gemaakt moet worden binnen de afgesproken scope." },
+    { term: "Doel", def: "Voorbeeld: het ontwikkelen van een fitness app." },
+    { term: "Scope", def: "Voorbeeld: de fitness app krijgt een stappenteller, hartritmemeting en slaappatroonmeting, voor iPhone en Android." },
+    { term: "Out of scope", def: "Voorbeeld: het integreren van een routeschema op Google Maps bij de ontwikkeling van een fitness app." }
+] },
+
+{ chapterId: 3, name: "De 4 projectfasen", items: [
+    { term: "Initiatie", def: "Je zorgt dat duidelijk is wie de klant is en wat hij/zij met het project wil bereiken." },
+    { term: "Initiatie", def: "Je onderzoekt een eerste idee van de haalbaarheid van het project." },
+    { term: "Initiatie", def: "Je start met het opstellen van het projectcharter (projectwerkboek)." },
+    { term: "Initiatie", def: "Je identificeert de stakeholders en bouwt een relatie met de klant op." },
+    { term: "Planning", def: "Je legt de scope van het project vast: wat ga je precies maken?" },
+    { term: "Planning", def: "Je bepaalt welke middelen (mensen, budget, materiaal) je nodig hebt." },
+    { term: "Planning", def: "Je maakt een highlevel planning op en legt mijlpalen vast." },
+    { term: "Planning", def: "Je finaliseert het projectcharter en organiseert de project kickoff." },
+    { term: "Uitvoering", def: "Het projectplan wordt effectief uitgevoerd en het project wordt zichtbaar voor buitenstaanders." },
+    { term: "Uitvoering", def: "Je rapporteert op geregelde tijdstippen over de voortgang aan alle stakeholders." },
+    { term: "Uitvoering", def: "Wijzigingen (change requests) worden op een gepaste manier behandeld en laten goedkeuren." },
+    { term: "Uitvoering", def: "De voortgang en kwaliteit van het project worden bewaakt." },
+    { term: "Afsluit", def: "De klant aanvaardt het product, meestal via een formele acceptatie met handtekening." },
+    { term: "Afsluit", def: "Er vindt een projectevaluatie plaats: wat ging goed, wat ging minder goed, wat hebben we geleerd?" },
+    { term: "Afsluit", def: "De garantieperiode start, waarin problemen gratis opgelost worden." },
+    { term: "Afsluit", def: "Alle projectdocumentatie wordt afgewerkt." }
+] },
+
+{ chapterId: 3, name: "Mijlpaal, doorlooptijd en garantieperiode", items: [
+    { term: "Mijlpaal", def: "Een belangrijk meetpunt of een cruciale gebeurtenis binnen een project, bv. 'kelder klaar tegen 31/10'." },
+    { term: "Doorlooptijd", def: "De tijd die nodig is om het hele project van begin tot eind af te ronden." },
+    { term: "Garantieperiode", def: "De periode na de implementatie waarin problemen gratis opgelost worden; de duur hangt af van de projectgrootte." },
+    { term: "Project kickoff", def: "De startmeeting voor het project met alle teamleden en eventueel de klant, georganiseerd door de projectleider." }
+], extra: ["Projectcharter", "Change request"] },
+
+{ chapterId: 3, name: "Issue versus change request", items: [
+    { term: "Issue (probleem)", def: "Een probleem tijdens de uitvoering waarvan je het gevolg bekijkt en mogelijke oplossingen/acties bepaalt, bv. 'de grond is harder dan voorzien'." },
+    { term: "Change request (wijziging)", def: "Een gevraagde wijziging waarvan je de impact analyseert, formeel voorlegt aan stakeholders, laat goedkeuren en documenteert." },
+    { term: "Wijziging op vraag van de klant", def: "Bv. extra functionaliteiten, gewijzigde functionaliteiten, gewijzigde prioriteiten of een aanpassing van het budget." },
+    { term: "Wijziging door onvoorziene aanleiding", def: "Bv. een verkeerde inschatting van de duur van een activiteit, een mislukte activiteit, of ziekte/vertrek van een medewerker." }
+] },
+
+{ chapterId: 3, name: "Rollen in een klassiek (waterval)project", items: [
+    { term: "Projectleider", def: "Neemt initiatief voor de uitvoering van activiteiten, het verkrijgen en toewijzen van middelen, en bewaakt voortgang en kwaliteit." },
+    { term: "Klant", def: "Bepaalt mee het doel en de scope, moet het tijdschema en wijzigingen goedkeuren, en aanvaardt formeel het eindresultaat." },
+    { term: "Stakeholders", def: "Worden geraadpleegd of ingelicht, bv. via een periodiek statusrapport, en beslissen mee bij belangrijke wijzigingen." },
+    { term: "Projectteamlid", def: "Voert de projectactiviteiten uit en vult wekelijks de status in binnen de projectmanagementtool." }
+] },
+
+/* ============================== HOOFDSTUK 4 ============================== */
+{ chapterId: 4, name: "De 4 letters van RACI", items: [
+    { term: "R – Responsible", def: "Verantwoordelijk voor het effectief uitvoeren van de stap of taak." },
+    { term: "A – Accountable", def: "Heeft de eindverantwoordelijkheid over het resultaat van de stap; er mag maar één per taak zijn." },
+    { term: "C – Consulted", def: "Moet geraadpleegd worden; overleg in twee richtingen voordat de taak wordt afgerond." },
+    { term: "I – Informed", def: "Moet ingelicht worden over de voortgang of het resultaat; dit is eenrichtingsverkeer." },
+    { term: "R – Responsible", def: "Als deze rol ontbreekt op een taak, is dat een probleem: dan zal niemand het werk effectief uitvoeren." },
+    { term: "A – Accountable", def: "Je kan er maar één van hebben per taak, net zoals je maar één buschauffeur tegelijk kan hebben." },
+    { term: "C – Consulted", def: "Te veel van deze rol op een taak leidt tot traagheid van de besluitvorming." },
+    { term: "I – Informed", def: "Te weinig van deze rol kan erop wijzen dat er onvoldoende communicatie is in het team." },
+    { term: "R – Responsible", def: "In het RACI-voorbeeld van restaurant 'De Goei Goesting' krijgt de ober deze rol (samen met de eindverantwoordelijkheid) voor het bedienen." },
+    { term: "A – Accountable", def: "Als er maar één R op een taak staat, krijgt diezelfde persoon ook deze rol; je noteert dit dan best als 'A/R'." },
+    { term: "C – Consulted", def: "De keuken kan deze rol krijgen bij het samenstellen van het menu, omdat haar mening gevraagd wordt." },
+    { term: "I – Informed", def: "De klant krijgt deze rol zodra het bord bijna aan tafel gebracht wordt: hij wordt op de hoogte gehouden, zonder inspraak." }
+] },
+
+{ chapterId: 4, name: "Het RACI-model algemeen", items: [
+    { term: "RACI-model", def: "Een model om de verantwoordelijkheden van iedereen binnen een proces of project op een eenvoudige manier duidelijk te maken." },
+    { term: "Verwarring over verantwoordelijkheid", def: "Het probleem dat een RACI-model oplost: doordat verschillende profielen samenwerken, denkt iedereen soms dat 'iemand anders' een taak wel zal doen." }
+], extra: ["Een organogram", "Een sprint backlog", "Een burndown chart"] },
+
+{ chapterId: 4, name: "RACI toepassen op projecttaken", items: [
+    { term: "R – Responsible", def: "De ontwikkelaar die de code effectief schrijft, is voor die taak deze rol." },
+    { term: "R – Responsible", def: "De grafisch ontwerper die het logo effectief tekent, is voor die taak deze rol." },
+    { term: "A – Accountable", def: "Wie uiteindelijk zijn hoofd moet buigen als een taak fout afloopt, draagt voor die taak deze rol." },
+    { term: "A – Accountable", def: "De projectleider die de eindverantwoordelijkheid draagt over het goedgekeurde ontwerp, heeft voor die taak deze rol." },
+    { term: "C – Consulted", def: "De klant die om feedback gevraagd wordt vóór het definitieve ontwerp gekozen wordt, krijgt voor die taak deze rol." },
+    { term: "C – Consulted", def: "Een collega-specialist wiens advies je inwint voordat je een technische keuze maakt, krijgt voor die taak deze rol." },
+    { term: "I – Informed", def: "Stakeholders die enkel het tweewekelijkse statusrapport ontvangen zonder inspraak, krijgen voor die taak deze rol." },
+    { term: "I – Informed", def: "Een afdeling die achteraf op de hoogte gebracht wordt dat een systeem live gegaan is, krijgt voor die taak deze rol." }
+] },
+
+/* ============================== HOOFDSTUK 5 ============================== */
+{ chapterId: 5, name: "De fasen van de watervalmethode", items: [
+    { term: "Analyse", def: "De fase waarin alle vereisten verzameld worden, zoals logo, kleurenpalet, typografie, homepage en productpagina." },
+    { term: "Ontwerp", def: "De fase waarin schetsen en moodboards gemaakt worden, gevolgd door één definitief ontwerp, bv. in Figma." },
+    { term: "Implementatie", def: "De fase waarin de visuele elementen effectief gemaakt worden, bv. in Illustrator, en het prototype gebouwd wordt." },
+    { term: "Testen", def: "De fase waarin het projectteam of een mogelijke klant het opgeleverde resultaat controleert." },
+    { term: "Onderhoud", def: "De fase na oplevering waarin kleine aanpassingen gebeuren bij fouten of problemen." }
+] },
+
+{ chapterId: 5, name: "Watervalmethode – basisprincipe", items: [
+    { term: "Sequentiële fasen", def: "Alle ontwikkelfases vinden na elkaar plaats, zoals een vloeiende waterval; een fase moet afgesloten zijn voor de volgende start." },
+    { term: "Terugkeren bij een fout", def: "Bij een fout in een vorige fase moet je terug naar die fase, het probleem oplossen en alle volgende fases opnieuw doorlopen." }
+], extra: ["Iteratief werken in korte cycli", "Zelforganisatie van het team", "Voortschrijdend inzicht per sprint"] },
+
+{ chapterId: 5, name: "Voor- en nadelen van de watervalmethode", items: [
+    { term: "Voordeel voor het team", def: "Duidelijke structuur en planning: taken zijn gedefinieerd per fase, iedereen kent de volgorde en verwachtingen." },
+    { term: "Voordeel voor het team", def: "Minder risico op misverstanden doordat elke fase goed gedocumenteerd is en goedgekeurd wordt." },
+    { term: "Nadeel voor het team", def: "Weinig ruimte voor creativiteit, want de documentatie moet gevolgd worden." },
+    { term: "Nadeel voor het team", def: "Hoge druk aan het einde, doordat een groot deel van het testen en de kwaliteit op het einde komt." },
+    { term: "Voordeel voor het bedrijf", def: "Goede controle over het budget en de planning." },
+    { term: "Voordeel voor het bedrijf", def: "Duidelijke documentatie, nuttig bij inwerking van nieuwe teamleden, audits en juridische kwesties." },
+    { term: "Nadeel voor het bedrijf", def: "Weinig flexibiliteit bij veranderingen, tenzij met tijdsverlies en extra kosten." },
+    { term: "Nadeel voor het bedrijf", def: "Fouten worden pas tijdens de testfase ontdekt, wat kan leiden tot vertraging of extra kosten." },
+    { term: "Voordeel voor de klant", def: "De klant heeft aan het begin van het project al een goed beeld van wat hij mag verwachten." },
+    { term: "Voordeel voor de klant", def: "De planning en de kosten liggen al vast vanaf het begin van het project." },
+    { term: "Nadeel voor de klant", def: "Weinig flexibiliteit als de klant tijdens het project wijzigingen wil aanbrengen." },
+    { term: "Nadeel voor de klant", def: "Tragere oplevering van waarde: de klant ziet het resultaat pas op het einde van het project." }
+] },
+
+{ chapterId: 5, name: "Agile principes", items: [
+    { term: "Agile", def: "Wendbaar, lenig, flexibel, veerkrachtig; snel kunnen inspelen op nieuwe trends of veranderende klantwensen." },
+    { term: "Zelforganisatie", def: "Het team neemt zelf beslissingen over hoe het werkt, en handelt autonoom." },
+    { term: "Leren & aanpassen", def: "Het team evalueert samen het verloop, past aan en verbetert." },
+    { term: "Iteratief werken", def: "Schatten, plannen en verbeteren herhaalt zich meermaals, in korte cycli." },
+    { term: "Focus op waarde voor de klant", def: "Zo goed mogelijk proberen te voldoen aan de vraag van de klant." },
+    { term: "Vertrouwen in het team", def: "Erop vertrouwen dat elk teamlid zijn rol opneemt binnen de samenwerking." }
+] },
+
+{ chapterId: 5, name: "Scrum – basisbegrippen", items: [
+    { term: "Scrum", def: "Een methode die de agile principes volgt en gebruikt wordt om op een flexibele manier (software)producten te maken." },
+    { term: "Sprint", def: "Een korte periode met een vaste lengte (1 tot 4 weken) waarin een scrumteam een werkend, waardevol stukje product maakt." }
+], extra: ["Kanban", "Waterval", "Lean"] },
+
+{ chapterId: 5, name: "Scrum-artefacten", items: [
+    { term: "Product Backlog", def: "Lijst van geprioriteerde punten die ontwikkeld moeten worden in het project, opgeleverd in meerdere sprints." },
+    { term: "Product Backlog Item (PBI)", def: "Elk puntje op de product backlog dat gerealiseerd moet worden en waarde toevoegt aan het product voor de klant." },
+    { term: "Sprint Backlog", def: "Verzameling taken die gerealiseerd moeten worden in één sprint, opgesplitst uit de PBI's van die sprint." },
+    { term: "User story", def: "Een korte, eenvoudige beschrijving van een kenmerk, verteld vanuit het perspectief van de gebruiker die het wenst." }
+], extra: ["Epic", "Burndown chart"] },
+
+{ chapterId: 5, name: "User story versus epic", items: [
+    { term: "User story", def: "Klein en specifiek, gericht op één functionaliteit; moet in één sprint afgewerkt worden; vast formaat 'Als … wil ik … zodat …'." },
+    { term: "Epic", def: "Een 'grote user story' die een groot stuk werk beschrijft en meerdere user stories in een groter thema verzamelt; kan meerdere sprints duren." }
+], extra: ["Sprint Backlog", "Product Backlog"] },
+
+{ chapterId: 5, name: "Scrum-ceremonies (meetings)", items: [
+    { term: "Sprint Planning", def: "De meeting aan de start van de sprint waarbij het team vastlegt wat er geleverd zal worden, op basis van de product backlog." },
+    { term: "Sprint Planning", def: "Tijdens deze meeting wordt het scrumbord klaargemaakt voor de volgende sprint en worden sprinttaken ingeschat." },
+    { term: "Daily Stand-up/Daily Scrum", def: "De dagelijkse, korte (max. 10 min) meeting waarin elk teamlid vertelt wat hij bereikte, wat hij vandaag doet en welke problemen hij verwacht." },
+    { term: "Daily Stand-up/Daily Scrum", def: "Tijdens deze meeting focus je op vooruitgang, houd je het kort, en bespreek je details apart." },
+    { term: "Sprint Review", def: "De meeting op het einde van de sprint waarin nagekeken wordt of het sprintdoel behaald is en feedback van de klant gevraagd wordt." },
+    { term: "Sprint Review", def: "Tijdens deze meeting toont het team het afgewerkte werk aan de klant." },
+    { term: "Sprint Retrospective", def: "De meeting op het einde van de sprint waarin het team bespreekt wat ze geleerd hebben over het verloop en hoe het is gegaan." },
+    { term: "Sprint Retrospective", def: "Tijdens deze meeting spreekt het team concrete acties af om samenwerking en processen de volgende keer beter te maken." }
+] },
+
+{ chapterId: 5, name: "Rollen in scrum versus waterval", items: [
+    { term: "Product owner", def: "Bepaalt de visie en prioriteiten, beheert de product backlog en beslist wat er eerst ontwikkeld wordt; is geen lid van het scrumteam." },
+    { term: "Product owner", def: "Neemt deel aan de sprintplanning en aan de demo tijdens de sprint review op het einde van elke sprint." },
+    { term: "Scrum master", def: "Zorgt dat het scrumproces goed verloopt, organiseert de ceremonies en coacht het team, zonder het traditioneel aan te sturen." },
+    { term: "Scrum master", def: "Neemt storende elementen weg zodat het team focus kan houden op de sprint; is een raadgever en inspirator." },
+    { term: "Scrum team", def: "Multidisciplinair en zelfsturend team, verantwoordelijk voor het opleveren van een product aan het einde van elke sprint (max. 9 personen)." },
+    { term: "Scrum team", def: "Wijst zichzelf de taken toe binnen de sprint en doet analyse, ontwerp, ontwikkeling, testen en documentatie." },
+    { term: "Projectleider (waterval)", def: "Stuurt het project actief en klassiek aan, is verantwoordelijk voor voortgang en kwaliteit, en rapporteert aan de stakeholders." },
+    { term: "Projectleider (waterval)", def: "Deze rol bestaat typisch in de watervalmethode; in scrum wordt deze vervangen door een zelfsturend team met een scrum master als facilitator." }
+] },
+
+{ chapterId: 5, name: "Werkinschatting: waterval versus scrum", items: [
+    { term: "Absolute inschatting (waterval)", def: "Werk inschatten in meetbare tijdseenheden zoals uren, dagen of manuren, gemaakt aan het begin van het project." },
+    { term: "Relatieve inschatting (scrum)", def: "Werk inschatten door te vergelijken met iets wat je al kent, uitgedrukt in story points of T-shirt sizes, tijdens de sprintplanning." }
+], extra: ["Burndown chart bijhouden", "Vaste deadline afspreken"] },
+
+{ chapterId: 5, name: "Visueel management, multidisciplinair werken en burndown chart", items: [
+    { term: "Visueel management", def: "Het visueel maken van taken: wat je nog moet doen, waarmee je bezig bent, wat klaar is en wat je later opneemt, bv. via een scrumbord." },
+    { term: "Multidisciplinair", def: "Mensen met verschillende kennis en vanuit verschillende disciplines werken samen om een activiteit te voltooien." },
+    { term: "Burndown chart", def: "Een grafische weergave van het resterende werk t.o.v. de beschikbare tijd, met een lijn voor resterend werk en een lijn voor ideale voortgang." }
+], extra: ["Sprint backlog bijhouden", "Product backlog opstellen"] },
+
+{ chapterId: 5, name: "Voor- en nadelen van scrum", items: [
+    { term: "Voordeel van scrum", def: "Feedback wordt eerder ontvangen, waardoor sneller duidelijk is wat wel en niet werkt." },
+    { term: "Voordeel van scrum", def: "Snellere en hogere klantenbetrokkenheid, en snellere communicatie in het team." },
+    { term: "Nadeel van scrum", def: "Het team is als geheel verantwoordelijk en zelfsturend, waardoor minder duidelijk is wat iemands individuele bijdrage is." },
+    { term: "Nadeel van scrum", def: "Er is minder structuur en minder documentatie, en het vraagt veel tijd van de opdrachtgever." }
+] },
+
+{ chapterId: 5, name: "Waterval versus scrum: wanneer gebruiken?", items: [
+    { term: "Waterval", def: "Geschikt wanneer de vereisten van de klant op voorhand duidelijk zijn en gedeeltelijke oplevering niet mogelijk is, bv. software voor een vliegtuig." },
+    { term: "Scrum", def: "Geschikt wanneer de vereisten nog niet duidelijk zijn aan het begin van het project en gedeeltelijke oplevering wel mogelijk is, bv. een klantenbeheersysteem." }
+], extra: ["Kanban", "Lean"] },
+
+/* ============================== HOOFDSTUK 6 ============================== */
+{ chapterId: 6, name: "Hard skills versus soft skills", items: [
+    { term: "Hard skills", def: "Meetbare, technische vaardigheden die je aanleert via studies, opleidingen, cursussen, stages of werkervaring, bv. kennis van Figma." },
+    { term: "Soft skills", def: "Persoonlijke, gedragsmatige eigenschappen die afhangen van je persoonlijkheid en bepalen hoe je samenwerkt en omgaat met anderen." }
+], extra: ["Werkervaring", "Diploma"] },
+
+{ chapterId: 6, name: "Voorbeelden: hard skill of soft skill?", items: [
+    { term: "Hard skills", def: "Kennis van programmeertalen." },
+    { term: "Hard skills", def: "Kennis van Figma of Canva." },
+    { term: "Hard skills", def: "Kennis van scrum als werkmethode." },
+    { term: "Hard skills", def: "Kennis van het Nederlands als taal." },
+    { term: "Soft skills", def: "Effectieve of verbale communicatie." },
+    { term: "Soft skills", def: "Presentatievaardigheden." },
+    { term: "Soft skills", def: "Kritisch denken en probleemoplossend vermogen." },
+    { term: "Soft skills", def: "Resultaatgerichtheid en samenwerken." }
+], extra: ["Werkervaring", "Diploma"] },
+
+{ chapterId: 6, name: "Beroepsprofielen: wat doet deze functie?", items: [
+    { term: "Systeembeheerder", def: "Beheert en onderhoudt de IT-infrastructuur van een bedrijf: servers, netwerken en opslag, en zorgt voor betrouwbare systemen." },
+    { term: "Helpdesk medewerker", def: "Eerste aanspreekpunt voor gebruikers met technische vragen; lost storingen op en begeleidt medewerkers in het gebruik van systemen." },
+    { term: "IT-architect", def: "Bewaakt het overzicht van applicaties en systemen in het bedrijf en adviseert over nieuwe technologieën en de technische aanpak." },
+    { term: "Ontwikkelaar", def: "Bouwt en programmeert software of websites op basis van de analyse en het ontwerp, met tools, talen en frameworks." },
+    { term: "Tester", def: "Controleert of software of een product foutloos werkt en voldoet aan de vereisten, vóór de oplevering aan de klant." },
+    { term: "Analist", def: "Onderzoekt en beschrijft de vereisten van een project of klant, en vertaalt deze naar een duidelijke opdracht voor het team." },
+    { term: "Project manager", def: "Plant, coördineert en bewaakt de voortgang, kwaliteit, timing en het budget van een project, en rapporteert aan stakeholders." },
+    { term: "Grafisch ontwerper", def: "Ontwerpt visuele communicatie zoals logo's en huisstijlen, met aandacht voor typografie en kleurgebruik." },
+    { term: "Multimedia ontwerper", def: "Ontwerpt en combineert verschillende mediavormen (beeld, geluid, video, interactie) voor digitale producties." },
+    { term: "Web designer", def: "Ontwerpt en bouwt de lay-out en visuele vormgeving van websites, vaak met oog voor responsief design." },
+    { term: "UX/UI designer", def: "Ontwerpt de gebruikerservaring (UX) en de visuele interface (UI) van digitale producten, zodat ze intuïtief en gebruiksvriendelijk zijn." },
+    { term: "Illustrator (beroep)", def: "Maakt originele tekeningen en illustraties, bv. voor boeken, campagnes of digitale content." }
+] },
+
+{ chapterId: 6, name: "Trends op de arbeidsmarkt voor digitale vormgevers", items: [
+    { term: "Digital first", def: "Bedrijven investeren meer in hun online aanwezigheid (websites, apps, social visuals) en minder in drukwerk, versneld door Corona." },
+    { term: "Combinatieprofielen", def: "Werkgevers zoeken vaker gecombineerde profielen zoals UI + UX, of Webdesign + No-code (Wix, Webflow, Framer)." },
+    { term: "Motion & video booming", def: "Door TikTok, Reels en YouTube Shorts stijgt de vraag naar motion graphics, video bewerking en animaties." },
+    { term: "AI-impact op designers", def: "Designers verschuiven van 'zelf alles maken' naar 'AI aansturen en kwaliteit bewaken', met skills zoals goede prompts schrijven." },
+    { term: "Toegankelijkheid & ethiek", def: "Door de European Accessibility Act (EAA) wordt toegankelijkheid wettelijk verplicht, naast aandacht voor duurzaamheid en ethiek." }
+] },
+
+{ chapterId: 6, name: "Doorgroeimogelijkheden", items: [
+    { term: "Groeien in expertise", def: "Doorgroeien tot een senior profiel binnen hetzelfde vakgebied, bv. senior in UI/UX design." },
+    { term: "Brede ervaring uitbouwen", def: "Doorgroeien door meerdere rollen te combineren, bv. webdesigner én multimedia ontwerper." },
+    { term: "Leiding nemen", def: "Doorgroeien naar een leidinggevende rol, bv. teamlead of projectmanager." }
+], extra: ["Specialiseren in AI-tools", "Overstappen naar een ander vakgebied"] },
+
+/* ============================== HOOFDSTUK 7 ============================== */
+{ chapterId: 7, name: "Kosten versus baten", items: [
+    { term: "Kosten", def: "Alle uitgaven die je doet om je project te realiseren, bv. materiaal, software, mensen, onderhoud en opleidingen." },
+    { term: "Baten", def: "Alle voordelen of opbrengsten die een project oplevert, bv. financiële winst, efficiëntie, klantvoordeel of strategisch voordeel." }
+], extra: ["Haalbaarheid", "Total Cost of Ownership"] },
+
+{ chapterId: 7, name: "Financieel versus niet-financieel", items: [
+    { term: "Financiële baten", def: "Opbrengsten die rechtstreeks in geld kunnen worden uitgedrukt, zoals meer verkoop of lagere personeelskosten." },
+    { term: "Niet-financiële baten", def: "Voordelen die niet meteen financieel meetbaar zijn, zoals tevreden klanten, betere reputatie of toegang tot nieuwe markten." },
+    { term: "Financiële kosten", def: "Kosten die rechtstreeks in geld worden uitgedrukt, zoals licenties, loonkosten of de aankoop van hardware/software." },
+    { term: "Niet-financiële kosten", def: "Kosten die moeilijker in geld uit te drukken zijn, zoals stress, langere wachttijden of verminderde motivatie." }
+] },
+
+{ chapterId: 7, name: "Eenmalig versus recurrent", items: [
+    { term: "Eenmalige kosten/baten", def: "Kosten of baten die slechts één keer voorkomen, bv. de aankoop van een laptop of de installatie van software." },
+    { term: "Recurrente kosten/baten", def: "Kosten of baten die regelmatig terugkeren, zoals licenties per maand, hosting, onderhoud of vaste maandelijkse omzet." }
+], extra: ["Total Cost of Ownership", "Kosten-batenanalyse"] },
+
+{ chapterId: 7, name: "Kosten-batenanalyse en verwante begrippen", items: [
+    { term: "Kosten-batenanalyse (KBA)", def: "Een methode om te bepalen of een project de moeite waard is, door kosten en baten te vergelijken over de volledige levensduur." },
+    { term: "Total Cost of Ownership (TCO)", def: "Het totaal van alle kosten over de volledige levensduur van een systeem: aanschaf, implementatie, onderhoud én support." },
+    { term: "Haalbaarheid", def: "De mate waarin een project uitvoerbaar en zinvol is, op financieel, operationeel, technisch en tijdsgebonden vlak." },
+    { term: "Make-or-buy-beslissing", def: "De keuze tussen zelf ontwikkelen of uitvoeren (make) of aankopen/uitbesteden (buy) van een product of dienst." }
+] },
+
+{ chapterId: 7, name: "De vier dimensies van haalbaarheid", items: [
+    { term: "Financiële haalbaarheid", def: "Is er voldoende budget? Wegen de baten op tegen de kosten?" },
+    { term: "Operationele haalbaarheid", def: "Gaat het project echt het probleem oplossen dat het moet oplossen?" },
+    { term: "Technische haalbaarheid", def: "Beschikken we over de juiste kennis en middelen om het project uit te voeren?" },
+    { term: "Timing (haalbaarheid)", def: "Hebben we voldoende tijd om het project binnen de gewenste periode uit te voeren?" }
+] },
+
+{ chapterId: 7, name: "Make or buy", items: [
+    { term: "Make (zelf maken)", def: "Software zelf laten ontwikkelen door de eigen IT-medewerkers, bv. omdat het goedkoper is of processen geheim moeten blijven." },
+    { term: "Buy: standaardsoftware", def: "Een kant-en-klaar softwarepakket aankopen dat door een externe leverancier wordt aangeboden en onmiddellijk inzetbaar is, bv. SAP." },
+    { term: "Buy: outsourcing", def: "Het maken van een specifiek softwarepakket uitbesteden aan een externe partij die de uitvoering op zich neemt." },
+    { term: "Buy: licentie/abonnement", def: "Een licentie of abonnement nemen op een clouddienst in plaats van zelf te ontwikkelen of te installeren." }
+], extra: ["Cloud computing", "Lock-in"] },
+
+{ chapterId: 7, name: "Onshore, nearshore, offshore", items: [
+    { term: "Onshore outsourcing", def: "Uitbesteden aan een externe partij binnen hetzelfde land." },
+    { term: "Nearshore outsourcing", def: "Uitbesteden aan een partij in een buurland; vaak goedkoper, maar cultureel dichterbij dan offshore." },
+    { term: "Offshore outsourcing", def: "Uitbesteden aan een partij in een ver land, bv. India of de Filipijnen, vaak om kosten te besparen." }
+], extra: ["Cloud computing", "On-premise"] },
+
+{ chapterId: 7, name: "Voor- en nadelen van outsourcing", items: [
+    { term: "Voordeel van outsourcing", def: "Kostenbesparing: soms goedkoper dan intern personeel of een eigen infrastructuur." },
+    { term: "Voordeel van outsourcing", def: "Toegang tot expertise: gespecialiseerde kennis of technologie die je zelf niet in huis hebt." },
+    { term: "Voordeel van outsourcing", def: "Flexibiliteit: makkelijk op- en afschalen volgens de nood, bv. bij extra werkpieken." },
+    { term: "Nadeel van outsourcing", def: "Afhankelijkheid van externe partijen: risico bij prijsstijging, faillissement of een slechte samenwerking." },
+    { term: "Nadeel van outsourcing", def: "Minder controle over kwaliteit, planning en communicatie." },
+    { term: "Nadeel van outsourcing", def: "Risico op lock-in: het wordt moeilijk om over te stappen naar een andere leverancier." }
+] },
+
+{ chapterId: 7, name: "Cloud computing versus on-premise", items: [
+    { term: "Cloud computing", def: "IT-diensten leveren via het internet (opslag, software, rekenkracht) zonder dat je deze zelf lokaal beheert; de leverancier zorgt voor onderhoud en beveiliging." },
+    { term: "On-premise", def: "Software en hardware lokaal installeren en beheren binnen de eigen organisatie." },
+    { term: "Lock-in", def: "De situatie waarin een organisatie sterk afhankelijk wordt van één leverancier, waardoor overstappen moeilijk of duur wordt." }
+], extra: ["Outsourcing", "Nearshore outsourcing"] }
+];
+
+/* =========================================================================
+   GENERATOR: bouwt uit de clusters twee soorten vragen
+   - "recognize": front = omschrijving/voorbeeld -> kies het juiste begrip
+   - "define":    front = begrip -> kies de exact juiste omschrijving
+     (dit traint het onderscheid tussen 4 bijna-identieke omschrijvingen)
+   ========================================================================= */
+
+function shuffle(array) {
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
     }
+    return a;
+}
 
-    function initChapters() {
-        const chapters = [...new Set(flashcardsData.map(item => item.chapter))];
-        chapterSelect.innerHTML = `<option value="all">Alle Hoofdstukken (${flashcardsData.length})</option>`;
+function uniqueTerms(cluster) {
+    return [...new Set(cluster.items.map(i => i.term))];
+}
 
-        chapters.forEach(ch => {
-            const count = flashcardsData.filter(item => item.chapter === ch).length;
-            const opt = document.createElement("option");
-            opt.value = ch;
-            opt.textContent = `${ch} (${count})`;
-            chapterSelect.appendChild(opt);
-        });
-    }
+function canonicalDef(cluster, term) {
+    return cluster.items.find(i => i.term === term).def;
+}
 
-    function filterCards() {
-        const selected = chapterSelect.value;
-        currentList = selected === "all"
-            ? [...flashcardsData]
-            : flashcardsData.filter(item => item.chapter === selected);
+function buildQuestions() {
+    const questions = [];
 
-        // ALTIJD random volgorde bij het starten/filteren
-        shuffle(currentList);
-        currentIndex = 0;
-        updateQuestion();
-    }
+    CLUSTERS.forEach((cluster, clusterIdx) => {
+        const terms = uniqueTerms(cluster);
+        const pool = [...new Set([...terms, ...(cluster.extra || [])])];
 
-    function updateQuestion() {
-        answered = false;
-        card.classList.remove("flipped");
-        nextBtn.style.display = "none";
-        optionsContainer.innerHTML = "";
-
-        if (currentList.length === 0) {
-            frontText.textContent = "Geen begrippen beschikbaar";
-            progress.textContent = "0 / 0";
-            return;
-        }
-
-        const item = currentList[currentIndex];
-
-        // Wacht heel even met text updaten zodat de kaart eerst terug kan draaien
-        setTimeout(() => {
-            frontChapter.textContent = item.chapter;
-            frontText.textContent = item.def;
-            progress.textContent = `Vraag ${currentIndex + 1} van ${currentList.length}`;
-
-            // Genereer de 4 opties
-            const correctTerm = item.term;
-
-            // Zoek 3 random andere termen (liefst uit zelfde hoofdstuk, anders algemeen)
-            let allOtherTerms = flashcardsData
-                .filter(d => d.term !== correctTerm)
-                .map(d => d.term);
-
-            // Unieke termen overhouden
-            allOtherTerms = [...new Set(allOtherTerms)];
-
-            // Shuffle en pak er 3
-            shuffle(allOtherTerms);
-            let distractors = allOtherTerms.slice(0, 3);
-
-            // Voeg de juiste toe en shuffle de 4 opties
-            let options = [correctTerm, ...distractors];
-            shuffle(options);
-
-            // Knoppen aanmaken
-            options.forEach(opt => {
-                const btn = document.createElement("button");
-                btn.className = "option-btn";
-                btn.textContent = opt;
-                btn.onclick = () => handleAnswer(btn, opt, correctTerm, item);
-                optionsContainer.appendChild(btn);
+        // Variant "recognize": front = definitie, opties = begrippen
+        if (pool.length >= 4) {
+            cluster.items.forEach((item, itemIdx) => {
+                const distractorPool = pool.filter(t => t !== item.term);
+                const distractors = shuffle(distractorPool).slice(0, 3);
+                if (distractors.length < 3) return;
+                questions.push({
+                    id: "r" + clusterIdx + "-" + itemIdx,
+                    chapterId: cluster.chapterId,
+                    clusterName: cluster.name,
+                    type: "recognize",
+                    front: item.def,
+                    correct: item.term,
+                    options: shuffle([item.term, ...distractors])
+                });
             });
-        }, 150);
-    }
-
-    function handleAnswer(clickedBtn, selectedOption, correctTerm, item) {
-        if (answered) return;
-        answered = true;
-
-        const buttons = optionsContainer.querySelectorAll(".option-btn");
-
-        buttons.forEach(btn => {
-            btn.disabled = true; // deactiveer alle knoppen
-
-            if (btn.textContent === correctTerm) {
-                btn.classList.add("correct"); // markeer de juiste altijd groen
-            } else if (btn === clickedBtn) {
-                btn.classList.add("wrong"); // markeer fout geklikte rood
-            }
-        });
-
-        // Update achterkant van de kaart
-        backText.textContent = correctTerm;
-        if (selectedOption === correctTerm) {
-            resultBadge.textContent = "✓ CORRECT";
-            resultBadge.style.color = "#a7f3d0"; // light green
-        } else {
-            resultBadge.textContent = "✗ FOUT";
-            resultBadge.style.color = "#fca5a5"; // light red
         }
 
-        // Draai de kaart om
-        card.classList.add("flipped");
-
-        // Toon de volgende knop
-        nextBtn.style.display = "block";
-    }
-
-    function nextCard() {
-        currentIndex++;
-        if (currentIndex >= currentList.length) {
-            // Als we aan het einde zijn, schudden we de lijst opnieuw!
-            shuffle(currentList);
-            currentIndex = 0;
-            alert("Je hebt alle kaarten gehad! We schudden ze opnieuw voor een nieuwe ronde.");
-        }
-        updateQuestion();
-    }
-
-    // Events
-    chapterSelect.addEventListener("change", filterCards);
-    nextBtn.addEventListener("click", nextCard);
-
-    // Druk op Enter of spatie voor 'Volgende' (als we geantwoord hebben)
-    window.addEventListener("keydown", (e) => {
-        if ((e.code === "Space" || e.code === "Enter") && answered) {
-            e.preventDefault();
-            nextCard();
+        // Variant "define": front = begrip, opties = omschrijvingen (bijna identiek)
+        if (terms.length >= 4) {
+            terms.forEach((term, termIdx) => {
+                const def = canonicalDef(cluster, term);
+                const distractorTerms = shuffle(terms.filter(t => t !== term)).slice(0, 3);
+                if (distractorTerms.length < 3) return;
+                const distractorDefs = distractorTerms.map(t => canonicalDef(cluster, t));
+                questions.push({
+                    id: "d" + clusterIdx + "-" + termIdx,
+                    chapterId: cluster.chapterId,
+                    clusterName: cluster.name,
+                    type: "define",
+                    front: term,
+                    correct: def,
+                    options: shuffle([def, ...distractorDefs])
+                });
+            });
         }
     });
 
-    // Start applicatie
-    initChapters();
-    filterCards();
+    return questions;
+}
+
+const ALL_QUESTIONS = buildQuestions();
+
+/* =========================================================================
+   UI
+   ========================================================================= */
+
+let currentList = [];
+let currentIndex = 0;
+let answered = false;
+let selectedChapter = "all";
+let score = { correct: 0, total: 0 };
+
+const chapterList = document.getElementById("chapterList");
+const card = document.getElementById("card");
+const cardBack = document.getElementById("cardBack");
+const frontText = document.getElementById("frontText");
+const backText = document.getElementById("backText");
+const frontChapter = document.getElementById("frontChapter");
+const frontType = document.getElementById("frontType");
+const resultBadge = document.getElementById("resultBadge");
+const progress = document.getElementById("progress");
+const scorePill = document.getElementById("scorePill");
+const nextBtn = document.getElementById("nextBtn");
+const optionsContainer = document.getElementById("optionsContainer");
+
+function chapterCount(chapterId) {
+    return ALL_QUESTIONS.filter(q => q.chapterId === chapterId).length;
+}
+
+function renderChapterList() {
+    const total = ALL_QUESTIONS.length;
+    const maxCount = Math.max(...CHAPTERS.map(c => chapterCount(c.id)));
+    let html = "";
+
+    html += rowHtml("all", "Alle hoofdstukken", total, total, true);
+    CHAPTERS.forEach(ch => {
+        const count = chapterCount(ch.id);
+        html += rowHtml(String(ch.id), ch.name, count, maxCount, false);
+    });
+
+    chapterList.innerHTML = html;
+
+    chapterList.querySelectorAll(".chapter-row").forEach(row => {
+        row.addEventListener("click", () => {
+            selectedChapter = row.dataset.value;
+            renderChapterList();
+            filterCards();
+        });
+    });
+}
+
+function rowHtml(value, name, count, maxCount, isAll) {
+    const active = String(selectedChapter) === value;
+    const pct = maxCount > 0 ? Math.max(6, Math.round((count / maxCount) * 100)) : 0;
+    return `<div class="chapter-row${active ? " active" : ""}" data-value="${value}">
+        <span class="chapter-radio"></span>
+        <div class="chapter-info">
+            <div class="chapter-name">${name}</div>
+            <div class="chapter-meta">
+                <div class="chapter-bar-track"><div class="chapter-bar-fill" style="width:${isAll ? 100 : pct}%"></div></div>
+                <span class="chapter-count">${count} vr.</span>
+            </div>
+        </div>
+    </div>`;
+}
+
+function filterCards() {
+    currentList = selectedChapter === "all"
+        ? [...ALL_QUESTIONS]
+        : ALL_QUESTIONS.filter(q => q.chapterId === Number(selectedChapter));
+
+    shuffle2(currentList);
+    currentIndex = 0;
+    score = { correct: 0, total: 0 };
+    updateScorePill();
+    updateQuestion();
+}
+
+function shuffle2(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+function chapterName(id) {
+    const ch = CHAPTERS.find(c => c.id === id);
+    return ch ? ch.name.replace(/^Hoofdstuk \d+: /, "H" + id + ": ") : "";
+}
+
+function updateQuestion() {
+    answered = false;
+    card.classList.remove("flipped");
+    cardBack.classList.remove("is-correct", "is-wrong");
+    nextBtn.style.display = "none";
+    optionsContainer.innerHTML = "";
+
+    if (currentList.length === 0) {
+        frontText.textContent = "Geen vragen beschikbaar.";
+        progress.textContent = "0 / 0";
+        return;
+    }
+
+    const q = currentList[currentIndex];
+
+    setTimeout(() => {
+        frontChapter.textContent = chapterName(q.chapterId);
+        frontType.textContent = q.type === "recognize" ? "Herken het begrip" : "Kies de juiste omschrijving";
+        frontText.textContent = q.front;
+        progress.textContent = `Vraag ${currentIndex + 1} van ${currentList.length}`;
+
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerHTML = `<span class="num">${i + 1}</span><span>${opt}</span>`;
+            btn.onclick = () => handleAnswer(btn, opt, q);
+            optionsContainer.appendChild(btn);
+        });
+    }, 140);
+}
+
+function handleAnswer(clickedBtn, selectedOption, q) {
+    if (answered) return;
+    answered = true;
+
+    const isCorrect = selectedOption === q.correct;
+    score.total++;
+    if (isCorrect) score.correct++;
+    updateScorePill();
+
+    const buttons = optionsContainer.querySelectorAll(".option-btn");
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        const label = btn.querySelector("span:last-child").textContent;
+        if (label === q.correct) {
+            btn.classList.add("correct");
+        } else if (btn === clickedBtn) {
+            btn.classList.add("wrong");
+        }
+    });
+
+    const isLong = q.correct.length > 60;
+    backText.textContent = q.correct;
+    backText.classList.toggle("long", isLong);
+
+    cardBack.classList.toggle("is-correct", isCorrect);
+    cardBack.classList.toggle("is-wrong", !isCorrect);
+
+    if (isCorrect) {
+        resultBadge.textContent = "✓ Correct";
+        resultBadge.className = "result-badge is-correct";
+    } else {
+        resultBadge.textContent = "✗ Fout";
+        resultBadge.className = "result-badge is-wrong";
+    }
+
+    card.classList.add("flipped");
+    nextBtn.style.display = "block";
+}
+
+function updateScorePill() {
+    scorePill.textContent = score.total > 0 ? `${score.correct}/${score.total}` : "";
+}
+
+function nextCard() {
+    currentIndex++;
+    if (currentIndex >= currentList.length) {
+        shuffle2(currentList);
+        currentIndex = 0;
+    }
+    updateQuestion();
+}
+
+nextBtn.addEventListener("click", nextCard);
+
+window.addEventListener("keydown", (e) => {
+    if ((e.code === "Space" || e.code === "Enter") && answered) {
+        e.preventDefault();
+        nextCard();
+        return;
+    }
+    if (!answered && ["Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) {
+        const idx = Number(e.code.slice(-1)) - 1;
+        const btns = optionsContainer.querySelectorAll(".option-btn");
+        if (btns[idx]) btns[idx].click();
+    }
+});
+
+renderChapterList();
+filterCards();
 </script>
 </body>
 </html>
