@@ -390,9 +390,228 @@
         font-size: 0.7rem;
     }
 
+    /* ---------- Subthema-selectie per hoofdstuk ---------- */
+    .chapter-block { margin-bottom: 0.15rem; }
+
+    .chapter-row { position: relative; padding-right: 2.6rem; }
+
+    .chapter-expand {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-faint);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.15s, border-color 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chapter-expand:hover { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+    .chapter-expand.open { transform: rotate(180deg); color: var(--accent); }
+
+    .subtheme-panel {
+        margin: 0.35rem 0 0.6rem 2.4rem;
+        padding: 0.6rem 0.7rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-sm);
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .subtheme-row {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.4rem 0.3rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+    }
+
+    .subtheme-row:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+
+    .subtheme-row input[type="checkbox"] {
+        width: 15px; height: 15px;
+        accent-color: var(--accent);
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .subtheme-row span:first-of-type { flex: 1; }
+
+    .subtheme-count {
+        font-size: 0.7rem;
+        color: var(--text-faint);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .subtheme-start {
+        margin-top: 0.45rem;
+        align-self: flex-start;
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid rgba(124, 157, 255, 0.35);
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .subtheme-start:hover { background: rgba(124, 157, 255, 0.22); }
+
+    .special-row.disabled { cursor: not-allowed; opacity: 0.55; }
+    .special-row.disabled:hover { background: transparent; }
+
+    .empty-hint {
+        font-size: 0.72rem;
+        color: var(--text-faint);
+        margin-top: 0.3rem;
+    }
+
+    /* ---------- Quiz-scherm (scherm 2) ---------- */
+    .quiz-topbar {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .back-btn {
+        background: var(--surface);
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s, background 0.15s;
+        white-space: nowrap;
+    }
+
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--surface-2); }
+
+    .quiz-title {
+        font-size: 0.82rem;
+        color: var(--text-faint);
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cluster-label {
+        font-size: 0.74rem;
+        color: var(--accent-2);
+        margin-top: 0.6rem;
+        letter-spacing: 0.01em;
+    }
+
+    .options-grid.single-col { grid-template-columns: 1fr; }
+
+    /* ---------- Eindscherm ---------- */
+    .summary-panel {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.6rem 1.5rem;
+        box-shadow: var(--shadow);
+        text-align: center;
+    }
+
+    .summary-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1.3rem;
+    }
+
+    .summary-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-stat {
+        background: var(--surface-2);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-sm);
+        padding: 0.9rem 0.6rem;
+    }
+
+    .summary-stat.highlight {
+        background: var(--accent-soft);
+        border-color: rgba(124, 157, 255, 0.4);
+    }
+
+    .summary-stat-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .summary-stat.highlight .summary-stat-value { color: var(--accent); }
+
+    .summary-stat-label {
+        font-size: 0.72rem;
+        color: var(--text-faint);
+        margin-top: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .summary-actions { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .primary-btn {
+        background: linear-gradient(120deg, var(--accent), var(--accent-2));
+        color: #0a0d16;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.9rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: filter 0.15s, transform 0.1s;
+    }
+
+    .primary-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+    .secondary-btn {
+        background: transparent;
+        color: var(--text-dim);
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s;
+    }
+
+    .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
+
     @media (max-width: 560px) {
         .options-grid { grid-template-columns: 1fr; }
         h1 { font-size: 1.5rem; }
+        .subtheme-panel { margin-left: 0.5rem; }
+        .summary-stats { grid-template-columns: 1fr 1fr; }
     }
 </style>
 </head>
@@ -405,37 +624,77 @@
         <p class="subtitle">Herexamen-training — begrippen, rollen &amp; onderscheid scherp krijgen</p>
     </header>
 
-    <div class="chapter-panel">
-        <div class="chapter-panel-title">Hoofdstuk</div>
-        <div class="chapter-list" id="chapterList"></div>
-    </div>
-
-    <div class="card-container" id="cardContainer">
-        <div class="card" id="card">
-            <div class="card-face card-front">
-                <div class="badge-row">
-                    <span class="badge" id="frontChapter"></span>
-                    <span class="badge qtype" id="frontType"></span>
-                </div>
-                <div class="content" id="frontText">Laden...</div>
-            </div>
-            <div class="card-face card-back" id="cardBack">
-                <span class="result-badge" id="resultBadge"></span>
-                <div class="content" id="backText"></div>
-            </div>
+    <!-- SCHERM 1: hoofdstukken- en subthemakeuze -->
+    <div id="screenMenu">
+        <div class="chapter-panel">
+            <div class="chapter-panel-title">Kies wat je wil oefenen</div>
+            <div class="chapter-list" id="chapterList"></div>
         </div>
     </div>
 
-    <div class="options-grid" id="optionsContainer"></div>
+    <!-- SCHERM 2: actieve ronde -->
+    <div id="screenQuiz" style="display:none;">
+        <div class="quiz-topbar">
+            <button id="backBtn" class="back-btn">&larr; Hoofdstukken</button>
+            <span class="quiz-title" id="quizTitle"></span>
+        </div>
 
-    <div class="nav-buttons">
-        <span class="progress"><span id="progress"></span><span class="score-pill" id="scorePill"></span></span>
-        <button id="nextBtn">Volgende vraag &rarr;</button>
+        <div id="quizPlay">
+            <div class="card-container" id="cardContainer">
+                <div class="card" id="card">
+                    <div class="card-face card-front">
+                        <div class="badge-row">
+                            <span class="badge" id="frontChapter"></span>
+                            <span class="badge qtype" id="frontType"></span>
+                        </div>
+                        <div class="cluster-label" id="frontCluster"></div>
+                        <div class="content" id="frontText">Laden...</div>
+                    </div>
+                    <div class="card-face card-back" id="cardBack">
+                        <span class="result-badge" id="resultBadge"></span>
+                        <div class="content" id="backText"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="options-grid" id="optionsContainer"></div>
+
+            <div class="nav-buttons">
+                <span class="progress"><span id="progress"></span><span class="score-pill" id="scorePill"></span></span>
+                <button id="nextBtn">Volgende vraag &rarr;</button>
+            </div>
+
+            <footer>
+                Kies met <kbd>1</kbd>–<kbd>4</kbd> · <kbd>Enter</kbd> / <kbd>Spatie</kbd> voor volgende
+            </footer>
+        </div>
+
+        <div id="quizSummary" class="summary-panel" style="display:none;">
+            <div class="summary-title">Ronde voltooid — alles minstens één keer juist beantwoord</div>
+            <div class="summary-stats">
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="summaryCorrect">0</div>
+                    <div class="summary-stat-label">Juist (1e poging)</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="summaryWrong">0</div>
+                    <div class="summary-stat-label">Fout (1e poging)</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="summaryPct">0%</div>
+                    <div class="summary-stat-label">Score 1e poging</div>
+                </div>
+                <div class="summary-stat highlight">
+                    <div class="summary-stat-value" id="summaryGrade">0/20</div>
+                    <div class="summary-stat-label">Cijfer op 20</div>
+                </div>
+            </div>
+            <div class="summary-actions">
+                <button id="restartRoundBtn" class="primary-btn">Nog een ronde &rarr;</button>
+                <button id="toMenuBtn" class="secondary-btn">Terug naar hoofdstukken</button>
+            </div>
+        </div>
     </div>
-
-    <footer>
-        Kies met <kbd>1</kbd>–<kbd>4</kbd> · <kbd>Enter</kbd> / <kbd>Spatie</kbd> voor volgende
-    </footer>
 </div>
 
 <script>
@@ -462,7 +721,7 @@ const CLUSTERS = [
     { term: "Publiek (overheid)", def: "Gemeenschappelijk nut staat voorop, winst maken is geen doel." },
     { term: "Privaat (commercieel)", def: "Privaat nut staat voorop, winst maken is een belangrijk doel." },
     { term: "Non-profit (NGO, vereniging)", def: "Maatschappelijk nut staat voorop, winst maken is geen doel." }
-], extra: ["Coöperatieve organisatie", "Multinational", "KMO"] },
+], extra: ["Multinational", "KMO", "Industrie"] },
 
 { chapterId: 1, name: "Omvang van bedrijven", items: [
     { term: "Micro-onderneming", def: "Minder dan 10 werknemers en een jaaromzet onder 2 miljoen euro." },
@@ -477,13 +736,13 @@ const CLUSTERS = [
     { term: "Operationele afdelingen", def: "Doen het bedrijf draaien: maken de producten en leveren de diensten van de core business, meestal geen klantcontact." },
     { term: "Commerciële afdelingen", def: "Doen het bedrijf groeien: zorgen dat producten en diensten op de markt komen en verkocht worden, veel klantcontact." },
     { term: "Ondersteunende afdelingen", def: "Faciliteren de werking van het bedrijf achter de schermen, geen contact met klanten." }
-], extra: ["Strategische afdelingen", "Productieafdelingen enkel", "Transitieafdelingen"] },
+], extra: ["Automatisch proces", "Semiautomatisch proces", "Manueel proces"] },
 
 { chapterId: 1, name: "Soorten processen", items: [
     { term: "Automatisch proces", def: "Processtappen verlopen volledig door systemen, zonder menselijke tussenkomst." },
     { term: "Semiautomatisch proces", def: "Een deel van het proces verloopt automatisch, een deel manueel; mens en systeem werken samen." },
     { term: "Manueel proces", def: "Alle stappen van het proces worden door mensen uitgevoerd." }
-], extra: ["Robotic Process Automation (RPA)", "Geoptimaliseerd proces", "Gedigitaliseerd proces"] },
+], extra: ["RPA (Robotics Proces Automation)", "Configuratie", "Customisatie"] },
 
 { chapterId: 1, name: "Hoofd van de ICT-afdeling", items: [
     { term: "Vice President ICT", def: "Benaming voor het ICT-afdelingshoofd in heel grote bedrijven en multinationals." },
@@ -548,7 +807,7 @@ const CLUSTERS = [
 { chapterId: 2, name: "Platte versus steile structuur", items: [
     { term: "Platte structuur", def: "Structuur met weinig hiërarchische niveaus tussen de hoogste en de laagste managers." },
     { term: "Steile structuur", def: "Structuur met veel hiërarchische niveaus tussen de hoogste en de laagste managers." }
-], extra: ["Matrixstructuur", "Lijnstructuur", "Divisiestructuur", "Netwerkstructuur"] },
+], extra: ["Matrixorganisatie", "Divisionele organisatie", "Functionele organisatie", "Lijn-staforganisatie"] },
 
 { chapterId: 2, name: "Horizontale differentiatie", items: [
     { term: "Indeling naar functie", def: "Taken verdelen op basis van functie, bv. installatie van servers of helpdesk, webdevelopment." },
@@ -562,7 +821,7 @@ const CLUSTERS = [
     { term: "Informele organisatie", def: "De feitelijke samenwerking en relaties, gebaseerd op contacten, buiten de formele structuur om." },
     { term: "Organogram", def: "Schematische voorstelling van hoe formeel taken verdeeld zijn over personen en afdelingen." },
     { term: "Organisatiestructuur", def: "De manier waarop taken, bevoegdheden en verantwoordelijkheden verdeeld zijn over personen en afdelingen." }
-], extra: ["Organisatiecultuur"] },
+], extra: ["Spanwijdte"] },
 
 { chapterId: 2, name: "De 6 organisatiestructuren", items: [
     { term: "Lijnorganisatie", def: "Klassieke piramidestructuur waarbij elke werknemer één leidinggevende heeft en besluitvorming gecentraliseerd is." },
@@ -717,7 +976,7 @@ const CLUSTERS = [
 { chapterId: 5, name: "Scrum – basisbegrippen", items: [
     { term: "Scrum", def: "Een methode die de agile principes volgt en gebruikt wordt om op een flexibele manier (software)producten te maken." },
     { term: "Sprint", def: "Een korte periode met een vaste lengte (1 tot 4 weken) waarin een scrumteam een werkend, waardevol stukje product maakt." }
-], extra: ["Kanban", "Waterval", "Lean"] },
+], extra: ["Kanban", "Waterval", "Product Backlog"] },
 
 { chapterId: 5, name: "Scrum-artefacten", items: [
     { term: "Product Backlog", def: "Lijst van geprioriteerde punten die ontwikkeld moeten worden in het project, opgeleverd in meerdere sprints." },
@@ -774,7 +1033,7 @@ const CLUSTERS = [
 { chapterId: 5, name: "Waterval versus scrum: wanneer gebruiken?", items: [
     { term: "Waterval", def: "Geschikt wanneer de vereisten van de klant op voorhand duidelijk zijn en gedeeltelijke oplevering niet mogelijk is, bv. software voor een vliegtuig." },
     { term: "Scrum", def: "Geschikt wanneer de vereisten nog niet duidelijk zijn aan het begin van het project en gedeeltelijke oplevering wel mogelijk is, bv. een klantenbeheersysteem." }
-], extra: ["Kanban", "Lean"] },
+], extra: ["Kanban", "Sprint"] },
 
 /* ============================== HOOFDSTUK 6 ============================== */
 { chapterId: 6, name: "Hard skills versus soft skills", items: [
@@ -958,14 +1217,65 @@ function buildQuestions() {
 const ALL_QUESTIONS = buildQuestions();
 
 /* =========================================================================
-   UI
+   PERSISTENTIE: foutenstatistiek per vraag-id (localStorage)
    ========================================================================= */
 
-let currentList = [];
-let currentIndex = 0;
+const MISTAKES_KEY = "itorgMistakes_v1";
+
+function loadMistakes() {
+    try {
+        const raw = localStorage.getItem(MISTAKES_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return (parsed && typeof parsed === "object") ? parsed : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveMistakes() {
+    try { localStorage.setItem(MISTAKES_KEY, JSON.stringify(mistakes)); } catch (e) { /* localStorage niet beschikbaar */ }
+}
+
+let mistakes = loadMistakes(); // { [questionId]: aantal keer fout beantwoord (> 0) }
+
+function registerMistake(id) {
+    mistakes[id] = (mistakes[id] || 0) + 1;
+    saveMistakes();
+}
+
+function registerFix(id) {
+    if (mistakes[id]) {
+        mistakes[id] = mistakes[id] - 1;
+        if (mistakes[id] <= 0) delete mistakes[id];
+        saveMistakes();
+    }
+}
+
+function mistakeQuestionCount() {
+    return Object.keys(mistakes).filter(id => mistakes[id] > 0).length;
+}
+
+/* =========================================================================
+   UI: state
+   ========================================================================= */
+
+let screenName = "menu";           // "menu" | "quiz"
+let expandedChapter = null;        // chapterId waarvan het subthema-paneel open staat
+let chapterClusterSelection = {};  // chapterId -> Set(clusterName) die aangevinkt zijn
+
+let activeSelection = null;        // { type: "all" } | { type: "mistakes" } | { type: "chapter", chapterId }
+let roundQueue = [];               // werkende wachtrij van de huidige ronde (front = huidige vraag)
+let roundStats = {};               // vraag-id -> { firstCorrect: null|boolean, mastered: boolean }
+let roundTotal = 0;                // aantal unieke vragen in deze ronde
 let answered = false;
-let selectedChapter = "all";
-let score = { correct: 0, total: 0 };
+let score = { correct: 0, total: 0 }; // live teller (incl. herhalingen) voor de ronde
+
+const screenMenu = document.getElementById("screenMenu");
+const screenQuiz = document.getElementById("screenQuiz");
+const quizPlay = document.getElementById("quizPlay");
+const quizSummary = document.getElementById("quizSummary");
+const quizTitle = document.getElementById("quizTitle");
+const backBtn = document.getElementById("backBtn");
 
 const chapterList = document.getElementById("chapterList");
 const card = document.getElementById("card");
@@ -974,70 +1284,30 @@ const frontText = document.getElementById("frontText");
 const backText = document.getElementById("backText");
 const frontChapter = document.getElementById("frontChapter");
 const frontType = document.getElementById("frontType");
+const frontCluster = document.getElementById("frontCluster");
 const resultBadge = document.getElementById("resultBadge");
 const progress = document.getElementById("progress");
 const scorePill = document.getElementById("scorePill");
 const nextBtn = document.getElementById("nextBtn");
 const optionsContainer = document.getElementById("optionsContainer");
 
+const summaryCorrect = document.getElementById("summaryCorrect");
+const summaryWrong = document.getElementById("summaryWrong");
+const summaryPct = document.getElementById("summaryPct");
+const summaryGrade = document.getElementById("summaryGrade");
+const restartRoundBtn = document.getElementById("restartRoundBtn");
+const toMenuBtn = document.getElementById("toMenuBtn");
+
 function chapterCount(chapterId) {
     return ALL_QUESTIONS.filter(q => q.chapterId === chapterId).length;
 }
 
-function renderChapterList() {
-    const total = ALL_QUESTIONS.length;
-    const maxCount = Math.max(...CHAPTERS.map(c => chapterCount(c.id)));
-    let html = "";
-
-    html += rowHtml("all", "Alle hoofdstukken", total, total, true);
-    CHAPTERS.forEach(ch => {
-        const count = chapterCount(ch.id);
-        html += rowHtml(String(ch.id), ch.name, count, maxCount, false);
-    });
-
-    chapterList.innerHTML = html;
-
-    chapterList.querySelectorAll(".chapter-row").forEach(row => {
-        row.addEventListener("click", () => {
-            selectedChapter = row.dataset.value;
-            renderChapterList();
-            filterCards();
-        });
-    });
-}
-
-function rowHtml(value, name, count, maxCount, isAll) {
-    const active = String(selectedChapter) === value;
-    const pct = maxCount > 0 ? Math.max(6, Math.round((count / maxCount) * 100)) : 0;
-    return `<div class="chapter-row${active ? " active" : ""}" data-value="${value}">
-        <span class="chapter-radio"></span>
-        <div class="chapter-info">
-            <div class="chapter-name">${name}</div>
-            <div class="chapter-meta">
-                <div class="chapter-bar-track"><div class="chapter-bar-fill" style="width:${isAll ? 100 : pct}%"></div></div>
-                <span class="chapter-count">${count} vr.</span>
-            </div>
-        </div>
-    </div>`;
-}
-
-function filterCards() {
-    currentList = selectedChapter === "all"
-        ? [...ALL_QUESTIONS]
-        : ALL_QUESTIONS.filter(q => q.chapterId === Number(selectedChapter));
-
-    shuffle2(currentList);
-    currentIndex = 0;
-    score = { correct: 0, total: 0 };
-    updateScorePill();
-    updateQuestion();
-}
-
-function shuffle2(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+function chapterClusters(chapterId) {
+    const names = [...new Set(CLUSTERS.filter(c => c.chapterId === chapterId).map(c => c.name))];
+    return names.map(name => ({
+        name,
+        count: ALL_QUESTIONS.filter(q => q.chapterId === chapterId && q.clusterName === name).length
+    }));
 }
 
 function chapterName(id) {
@@ -1045,26 +1315,210 @@ function chapterName(id) {
     return ch ? ch.name.replace(/^Hoofdstuk \d+: /, "H" + id + ": ") : "";
 }
 
-function updateQuestion() {
+/* =========================================================================
+   SCHERM 1: hoofdstukken + subthema's
+   ========================================================================= */
+
+function renderChapterList() {
+    const total = ALL_QUESTIONS.length;
+    const maxCount = Math.max(...CHAPTERS.map(c => chapterCount(c.id)));
+    const mistakeCnt = mistakeQuestionCount();
+
+    let html = "";
+    html += specialRowHtml("all", "Alle hoofdstukken", total, total, false);
+    html += specialRowHtml("mistakes", "Enkel mijn fouten", mistakeCnt, Math.max(mistakeCnt, total), mistakeCnt === 0);
+
+    CHAPTERS.forEach(ch => {
+        const count = chapterCount(ch.id);
+        const clusters = chapterClusters(ch.id);
+
+        if (!chapterClusterSelection[ch.id]) {
+            chapterClusterSelection[ch.id] = new Set(clusters.map(c => c.name));
+        }
+        const selectedSet = chapterClusterSelection[ch.id];
+        const selectedCount = clusters.filter(c => selectedSet.has(c.name)).reduce((sum, c) => sum + c.count, 0);
+        const isExpanded = expandedChapter === ch.id;
+        const pct = maxCount > 0 ? Math.max(6, Math.round((count / maxCount) * 100)) : 0;
+
+        html += `<div class="chapter-block">
+            <div class="chapter-row" data-value="${ch.id}">
+                <span class="chapter-radio"></span>
+                <div class="chapter-info">
+                    <div class="chapter-name">${ch.name}</div>
+                    <div class="chapter-meta">
+                        <div class="chapter-bar-track"><div class="chapter-bar-fill" style="width:${pct}%"></div></div>
+                        <span class="chapter-count">${selectedCount < count ? selectedCount + "/" : ""}${count} vr.</span>
+                    </div>
+                </div>
+                <button type="button" class="chapter-expand${isExpanded ? " open" : ""}" data-chapter="${ch.id}" aria-label="Subthema's tonen">&#8964;</button>
+            </div>
+            <div class="subtheme-panel" style="display:${isExpanded ? "flex" : "none"}">
+                ${clusters.map((c, idx) => `<label class="subtheme-row">
+                    <input type="checkbox" data-chapter="${ch.id}" data-cidx="${idx}" ${selectedSet.has(c.name) ? "checked" : ""}>
+                    <span>${c.name}</span>
+                    <span class="subtheme-count">${c.count}</span>
+                </label>`).join("")}
+                <button type="button" class="subtheme-start" data-chapter="${ch.id}">Start geselecteerd (${selectedCount} vr.) &rarr;</button>
+            </div>
+        </div>`;
+    });
+
+    chapterList.innerHTML = html;
+    attachChapterListEvents();
+}
+
+function specialRowHtml(value, name, count, maxCount, disabled) {
+    const pct = maxCount > 0 ? Math.max(6, Math.round((count / maxCount) * 100)) : 0;
+    return `<div class="chapter-row special-row${disabled ? " disabled" : ""}" data-value="${value}">
+        <span class="chapter-radio"></span>
+        <div class="chapter-info">
+            <div class="chapter-name">${name}</div>
+            <div class="chapter-meta">
+                <div class="chapter-bar-track"><div class="chapter-bar-fill" style="width:${value === "all" ? 100 : pct}%"></div></div>
+                <span class="chapter-count">${count} vr.</span>
+            </div>
+            ${disabled ? '<div class="empty-hint">Nog geen fouten geregistreerd — los eerst wat vragen op.</div>' : ""}
+        </div>
+    </div>`;
+}
+
+function attachChapterListEvents() {
+    chapterList.querySelectorAll(".chapter-row:not(.special-row)").forEach(row => {
+        row.addEventListener("click", () => {
+            const chId = Number(row.dataset.value);
+            startRound({ type: "chapter", chapterId: chId });
+        });
+    });
+
+    chapterList.querySelectorAll(".special-row").forEach(row => {
+        row.addEventListener("click", () => {
+            if (row.classList.contains("disabled")) return;
+            startRound({ type: row.dataset.value });
+        });
+    });
+
+    chapterList.querySelectorAll(".chapter-expand").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const chId = Number(btn.dataset.chapter);
+            expandedChapter = expandedChapter === chId ? null : chId;
+            renderChapterList();
+        });
+    });
+
+    chapterList.querySelectorAll(".subtheme-panel").forEach(panel => {
+        panel.addEventListener("click", (e) => e.stopPropagation());
+    });
+
+    chapterList.querySelectorAll(".subtheme-panel input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", () => {
+            const chId = Number(cb.dataset.chapter);
+            const cidx = Number(cb.dataset.cidx);
+            const clusters = chapterClusters(chId);
+            const name = clusters[cidx].name;
+            const set = chapterClusterSelection[chId];
+            if (cb.checked) set.add(name); else set.delete(name);
+            renderChapterList();
+        });
+    });
+
+    chapterList.querySelectorAll(".subtheme-start").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const chId = Number(btn.dataset.chapter);
+            startRound({ type: "chapter", chapterId: chId });
+        });
+    });
+}
+
+/* =========================================================================
+   Selectie -> vragenset
+   ========================================================================= */
+
+function questionsForSelection(sel) {
+    if (sel.type === "all") return [...ALL_QUESTIONS];
+    if (sel.type === "mistakes") return ALL_QUESTIONS.filter(q => mistakes[q.id] > 0);
+    if (sel.type === "chapter") {
+        const set = chapterClusterSelection[sel.chapterId];
+        return ALL_QUESTIONS.filter(q => q.chapterId === sel.chapterId && (!set || set.has(q.clusterName)));
+    }
+    return [];
+}
+
+function selectionTitle(sel) {
+    if (sel.type === "all") return "Alle hoofdstukken";
+    if (sel.type === "mistakes") return "Enkel mijn fouten";
+    const ch = CHAPTERS.find(c => c.id === sel.chapterId);
+    const clusters = chapterClusters(sel.chapterId);
+    const set = chapterClusterSelection[sel.chapterId];
+    const isFullChapter = !set || clusters.every(c => set.has(c.name));
+    return isFullChapter ? ch.name : `${ch.name} — ${set.size} subthema${set.size === 1 ? "" : "'s"}`;
+}
+
+/* =========================================================================
+   SCHERM 2: ronde spelen
+   ========================================================================= */
+
+function showScreen(name) {
+    screenName = name;
+    screenMenu.style.display = name === "menu" ? "block" : "none";
+    screenQuiz.style.display = name === "quiz" ? "block" : "none";
+    if (name === "menu") renderChapterList();
+}
+
+function startRound(sel) {
+    const questions = questionsForSelection(sel);
+    activeSelection = sel;
+    roundStats = {};
+    questions.forEach(q => { roundStats[q.id] = { firstCorrect: null, mastered: false }; });
+    roundTotal = questions.length;
+    roundQueue = shuffle(questions);
+    score = { correct: 0, total: 0 };
+    updateScorePill();
+
+    quizTitle.textContent = selectionTitle(sel);
+    quizSummary.style.display = "none";
+    quizPlay.style.display = "block";
+
+    showScreen("quiz");
+    renderCurrentQuestion();
+}
+
+function renderCurrentQuestion() {
     answered = false;
     card.classList.remove("flipped");
     cardBack.classList.remove("is-correct", "is-wrong");
     nextBtn.style.display = "none";
     optionsContainer.innerHTML = "";
+    optionsContainer.classList.remove("single-col");
 
-    if (currentList.length === 0) {
-        frontText.textContent = "Geen vragen beschikbaar.";
-        progress.textContent = "0 / 0";
+    if (roundTotal === 0) {
+        frontChapter.textContent = "";
+        frontType.textContent = "";
+        frontCluster.textContent = "";
+        frontText.textContent = "Geen vragen in deze selectie. Ga terug en kies een andere selectie.";
+        progress.textContent = "";
         return;
     }
 
-    const q = currentList[currentIndex];
+    if (roundQueue.length === 0) {
+        showSummary();
+        return;
+    }
+
+    const q = roundQueue[0];
 
     setTimeout(() => {
         frontChapter.textContent = chapterName(q.chapterId);
         frontType.textContent = q.type === "recognize" ? "Herken het begrip" : "Kies de juiste omschrijving";
+        frontCluster.textContent = q.clusterName;
         frontText.textContent = q.front;
-        progress.textContent = `Vraag ${currentIndex + 1} van ${currentList.length}`;
+
+        const masteredCount = Object.values(roundStats).filter(s => s.mastered).length;
+        progress.textContent = `${masteredCount} / ${roundTotal} beheerst${roundQueue.length > 1 ? " · nog " + roundQueue.length + " in de wachtrij" : ""}`;
+
+        const longest = Math.max(...q.options.map(o => o.length));
+        optionsContainer.classList.toggle("single-col", longest > 60);
 
         q.options.forEach((opt, i) => {
             const btn = document.createElement("button");
@@ -1081,9 +1535,19 @@ function handleAnswer(clickedBtn, selectedOption, q) {
     answered = true;
 
     const isCorrect = selectedOption === q.correct;
+    const stat = roundStats[q.id];
+    if (stat.firstCorrect === null) stat.firstCorrect = isCorrect;
+
     score.total++;
     if (isCorrect) score.correct++;
     updateScorePill();
+
+    if (isCorrect) {
+        stat.mastered = true;
+        registerFix(q.id);
+    } else {
+        registerMistake(q.id);
+    }
 
     const buttons = optionsContainer.querySelectorAll(".option-btn");
     buttons.forEach(btn => {
@@ -1119,21 +1583,47 @@ function updateScorePill() {
     scorePill.textContent = score.total > 0 ? `${score.correct}/${score.total}` : "";
 }
 
-function nextCard() {
-    currentIndex++;
-    if (currentIndex >= currentList.length) {
-        shuffle2(currentList);
-        currentIndex = 0;
+function nextInRound() {
+    const finished = roundQueue.shift();
+    if (finished && !roundStats[finished.id].mastered) {
+        // fout beantwoord: terug achteraan de wachtrij van deze ronde, opties opnieuw geschud
+        roundQueue.push({ ...finished, options: shuffle(finished.options) });
     }
-    updateQuestion();
+    renderCurrentQuestion();
 }
 
-nextBtn.addEventListener("click", nextCard);
+function showSummary() {
+    quizPlay.style.display = "none";
+    quizSummary.style.display = "block";
+
+    const ids = Object.keys(roundStats);
+    const firstCorrectCount = ids.filter(id => roundStats[id].firstCorrect === true).length;
+    const firstWrongCount = ids.length - firstCorrectCount;
+    const pct = ids.length ? Math.round((firstCorrectCount / ids.length) * 100) : 0;
+    const gradeRaw = ids.length ? (firstCorrectCount / ids.length) * 20 : 0;
+    const grade = Math.round(gradeRaw * 10) / 10;
+    const gradeStr = Number.isInteger(grade) ? String(grade) : grade.toFixed(1).replace(".", ",");
+
+    summaryCorrect.textContent = String(firstCorrectCount);
+    summaryWrong.textContent = String(firstWrongCount);
+    summaryPct.textContent = pct + "%";
+    summaryGrade.textContent = gradeStr + " / 20";
+}
+
+function goToMenu() {
+    showScreen("menu");
+}
+
+backBtn.addEventListener("click", goToMenu);
+toMenuBtn.addEventListener("click", goToMenu);
+restartRoundBtn.addEventListener("click", () => startRound(activeSelection));
+nextBtn.addEventListener("click", nextInRound);
 
 window.addEventListener("keydown", (e) => {
+    if (screenName !== "quiz" || quizPlay.style.display === "none") return;
     if ((e.code === "Space" || e.code === "Enter") && answered) {
         e.preventDefault();
-        nextCard();
+        nextInRound();
         return;
     }
     if (!answered && ["Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) {
@@ -1144,7 +1634,6 @@ window.addEventListener("keydown", (e) => {
 });
 
 renderChapterList();
-filterCards();
 </script>
 </body>
 </html>
