@@ -13,9 +13,14 @@
   <header class="header">
     <div class="header-top">
       <h1><span class="accent">Español</span></h1>
-      <div class="streak" id="streak">
-        <span class="streak-fire">🔥</span>
-        <span class="streak-count" id="streakCount">0</span>
+      <div class="header-right">
+        <button class="btn-stats-toggle" id="btnStats" aria-label="Statistieken">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+        </button>
+        <div class="streak" id="streak">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-count" id="streakCount">0</span>
+        </div>
       </div>
     </div>
 
@@ -37,6 +42,18 @@
       </div>
     </div>
   </header>
+
+  <!-- Mode toggles -->
+  <div class="mode-bar" id="modeBar">
+    <button class="mode-btn active" id="modeFlashcard" data-mode="flashcard">Flashcards</button>
+    <button class="mode-btn" id="modeType" data-mode="type">Typen</button>
+    <button class="mode-btn" id="modeReverse" data-mode="reverse">NL → ES</button>
+    <button class="mode-btn" id="modeCloze" data-mode="cloze">Zinnen</button>
+    <button class="mode-btn mic-toggle" id="modeMic" data-mode="mic">🎤 Mic</button>
+  </div>
+
+  <!-- Category filter -->
+  <div class="category-bar hidden" id="categoryBar"></div>
 
   <nav class="level-nav" id="levelNav"></nav>
 
@@ -60,7 +77,56 @@
       </div>
       <div class="quiz-feedback hidden" id="quizFeedback"></div>
     </div>
+
+    <!-- Type mode input -->
+    <div class="type-container hidden" id="typeContainer">
+      <div class="quiz-input-wrap">
+        <input type="text" class="quiz-input" id="typeInput" placeholder="Type het Spaanse woord..." autocomplete="off" autocapitalize="off">
+        <button class="btn-quiz-submit" id="typeSubmit">Check</button>
+      </div>
+      <div class="quiz-feedback hidden" id="typeFeedback"></div>
+    </div>
+
+    <!-- Cloze mode input -->
+    <div class="type-container hidden" id="clozeContainer">
+      <div class="cloze-sentence" id="clozeSentence"></div>
+      <div class="quiz-input-wrap">
+        <input type="text" class="quiz-input" id="clozeInput" placeholder="Vul het ontbrekende woord in..." autocomplete="off" autocapitalize="off">
+        <button class="btn-quiz-submit" id="clozeSubmit">Check</button>
+      </div>
+      <div class="quiz-feedback hidden" id="clozeFeedback"></div>
+    </div>
   </main>
+
+  <!-- Stats panel (overlay) -->
+  <div class="stats-panel hidden" id="statsPanel">
+    <div class="stats-panel-inner">
+      <div class="stats-panel-header">
+        <h2>Statistieken</h2>
+        <button class="btn-close-stats" id="btnCloseStats">&times;</button>
+      </div>
+      <div class="stats-section">
+        <h3>Leitner Verdeling</h3>
+        <div class="leitner-chart" id="leitnerChart"></div>
+      </div>
+      <div class="stats-section">
+        <h3>Voortgang per Level</h3>
+        <div class="level-chart" id="levelChart"></div>
+      </div>
+      <div class="stats-section">
+        <h3>Moeilijkste Categorieën</h3>
+        <div class="category-chart" id="categoryChart"></div>
+      </div>
+      <div class="stats-section">
+        <h3>Streak Historie</h3>
+        <div class="streak-info" id="streakInfo"></div>
+      </div>
+      <div class="stats-section">
+        <h3>Overzicht</h3>
+        <div class="overview-stats" id="overviewStats"></div>
+      </div>
+    </div>
+  </div>
 
   <footer class="stats-bar" id="statsBar">
     <div class="stat">

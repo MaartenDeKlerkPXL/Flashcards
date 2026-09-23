@@ -10,7 +10,10 @@ let allWords = [];
 let queue = [];
 let currentIndex = 0;
 let revealed = false;
-let mode = "practice"; // practice | quiz | done
+let mode = "practice";
+let practiceMode = "flashcard"; // flashcard | type | reverse | cloze
+let micMode = false;
+let activeCategory = null;
 let quizWords = [];
 let quizIndex = 0;
 let quizErrors = 0;
@@ -44,7 +47,7 @@ function loadState() {
 }
 
 function defaultState() {
-  return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 } };
+  return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 }, history: [] };
 }
 
 function migrateState(state) {
@@ -54,6 +57,7 @@ function migrateState(state) {
     }
     delete state.streak.lastDate;
   }
+  if (!state.history) state.history = [];
   return state;
 }
 
@@ -69,7 +73,6 @@ function getWP(state, id) {
 function updateStreak(state) {
   const today = todayStr();
   const s = state.streak;
-
   if (state.todayStats.date !== today) {
     const yesterday = addDays(today, -1);
     if (s.lastCompletedDate && s.lastCompletedDate !== yesterday && s.lastCompletedDate !== today) {
@@ -85,7 +88,15 @@ function checkStreakGoal(state) {
   if (state.todayStats.correctCount >= DAILY_GOAL && s.lastCompletedDate !== today) {
     s.count++;
     s.lastCompletedDate = today;
+    addHistory(state, today, state.todayStats.correctCount);
   }
+}
+
+function addHistory(state, date, count) {
+  const existing = state.history.find((h) => h.date === date);
+  if (existing) existing.count = count;
+  else state.history.push({ date, count });
+  if (state.history.length > 90) state.history.shift();
 }
 
 // ─── Level helpers ───
@@ -110,16 +121,30 @@ function isQuizReady(state, lvl) {
   });
 }
 
+function getCategoriesForLevel(lvl) {
+  const cats = new Set();
+  wordsForLevel(lvl).forEach((w) => cats.add(w.category));
+  return [...cats].sort();
+}
+
 // ─── Queue building ───
 function buildQueue(state, lvl) {
   const today = todayStr();
-  const levelWords = wordsForLevel(lvl).filter((w) => {
+  let levelWords = wordsForLevel(lvl).filter((w) => {
     const wp = getWP(state, w.id);
     return wp.nextReview <= today;
   });
 
+  if (activeCategory) {
+    levelWords = levelWords.filter((w) => w.category === activeCategory);
+  }
+
+  if (micMode) {
+    levelWords = levelWords.filter((w) => !getWP(state, w.id).pronouncedCorrectly);
+  }
+
   let reviewWords = [];
-  if (lvl > 1) {
+  if (lvl > 1 && !activeCategory) {
     const prevWords = allWords.filter((w) => w.level < lvl && isLevelUnlocked(state, w.level));
     const dueReview = prevWords.filter((w) => {
       const wp = getWP(state, w.id);
@@ -161,7 +186,7 @@ function playAudio(word) {
 }
 
 // ─── Speech Recognition ───
-function startRecognition(word, state) {
+function startRecognition(word, state, onDone) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return;
   if (isListening) return;
@@ -187,18 +212,56 @@ function startRecognition(word, state) {
       saveState(state);
       if (micBtn) { micBtn.classList.remove("active"); micBtn.classList.add("success"); }
       updatePronunciationUI(state);
+      if (onDone) onDone(true);
     } else {
       if (micBtn) micBtn.classList.remove("active");
+      if (onDone) onDone(false);
     }
     isListening = false;
   };
 
-  recognition.onerror = () => { isListening = false; if (micBtn) micBtn.classList.remove("active"); };
+  recognition.onerror = () => { isListening = false; if (micBtn) micBtn.classList.remove("active"); if (onDone) onDone(false); };
   recognition.onend = () => { isListening = false; };
   recognition.start();
 }
 
 // ─── UI Updates ───
+function renderModeBar() {
+  document.querySelectorAll(".mode-btn:not(.mic-toggle)").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.mode === practiceMode);
+  });
+  $("modeMic").classList.toggle("active", micMode);
+}
+
+function renderCategoryBar(state) {
+  const cats = getCategoriesForLevel(activeLevel);
+  const bar = $("categoryBar");
+  if (cats.length <= 1) { bar.classList.add("hidden"); return; }
+
+  bar.classList.remove("hidden");
+  bar.innerHTML = "";
+  const allBtn = document.createElement("button");
+  allBtn.className = "cat-btn" + (activeCategory === null ? " active" : "");
+  allBtn.textContent = "Alles";
+  allBtn.addEventListener("click", () => { activeCategory = null; rebuildAndShow(state); });
+  bar.appendChild(allBtn);
+
+  cats.forEach((cat) => {
+    const btn = document.createElement("button");
+    btn.className = "cat-btn" + (activeCategory === cat ? " active" : "");
+    btn.textContent = cat;
+    btn.addEventListener("click", () => { activeCategory = cat; rebuildAndShow(state); });
+    bar.appendChild(btn);
+  });
+}
+
+function rebuildAndShow(state) {
+  currentIndex = 0;
+  queue = buildQueue(state, activeLevel);
+  renderCategoryBar(state);
+  showNext(state);
+}
+
 function renderLevelNav(state) {
   const nav = $("levelNav");
   nav.innerHTML = "";
@@ -214,10 +277,12 @@ function renderLevelNav(state) {
     btn.addEventListener("click", () => {
       if (!isLevelUnlocked(state, i) && !isLevelCompleted(state, i)) return;
       activeLevel = i;
+      activeCategory = null;
       mode = "practice";
       currentIndex = 0;
       queue = buildQueue(state, i);
       renderLevelNav(state);
+      renderCategoryBar(state);
       showNext(state);
     });
     nav.appendChild(btn);
@@ -267,21 +332,162 @@ function updateStatsUI(state) {
   $("statTotal").textContent = unlocked.length;
 }
 
+// ─── Stats Panel ───
+function showStatsPanel(state) {
+  $("statsPanel").classList.remove("hidden");
+  renderLeitnerChart(state);
+  renderLevelChart(state);
+  renderCategoryChart(state);
+  renderStreakInfo(state);
+  renderOverviewStats(state);
+}
+
+function renderLeitnerChart(state) {
+  const counts = [0, 0, 0, 0, 0, 0];
+  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
+  unlocked.forEach((w) => { counts[getWP(state, w.id).box]++; });
+  const max = Math.max(...counts, 1);
+  const labels = ["Nieuw", "Box 1", "Box 2", "Box 3", "Box 4", "Box 5"];
+  const colors = ["var(--text-muted)", "#e74c3c", "#e67e22", "#f1c40f", "#2ecc71", "#27ae60"];
+
+  $("leitnerChart").innerHTML = counts.map((c, i) => `
+    <div class="leitner-bar-wrap">
+      <div class="leitner-bar-count">${c}</div>
+      <div class="leitner-bar" style="height:${(c / max) * 100}%;background:${colors[i]}"></div>
+      <div class="leitner-bar-label">${labels[i]}</div>
+    </div>
+  `).join("");
+}
+
+function renderLevelChart(state) {
+  $("levelChart").innerHTML = "";
+  for (let i = 1; i <= LEVELS; i++) {
+    const words = wordsForLevel(i);
+    if (!isLevelUnlocked(state, i)) continue;
+    const mastered = words.filter((w) => getWP(state, w.id).box >= 3).length;
+    const pct = Math.round((mastered / words.length) * 100);
+    const color = isLevelCompleted(state, i) ? "var(--easy)" : "var(--accent)";
+    $("levelChart").innerHTML += `
+      <div class="level-chart-row">
+        <div class="level-chart-label">${i}</div>
+        <div class="level-chart-bar-bg">
+          <div class="level-chart-bar-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+        <div class="level-chart-pct">${pct}%</div>
+      </div>
+    `;
+  }
+}
+
+function renderCategoryChart(state) {
+  const catStats = {};
+  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
+  unlocked.forEach((w) => {
+    if (!catStats[w.category]) catStats[w.category] = { total: 0, hard: 0 };
+    catStats[w.category].total++;
+    const wp = getWP(state, w.id);
+    if (wp.box < 2 && wp.lastReviewed) catStats[w.category].hard++;
+  });
+
+  const sorted = Object.entries(catStats)
+    .map(([cat, s]) => ({ cat, pct: s.total > 0 ? Math.round((s.hard / s.total) * 100) : 0, hard: s.hard }))
+    .filter((c) => c.hard > 0)
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 8);
+
+  if (sorted.length === 0) {
+    $("categoryChart").innerHTML = '<div style="font-size:.85rem;color:var(--text-muted)">Nog geen data — begin met oefenen!</div>';
+    return;
+  }
+
+  $("categoryChart").innerHTML = sorted.map((c) => `
+    <div class="cat-chart-row">
+      <div class="cat-chart-label">${c.cat}</div>
+      <div class="cat-chart-bar-bg">
+        <div class="cat-chart-bar-fill" style="width:${c.pct}%"></div>
+      </div>
+      <div class="cat-chart-pct">${c.pct}%</div>
+    </div>
+  `).join("");
+}
+
+function renderStreakInfo(state) {
+  const s = state.streak;
+  const todayDone = state.todayStats.date === todayStr() ? state.todayStats.correctCount : 0;
+  $("streakInfo").innerHTML = `
+    <div class="streak-info-row">
+      <span class="streak-info-label">Huidige streak</span>
+      <span class="streak-info-value">🔥 ${s.count} ${s.count === 1 ? "dag" : "dagen"}</span>
+    </div>
+    <div class="streak-info-row">
+      <span class="streak-info-label">Vandaag</span>
+      <span class="streak-info-value">${todayDone} / ${DAILY_GOAL} woorden</span>
+    </div>
+    <div class="streak-info-row">
+      <span class="streak-info-label">Laatste voltooide dag</span>
+      <span class="streak-info-value">${s.lastCompletedDate || "—"}</span>
+    </div>
+  `;
+}
+
+function renderOverviewStats(state) {
+  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
+  const total = allWords.length;
+  const reviewed = unlocked.filter((w) => getWP(state, w.id).lastReviewed).length;
+  const mastered = unlocked.filter((w) => getWP(state, w.id).box >= 3).length;
+  const pronounced = unlocked.filter((w) => getWP(state, w.id).pronouncedCorrectly).length;
+  const daysLeft = daysBetween(todayStr(), VACATION_DATE);
+  const levelsComplete = state.completedLevels.length;
+
+  $("overviewStats").innerHTML = `
+    <div class="overview-stat">
+      <div class="overview-stat-value">${reviewed}</div>
+      <div class="overview-stat-label">Geoefend</div>
+    </div>
+    <div class="overview-stat">
+      <div class="overview-stat-value">${mastered}</div>
+      <div class="overview-stat-label">Beheerst</div>
+    </div>
+    <div class="overview-stat">
+      <div class="overview-stat-value">${pronounced}</div>
+      <div class="overview-stat-label">Uitgesproken</div>
+    </div>
+    <div class="overview-stat">
+      <div class="overview-stat-value">${levelsComplete}/${LEVELS}</div>
+      <div class="overview-stat-label">Levels klaar</div>
+    </div>
+    <div class="overview-stat">
+      <div class="overview-stat-value">${total}</div>
+      <div class="overview-stat-label">Totaal woorden</div>
+    </div>
+    <div class="overview-stat">
+      <div class="overview-stat-value">${daysLeft > 0 ? daysLeft : "0"}</div>
+      <div class="overview-stat-label">Dagen tot vakantie</div>
+    </div>
+  `;
+}
+
 // ─── Card Rendering ───
 function renderCard(word, state) {
   revealed = false;
   $("ratingContainer").classList.add("hidden");
   $("quizContainer").classList.add("hidden");
+  $("typeContainer").classList.add("hidden");
+  $("clozeContainer").classList.add("hidden");
 
   const wp = getWP(state, word.id);
+  const isReverse = practiceMode === "reverse";
+
+  const showWord = isReverse ? word.dutch : word.spanish;
+  const hiddenWord = isReverse ? word.spanish : word.dutch;
 
   $("cardContainer").innerHTML = `
     <div class="flashcard">
       <img class="card-image" src="${word.image}" alt="${word.spanish}" loading="eager"
            onerror="this.style.display='none'">
       <div class="card-body">
-        <div class="word-spanish">${word.spanish}</div>
-        <div class="word-dutch hidden" id="dutchWord">${word.dutch}</div>
+        <div class="word-spanish">${showWord}</div>
+        <div class="word-dutch hidden" id="dutchWord">${hiddenWord}</div>
         <div class="word-example hidden" id="exampleWord">${word.example || ""}</div>
         <div class="card-actions">
           <button class="btn-icon" id="btnAudio" aria-label="Audio">
@@ -301,8 +507,64 @@ function renderCard(word, state) {
   `;
 
   $("btnAudio").addEventListener("click", () => playAudio(word));
-  $("btnMic").addEventListener("click", () => startRecognition(word, state));
+  $("btnMic").addEventListener("click", () => {
+    startRecognition(word, state, (success) => {
+      if (success && micMode) {
+        setTimeout(() => {
+          rateWord("easy", loadState());
+        }, 600);
+      }
+    });
+  });
   $("btnReveal").addEventListener("click", () => revealCard());
+
+  if (practiceMode === "type") {
+    $("btnReveal").style.display = "none";
+    $("typeContainer").classList.remove("hidden");
+    $("typeInput").value = "";
+    $("typeFeedback").classList.add("hidden");
+    $("typeInput").focus();
+  } else if (practiceMode === "cloze") {
+    renderCloze(word, state);
+  } else if (micMode) {
+    setTimeout(() => startRecognition(word, state, (success) => {
+      if (success) {
+        revealCard();
+        setTimeout(() => rateWord("easy", loadState()), 600);
+      }
+    }), 300);
+  }
+}
+
+function renderCloze(word, state) {
+  if (!word.example) {
+    revealCard();
+    return;
+  }
+
+  $("btnReveal").style.display = "none";
+  $("clozeContainer").classList.remove("hidden");
+
+  const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.]+$/g, "").trim();
+  const sentence = word.example;
+  const regex = new RegExp(`(${escapeRegex(target)})`, "gi");
+  let clozeHTML = sentence.replace(regex, '<span class="cloze-blank">____</span>');
+
+  if (!clozeHTML.includes("cloze-blank")) {
+    const words = target.split(/\s+/);
+    const mainWord = words.length > 1 ? words[words.length - 1] : words[0];
+    const fallback = new RegExp(`(${escapeRegex(mainWord)})`, "gi");
+    clozeHTML = sentence.replace(fallback, '<span class="cloze-blank">____</span>');
+  }
+
+  $("clozeSentence").innerHTML = clozeHTML;
+  $("clozeInput").value = "";
+  $("clozeFeedback").classList.add("hidden");
+  $("clozeInput").focus();
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function revealCard() {
@@ -322,6 +584,54 @@ function animateOut(cb) {
     setTimeout(cb, 250);
   } else {
     cb();
+  }
+}
+
+// ─── Type mode check ───
+function checkTypeAnswer(state) {
+  const word = queue[currentIndex];
+  if (!word) return;
+
+  const input = $("typeInput").value.trim().toLowerCase();
+  const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
+  const targetFull = word.spanish.toLowerCase().trim();
+  const fb = $("typeFeedback");
+
+  if (input === target || input === targetFull) {
+    fb.textContent = "Correct!";
+    fb.className = "quiz-feedback correct";
+    revealCard();
+    setTimeout(() => rateWord("easy", loadState()), 800);
+  } else {
+    fb.textContent = `Fout! Het was: ${word.spanish}`;
+    fb.className = "quiz-feedback wrong";
+    revealCard();
+    setTimeout(() => rateWord("hard", loadState()), 1200);
+  }
+}
+
+// ─── Cloze mode check ───
+function checkClozeAnswer(state) {
+  const word = queue[currentIndex];
+  if (!word) return;
+
+  const input = $("clozeInput").value.trim().toLowerCase();
+  const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
+  const targetFull = word.spanish.toLowerCase().trim();
+  const fb = $("clozeFeedback");
+
+  if (input === target || input === targetFull) {
+    fb.textContent = "Correct!";
+    fb.className = "quiz-feedback correct";
+    document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
+    revealCard();
+    setTimeout(() => rateWord("easy", loadState()), 800);
+  } else {
+    fb.textContent = `Fout! Het was: ${target}`;
+    fb.className = "quiz-feedback wrong";
+    document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
+    revealCard();
+    setTimeout(() => rateWord("hard", loadState()), 1200);
   }
 }
 
@@ -347,6 +657,7 @@ function rateWord(rating, state) {
 
   wp.lastReviewed = today;
   state.wordProgress[word.id] = wp;
+  addHistory(state, today, state.todayStats.correctCount);
   saveState(state);
 
   updateDailyUI(state);
@@ -367,6 +678,8 @@ function startQuiz(state, lvl) {
   quizIndex = 0;
   quizErrors = 0;
   $("ratingContainer").classList.add("hidden");
+  $("typeContainer").classList.add("hidden");
+  $("clozeContainer").classList.add("hidden");
   showQuizWord(state);
 }
 
@@ -390,6 +703,8 @@ function showQuizWord(state) {
 
   const word = quizWords[quizIndex];
   renderCard(word, state);
+  $("typeContainer").classList.add("hidden");
+  $("clozeContainer").classList.add("hidden");
   $("dutchWord").classList.remove("hidden");
   $("dutchWord").textContent = "???";
   const ex = $("exampleWord");
@@ -446,6 +761,7 @@ function showQuizComplete(state) {
     currentIndex = 0;
     queue = buildQueue(state, activeLevel);
     renderLevelNav(state);
+    renderCategoryBar(state);
     showNext(state);
   });
 }
@@ -479,8 +795,10 @@ function showNext(state) {
   if (currentIndex >= queue.length) {
     $("ratingContainer").classList.add("hidden");
     $("quizContainer").classList.add("hidden");
+    $("typeContainer").classList.add("hidden");
+    $("clozeContainer").classList.add("hidden");
 
-    if (qReady) {
+    if (qReady && !activeCategory) {
       $("cardContainer").innerHTML = `
         <div class="done-screen">
           <div class="done-icon">📝</div>
@@ -491,11 +809,13 @@ function showNext(state) {
       `;
       $("btnStartQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
     } else {
+      const extra = micMode ? "<br>Alle woorden in dit level zijn uitgesproken!" : "";
+      const catMsg = activeCategory ? ` (${activeCategory})` : "";
       $("cardContainer").innerHTML = `
         <div class="done-screen">
           <div class="done-icon">🎉</div>
           <h2>Klaar voor vandaag!</h2>
-          <p>Geen woorden meer voor nu in Level ${activeLevel}.<br>Kom morgen terug of kies een ander level.</p>
+          <p>Geen woorden meer voor nu in Level ${activeLevel}${catMsg}.${extra}<br>Kom morgen terug of kies een ander level.</p>
         </div>
       `;
     }
@@ -504,21 +824,36 @@ function showNext(state) {
   }
 
   renderCard(queue[currentIndex], state);
-  updateProgressUI();
   renderLevelNav(state);
-}
-
-function updateProgressUI() {
-  // no separate progress bar in new design, covered by daily goal
 }
 
 // ─── Keyboard shortcuts ───
 document.addEventListener("keydown", (e) => {
+  if ($("statsPanel") && !$("statsPanel").classList.contains("hidden")) {
+    if (e.key === "Escape") $("statsPanel").classList.add("hidden");
+    return;
+  }
+
   if (mode === "quiz") {
     if (e.key === "Enter") {
       e.preventDefault();
-      const state = loadState();
-      checkQuizAnswer(state);
+      checkQuizAnswer(loadState());
+    }
+    return;
+  }
+
+  if (practiceMode === "type" && !revealed) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      checkTypeAnswer(loadState());
+    }
+    return;
+  }
+
+  if (practiceMode === "cloze" && !revealed) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      checkClozeAnswer(loadState());
     }
     return;
   }
@@ -529,7 +864,7 @@ document.addEventListener("keydown", (e) => {
   switch (e.key) {
     case " ":
       e.preventDefault();
-      revealCard();
+      if (practiceMode === "flashcard" || practiceMode === "reverse") revealCard();
       break;
     case "ArrowLeft":
       e.preventDefault();
@@ -550,6 +885,31 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// ─── Mode switching ───
+document.querySelectorAll(".mode-btn:not(.mic-toggle)").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    practiceMode = btn.dataset.mode;
+    renderModeBar();
+    const state = loadState();
+    currentIndex = 0;
+    queue = buildQueue(state, activeLevel);
+    showNext(state);
+  });
+});
+
+$("modeMic").addEventListener("click", () => {
+  micMode = !micMode;
+  renderModeBar();
+  const state = loadState();
+  currentIndex = 0;
+  queue = buildQueue(state, activeLevel);
+  showNext(state);
+});
+
+// ─── Stats panel ───
+$("btnStats").addEventListener("click", () => showStatsPanel(loadState()));
+$("btnCloseStats").addEventListener("click", () => $("statsPanel").classList.add("hidden"));
+
 // ─── Init ───
 if ("speechSynthesis" in window) {
   speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
@@ -560,6 +920,14 @@ $("btnHard").addEventListener("click", () => rateWord("hard", loadState()));
 $("quizSubmit").addEventListener("click", () => checkQuizAnswer(loadState()));
 $("quizInput")?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") { e.preventDefault(); checkQuizAnswer(loadState()); }
+});
+$("typeSubmit").addEventListener("click", () => checkTypeAnswer(loadState()));
+$("typeInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); checkTypeAnswer(loadState()); }
+});
+$("clozeSubmit").addEventListener("click", () => checkClozeAnswer(loadState()));
+$("clozeInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); checkClozeAnswer(loadState()); }
 });
 
 fetch("data.json")
@@ -573,6 +941,8 @@ fetch("data.json")
     activeLevel = state.currentLevel;
     queue = buildQueue(state, activeLevel);
 
+    renderModeBar();
+    renderCategoryBar(state);
     renderLevelNav(state);
     updateStreakUI(state);
     updateDailyUI(state);
