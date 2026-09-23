@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "spanish": "el coche",
+    "dutch": "de auto",
+    "image": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80",
+    "category": "algemeen"
+  },
+  {
+    "id": 2,
+    "spanish": "la casa",
+    "dutch": "het huis",
+    "image": "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=600&q=80",
+    "category": "algemeen"
+  },
+  {
+    "id": 3,
+    "spanish": "el perro",
+    "dutch": "de hond",
+    "image": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80",
+    "category": "dieren"
+  },
+  {
+    "id": 4,
+    "spanish": "el gato",
+    "dutch": "de kat",
+    "image": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80",
+    "category": "dieren"
+  },
+  {
+    "id": 5,
+    "spanish": "el agua",
+    "dutch": "het water",
+    "image": "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=600&q=80",
+    "category": "eten & drinken"
+  },
+  {
+    "id": 6,
+    "spanish": "el pan",
+    "dutch": "het brood",
+    "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
+    "category": "eten & drinken"
+  },
+  {
+    "id": 7,
+    "spanish": "la manzana",
+    "dutch": "de appel",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80",
+    "category": "eten & drinken"
+  },
+  {
+    "id": 8,
+    "spanish": "el sol",
+    "dutch": "de zon",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+    "category": "natuur"
+  },
+  {
+    "id": 9,
+    "spanish": "la luna",
+    "dutch": "de maan",
+    "image": "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?auto=format&fit=crop&w=600&q=80",
+    "category": "natuur"
+  },
+  {
+    "id": 10,
+    "spanish": "el libro",
+    "dutch": "het boek",
+    "image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=600&q=80",
+    "category": "algemeen"
+  },
+  {
+    "id": 11,
+    "spanish": "la playa",
+    "dutch": "het strand",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
+    "category": "natuur"
+  },
+  {
+    "id": 12,
+    "spanish": "la silla",
+    "dutch": "de stoel",
+    "image": "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=600&q=80",
+    "category": "algemeen"
+  },
+  {
+    "id": 13,
+    "spanish": "el teléfono",
+    "dutch": "de telefoon",
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
+    "category": "algemeen"
+  },
+  {
+    "id": 14,
+    "spanish": "la flor",
+    "dutch": "de bloem",
+    "image": "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?auto=format&fit=crop&w=600&q=80",
+    "category": "natuur"
+  },
+  {
+    "id": 15,
+    "spanish": "el café",
+    "dutch": "de koffie",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80",
+    "category": "eten & drinken"
+  }
+]
