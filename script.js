@@ -39,12 +39,22 @@ function daysBetween(a, b) {
 
 // ─── State ───
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(STATE_KEY)) || defaultState(); }
+  try { return migrateState(JSON.parse(localStorage.getItem(STATE_KEY)) || defaultState()); }
   catch { return defaultState(); }
 }
 
 function defaultState() {
-  return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastDate: null }, todayStats: { date: todayStr(), correctCount: 0 } };
+  return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 } };
+}
+
+function migrateState(state) {
+  if (state.streak.lastDate && !state.streak.lastCompletedDate) {
+    if (state.todayStats.correctCount >= DAILY_GOAL) {
+      state.streak.lastCompletedDate = state.todayStats.date;
+    }
+    delete state.streak.lastDate;
+  }
+  return state;
 }
 
 function saveState(s) {
@@ -59,20 +69,22 @@ function getWP(state, id) {
 function updateStreak(state) {
   const today = todayStr();
   const s = state.streak;
-  if (s.lastDate === today) return;
-  if (s.lastDate === addDays(today, -1)) {
-    const prev = state.todayStats;
-    if (prev.date === s.lastDate && prev.correctCount >= DAILY_GOAL) {
-      s.count++;
-    } else {
+
+  if (state.todayStats.date !== today) {
+    const yesterday = addDays(today, -1);
+    if (s.lastCompletedDate && s.lastCompletedDate !== yesterday && s.lastCompletedDate !== today) {
       s.count = 0;
     }
-  } else if (s.lastDate !== today) {
-    s.count = 0;
-  }
-  s.lastDate = today;
-  if (state.todayStats.date !== today) {
     state.todayStats = { date: today, correctCount: 0 };
+  }
+}
+
+function checkStreakGoal(state) {
+  const today = todayStr();
+  const s = state.streak;
+  if (state.todayStats.correctCount >= DAILY_GOAL && s.lastCompletedDate !== today) {
+    s.count++;
+    s.lastCompletedDate = today;
   }
 }
 
@@ -327,6 +339,7 @@ function rateWord(rating, state) {
     wp.correctCount++;
     if (state.todayStats.date === today) state.todayStats.correctCount++;
     else state.todayStats = { date: today, correctCount: 1 };
+    checkStreakGoal(state);
   } else {
     wp.box = 1;
     wp.nextReview = addDays(today, 1);
