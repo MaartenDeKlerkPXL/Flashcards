@@ -2,40 +2,91 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f0f13">
+  <link rel="manifest" href="manifest.json">
   <title>Español — Spaans Leren</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header class="header">
-    <h1><span>Español</span> — Spaans Leren</h1>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
+    <div class="header-top">
+      <h1><span class="accent">Español</span></h1>
+      <div class="streak" id="streak">
+        <span class="streak-fire">🔥</span>
+        <span class="streak-count" id="streakCount">0</span>
+      </div>
     </div>
-    <p class="progress-text" id="progressText"></p>
+
+    <div class="vacation-bar">
+      <div class="vacation-label" id="vacationLabel">186 dagen tot vakantie</div>
+      <div class="progress-bar">
+        <div class="progress-fill vacation-fill" id="vacationFill"></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-chip" id="dailyGoal">
+        <span class="stat-icon">📝</span>
+        <span id="dailyCount">0</span>/20 vandaag
+      </div>
+      <div class="stat-chip" id="pronGoal">
+        <span class="stat-icon">🎤</span>
+        <span id="pronCount">0</span>/<span id="pronTotal">0</span> uitspraak
+      </div>
+    </div>
   </header>
 
-  <div class="card-container" id="cardContainer"></div>
+  <nav class="level-nav" id="levelNav"></nav>
 
-  <div class="rating-container hidden" id="ratingContainer">
-    <button class="btn-rate easy" id="btnEasy">Makkelijk</button>
-    <button class="btn-rate hard" id="btnHard">Moeilijk</button>
-  </div>
+  <main class="main">
+    <div class="card-container" id="cardContainer"></div>
 
-  <div class="stats-bar" id="statsBar">
+    <div class="rating-container hidden" id="ratingContainer">
+      <button class="btn-rate hard" id="btnHard">
+        <span class="key-hint">←</span> Moeilijk
+      </button>
+      <button class="btn-rate easy" id="btnEasy">
+        Makkelijk <span class="key-hint">→</span>
+      </button>
+    </div>
+
+    <div class="quiz-container hidden" id="quizContainer">
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div class="quiz-input-wrap">
+        <input type="text" class="quiz-input" id="quizInput" placeholder="Type de vertaling..." autocomplete="off" autocapitalize="off">
+        <button class="btn-quiz-submit" id="quizSubmit">Check</button>
+      </div>
+      <div class="quiz-feedback hidden" id="quizFeedback"></div>
+    </div>
+  </main>
+
+  <footer class="stats-bar" id="statsBar">
     <div class="stat">
       <div class="stat-value" id="statNew">0</div>
       <div class="stat-label">Nieuw</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="statHard">0</div>
-      <div class="stat-label">Moeilijk</div>
+      <div class="stat-value" id="statLearning">0</div>
+      <div class="stat-label">Leren</div>
     </div>
     <div class="stat">
       <div class="stat-value" id="statMastered">0</div>
       <div class="stat-label">Beheerst</div>
     </div>
+    <div class="stat">
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-label">Totaal</div>
+    </div>
+  </footer>
+
+  <div class="keyboard-hints" id="keyHints">
+    <span>Spatie = toon</span>
+    <span>← moeilijk</span>
+    <span>→ makkelijk</span>
+    <span>↓ audio</span>
+    <span>↑ mic</span>
   </div>
 
   <script src="script.js"></script>
