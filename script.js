@@ -130,17 +130,24 @@ function getCategoriesForLevel(lvl) {
 // ─── Queue building ───
 function buildQueue(state, lvl) {
   const today = todayStr();
-  let levelWords = wordsForLevel(lvl).filter((w) => {
-    const wp = getWP(state, w.id);
-    return wp.nextReview <= today;
-  });
+  let levelWords;
+
+  if (micMode) {
+    levelWords = wordsForLevel(lvl).filter((w) => !getWP(state, w.id).pronouncedCorrectly);
+    levelWords.sort((a, b) => getWP(state, b.id).box - getWP(state, a.id).box);
+  } else {
+    levelWords = wordsForLevel(lvl).filter((w) => {
+      const wp = getWP(state, w.id);
+      return wp.nextReview <= today;
+    });
+  }
 
   if (activeCategory) {
     levelWords = levelWords.filter((w) => w.category === activeCategory);
   }
 
   if (micMode) {
-    levelWords = levelWords.filter((w) => !getWP(state, w.id).pronouncedCorrectly);
+    return levelWords;
   }
 
   let reviewWords = [];
@@ -417,7 +424,7 @@ function updateStatsUI(state) {
   unlocked.forEach((w) => {
     const b = getWP(state, w.id).box;
     if (b === 0) nNew++;
-    else if (b < 3) nLearn++;
+    else if (b < 2) nLearn++;
     else nMaster++;
   });
   $("statNew").textContent = nNew;
