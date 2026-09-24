@@ -470,6 +470,7 @@ function renderOverviewStats(state) {
 // ─── Card Rendering ───
 function renderCard(word, state) {
   revealed = false;
+  if (clozeTimer) { clearTimeout(clozeTimer); clozeTimer = null; }
   $("ratingContainer").classList.add("hidden");
   $("quizContainer").classList.add("hidden");
   $("typeContainer").classList.add("hidden");
@@ -536,6 +537,50 @@ function renderCard(word, state) {
   }
 }
 
+let clozeTimer = null;
+
+function clozeTargetFor(word) {
+  return word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.]+$/g, "").trim();
+}
+
+function clozeMakeBlanked(sentence, target) {
+  const regex = new RegExp(`(${escapeRegex(target)})`, "gi");
+  let html = sentence.replace(regex, '<span class="cloze-blank">____</span>');
+  if (!html.includes("cloze-blank")) {
+    const words = target.split(/\s+/);
+    const mainWord = words.length > 1 ? words[words.length - 1] : words[0];
+    const fallback = new RegExp(`(${escapeRegex(mainWord)})`, "gi");
+    html = sentence.replace(fallback, '<span class="cloze-blank">____</span>');
+  }
+  if (!html.includes("cloze-blank")) {
+    const stem = target.replace(/[oa]s?$/, "");
+    if (stem.length >= 3) {
+      const stemRegex = new RegExp(`\\b(${escapeRegex(stem)}[a-záéíóúñ]*)\\b`, "gi");
+      html = sentence.replace(stemRegex, '<span class="cloze-blank">____</span>');
+    }
+  }
+  return html;
+}
+
+function clozeShowSentence(word) {
+  if (clozeTimer) clearTimeout(clozeTimer);
+  $("clozeSentence").textContent = word.example;
+  $("clozeSentence").classList.remove("cloze-hidden");
+  $("clozeInput").classList.add("hidden");
+  $("clozeSubmit").classList.add("hidden");
+  $("btnPeek").classList.add("hidden");
+
+  clozeTimer = setTimeout(() => {
+    const target = clozeTargetFor(word);
+    $("clozeSentence").innerHTML = clozeMakeBlanked(word.example, target);
+    $("clozeSentence").classList.remove("cloze-hidden");
+    $("clozeInput").classList.remove("hidden");
+    $("clozeSubmit").classList.remove("hidden");
+    $("btnPeek").classList.remove("hidden");
+    $("clozeInput").focus();
+  }, 5000);
+}
+
 function renderCloze(word, state) {
   if (!word.example) {
     revealCard();
@@ -544,23 +589,13 @@ function renderCloze(word, state) {
 
   $("btnReveal").style.display = "none";
   $("clozeContainer").classList.remove("hidden");
-
-  const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.]+$/g, "").trim();
-  const sentence = word.example;
-  const regex = new RegExp(`(${escapeRegex(target)})`, "gi");
-  let clozeHTML = sentence.replace(regex, '<span class="cloze-blank">____</span>');
-
-  if (!clozeHTML.includes("cloze-blank")) {
-    const words = target.split(/\s+/);
-    const mainWord = words.length > 1 ? words[words.length - 1] : words[0];
-    const fallback = new RegExp(`(${escapeRegex(mainWord)})`, "gi");
-    clozeHTML = sentence.replace(fallback, '<span class="cloze-blank">____</span>');
-  }
-
-  $("clozeSentence").innerHTML = clozeHTML;
+  $("clozeTranslation").textContent = word.dutch;
   $("clozeInput").value = "";
   $("clozeFeedback").classList.add("hidden");
-  $("clozeInput").focus();
+
+  $("btnPeek").onclick = () => clozeShowSentence(word);
+
+  clozeShowSentence(word);
 }
 
 function escapeRegex(s) {
@@ -646,10 +681,13 @@ function rateWord(rating, state) {
   if (rating === "easy") {
     wp.box = Math.min(5, wp.box + 1);
     wp.nextReview = addDays(today, LEITNER_INTERVALS[wp.box] || 14);
+    const isNew = wp.correctCount === 0;
     wp.correctCount++;
-    if (state.todayStats.date === today) state.todayStats.correctCount++;
-    else state.todayStats = { date: today, correctCount: 1 };
-    checkStreakGoal(state);
+    if (isNew) {
+      if (state.todayStats.date === today) state.todayStats.correctCount++;
+      else state.todayStats = { date: today, correctCount: 1 };
+      checkStreakGoal(state);
+    }
   } else {
     wp.box = 1;
     wp.nextReview = addDays(today, 1);
