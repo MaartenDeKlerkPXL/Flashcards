@@ -186,42 +186,136 @@ function playAudio(word) {
 }
 
 // ─── Speech Recognition ───
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => {
+    const row = new Array(n + 1);
+    row[0] = i;
+    return row;
+  });
+  for (let j = 1; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+  return dp[m][n];
+}
+
+function normalizeSpanish(s) {
+  return s.toLowerCase()
+    .replace(/^(el |la |los |las |un |una )/, "")
+    .replace(/^[¿¡]+|[?!.,]+$/g, "")
+    .trim();
+}
+
+function fuzzyMatch(heard, target) {
+  const h = heard.toLowerCase().trim();
+  const t = normalizeSpanish(target);
+  const tFull = target.toLowerCase().trim();
+  if (h === t || h === tFull || h.includes(t)) return true;
+  const dist = levenshtein(h, t);
+  const threshold = t.length <= 4 ? 1 : Math.ceil(t.length * 0.3);
+  return dist <= threshold;
+}
+
+function showMicFeedback(micBtn, type, message) {
+  let fb = $("micFeedback");
+  if (!fb) {
+    fb = document.createElement("div");
+    fb.id = "micFeedback";
+    fb.className = "mic-feedback";
+    micBtn.parentNode.appendChild(fb);
+  }
+  fb.textContent = message;
+  fb.className = "mic-feedback " + type;
+  fb.classList.remove("hidden");
+  if (type !== "listening") {
+    setTimeout(() => fb.classList.add("hidden"), 3000);
+  }
+}
+
 function startRecognition(word, state, onDone) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
+  if (!SR) {
+    const micBtn = $("btnMic");
+    if (micBtn) showMicFeedback(micBtn, "error", "Mic niet beschikbaar in deze browser");
+    return;
+  }
   if (isListening) return;
 
   const recognition = new SR();
   recognition.lang = "es-ES";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 3;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 5;
+  recognition.continuous = false;
   isListening = true;
+
   const micBtn = $("btnMic");
-  if (micBtn) micBtn.classList.add("active");
+  if (micBtn) {
+    micBtn.classList.add("active", "listening");
+    showMicFeedback(micBtn, "listening", "Luisteren...");
+  }
+
+  let matched = false;
+  let bestHeard = "";
+  const timeout = setTimeout(() => {
+    if (isListening) recognition.stop();
+  }, 6000);
 
   recognition.onresult = (e) => {
-    const results = Array.from(e.results[0]).map((r) => r.transcript.toLowerCase().trim());
-    const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
-    const targetFull = word.spanish.toLowerCase().trim();
-    const match = results.some((r) => r === target || r === targetFull || r.includes(target));
+    const allTranscripts = [];
+    for (let i = 0; i < e.results.length; i++) {
+      for (let j = 0; j < e.results[i].length; j++) {
+        allTranscripts.push(e.results[i][j].transcript);
+      }
+    }
 
-    if (match) {
+    bestHeard = allTranscripts[0] || "";
+    matched = allTranscripts.some((t) => fuzzyMatch(t, word.spanish));
+
+    if (e.results[0] && !e.results[0].isFinal) {
+      if (micBtn) showMicFeedback(micBtn, "listening", `"${bestHeard.trim()}..."`);
+    }
+  };
+
+  recognition.onend = () => {
+    clearTimeout(timeout);
+    isListening = false;
+    if (micBtn) micBtn.classList.remove("active", "listening");
+
+    if (matched) {
       const wp = getWP(state, word.id);
       wp.pronouncedCorrectly = true;
       state.wordProgress[word.id] = wp;
       saveState(state);
-      if (micBtn) { micBtn.classList.remove("active"); micBtn.classList.add("success"); }
+      if (micBtn) micBtn.classList.add("success");
+      showMicFeedback(micBtn, "success", "Correct!");
       updatePronunciationUI(state);
       if (onDone) onDone(true);
+    } else if (bestHeard.trim()) {
+      showMicFeedback(micBtn, "error", `Ik hoorde "${bestHeard.trim()}" — probeer opnieuw`);
+      if (onDone) onDone(false);
     } else {
-      if (micBtn) micBtn.classList.remove("active");
+      showMicFeedback(micBtn, "error", "Niet herkend — spreek duidelijker");
       if (onDone) onDone(false);
     }
-    isListening = false;
   };
 
-  recognition.onerror = () => { isListening = false; if (micBtn) micBtn.classList.remove("active"); if (onDone) onDone(false); };
-  recognition.onend = () => { isListening = false; };
+  recognition.onerror = (e) => {
+    clearTimeout(timeout);
+    isListening = false;
+    if (micBtn) micBtn.classList.remove("active", "listening");
+    const messages = {
+      "not-allowed": "Microfoon geblokkeerd — sta toegang toe",
+      "no-speech": "Geen spraak gedetecteerd — probeer opnieuw",
+      "audio-capture": "Geen microfoon gevonden",
+      "network": "Netwerkfout — check je verbinding"
+    };
+    showMicFeedback(micBtn, "error", messages[e.error] || "Fout — probeer opnieuw");
+    if (onDone) onDone(false);
+  };
+
   recognition.start();
 }
 
