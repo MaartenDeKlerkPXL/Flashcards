@@ -719,11 +719,18 @@ function renderStreakInfo(state) {
     $("streakTitle").textContent = "Week Overzicht";
     const ws = state.weekStats || { sessionCount: 0 };
     const totalSessions = state.sessions?.length || 0;
+    const weekHistory = getWeekHistory(state);
+    const weekRows = weekHistory.length > 0 ? weekHistory.map((w) => {
+      const weekLabel = w.week === getWeekStart(todayStr()) ? "Deze week" : `Week ${w.week.slice(5)}`;
+      const goalMet = w.count >= cfg().weeklyGoalMin;
+      return `<div class="streak-info-row"><span class="streak-info-label">${weekLabel}</span><span class="streak-info-value">${goalMet ? "✅" : "⚠️"} ${w.count} sessie${w.count !== 1 ? "s" : ""}</span></div>`;
+    }).join("") : "";
     $("streakInfo").innerHTML = `
       <div class="streak-info-row"><span class="streak-info-label">Deze week</span><span class="streak-info-value">📅 ${ws.sessionCount}/${cfg().weeklyGoalMin} sessies</span></div>
       <div class="streak-info-row"><span class="streak-info-label">Aanbevolen</span><span class="streak-info-value">${cfg().weeklyGoalRec}x per week</span></div>
       <div class="streak-info-row"><span class="streak-info-label">Totaal sessies</span><span class="streak-info-value">${totalSessions}</span></div>
       <div class="streak-info-row"><span class="streak-info-label">Kaarten per sessie</span><span class="streak-info-value">${cfg().cardsPerSession}</span></div>
+      ${weekRows ? '<div style="margin-top:12px;font-size:.8rem;color:var(--text-muted);font-weight:600">WEEK HISTORIE</div>' + weekRows : ""}
     `;
   }
 }
@@ -748,6 +755,11 @@ function renderOverviewStats(state) {
     `;
   } else {
     const chapters = getChapters();
+    const typeCounts = {};
+    allWords.forEach((w) => { typeCounts[w.type] = (typeCounts[w.type] || 0) + 1; });
+    const typeLabels = { definition: "Begrippen", multichoice: "Meerkeuze", open: "Open", case: "Casus", fillin: "Invullen", order: "Volgorde" };
+    const typeBreakdown = Object.entries(typeCounts).map(([t, c]) => `${typeLabels[t] || t}: ${c}`).join(" · ");
+    const weeksGoalMet = getWeekHistory(state).filter((w) => w.count >= cfg().weeklyGoalMin).length;
     $("overviewStats").innerHTML = `
       <div class="overview-stat"><div class="overview-stat-value">${reviewed}</div><div class="overview-stat-label">Geoefend</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${mastered}</div><div class="overview-stat-label">Beheerst</div></div>
@@ -755,6 +767,8 @@ function renderOverviewStats(state) {
       <div class="overview-stat"><div class="overview-stat-value">${total}</div><div class="overview-stat-label">Totaal kaarten</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${daysLeft > 0 ? daysLeft : "0"}</div><div class="overview-stat-label">Dagen tot ${cfg().targetLabel}</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${state.sessions?.length || 0}</div><div class="overview-stat-label">Sessies totaal</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${weeksGoalMet}</div><div class="overview-stat-label">Weken doel gehaald</div></div>
+      <div class="overview-stat" style="grid-column:1/-1"><div class="overview-stat-value" style="font-size:.85rem">${typeBreakdown}</div><div class="overview-stat-label">Kaarttypes</div></div>
     `;
   }
 }
@@ -1323,6 +1337,7 @@ function showNext(state) {
           ${sessionDone ? "Goed bezig! Kom over een paar dagen terug." : "Probeer later opnieuw of wissel van hoofdstuk."}</p>
         </div>
       `;
+      if (sessionDone) showSessionCelebration();
     }
     renderLevelNav(state);
     return;
@@ -1345,6 +1360,7 @@ function switchSubject(subject) {
 
   $("pageTitle").innerHTML = `<span class="accent">${cfg().title}</span>`;
   document.title = `${cfg().title} — Leren`;
+  updateKeyHints();
 
   practiceMode = currentSubject === "pm" ? "mix" : "flashcard";
   micMode = false;
@@ -1463,6 +1479,51 @@ $("fillinInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { 
 document.querySelectorAll(".subject-btn").forEach((btn) => {
   btn.addEventListener("click", () => switchSubject(btn.dataset.subject));
 });
+
+// ─── Keyboard hints ───
+function updateKeyHints() {
+  const hints = $("keyHints");
+  if (currentSubject === "pm") {
+    hints.innerHTML = "<span>Spatie = toon</span><span>← niet geweten</span><span>↓ deels</span><span>→ goed</span>";
+  } else {
+    hints.innerHTML = "<span>Spatie = toon</span><span>← moeilijk</span><span>→ makkelijk</span><span>↓ audio</span><span>↑ mic</span>";
+  }
+}
+
+// ─── Session celebration ───
+function showSessionCelebration() {
+  const overlay = document.createElement("div");
+  overlay.className = "celebration-overlay";
+  overlay.innerHTML = '<div class="celebration-particles"></div>';
+  document.body.appendChild(overlay);
+  const particles = overlay.querySelector(".celebration-particles");
+  const colors = ["#2ecc71", "#3498db", "#9b59b6", "#f1c40f", "#e74c3c", "#1abc9c"];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = Math.random() * 0.5 + "s";
+    p.style.animationDuration = (1.5 + Math.random()) + "s";
+    particles.appendChild(p);
+  }
+  setTimeout(() => overlay.remove(), 3000);
+}
+
+// ─── Week history ───
+function getWeekHistory(state) {
+  if (currentSubject !== "pm" || !state.sessions) return [];
+  const weeks = {};
+  state.sessions.forEach((s) => {
+    const w = getWeekStart(s.date);
+    if (!weeks[w]) weeks[w] = 0;
+    weeks[w]++;
+  });
+  return Object.entries(weeks)
+    .map(([week, count]) => ({ week, count }))
+    .sort((a, b) => b.week.localeCompare(a.week))
+    .slice(0, 8);
+}
 
 // ─── Init ───
 if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
