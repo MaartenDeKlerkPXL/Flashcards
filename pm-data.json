@@ -1,0 +1,807 @@
+[
+  {
+    "id": "h01-001",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "term": "Product (eindproduct)",
+    "definition": "De kenmerken en functionaliteiten waaraan het resultaat van een project moet voldoen. Het eindproduct is de reden om een project op te starten.",
+    "hint": "Niet per se iets fysieks — kan ook kennis, een organisatiestructuur of een app zijn."
+  },
+  {
+    "id": "h01-002",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "term": "Tussenproduct",
+    "definition": "Een deelresultaat dat tijdens het project wordt opgeleverd. Kan in iteratieve ontwikkelstrategieën een doel op zich zijn.",
+    "hint": "Denk aan een prototype of een eerste versie van een module."
+  },
+  {
+    "id": "h01-003",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "term": "Project",
+    "definition": "De som van alle activiteiten die nodig zijn om een product, zoals beschreven in de behoefte of vraag van de organisatie, uit te werken en op te leveren.",
+    "hint": "Het project is de weg naar het product."
+  },
+  {
+    "id": "h01-004",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "kenmerken",
+    "term": "3 kenmerken van een project",
+    "definition": "1) Een project is uniek — geen enkel project gebeurt op exact dezelfde manier. 2) Een project heeft een specifiek eindresultaat. 3) Een project heeft een duidelijke start- en einddatum.",
+    "hint": "Uniek, eindresultaat, start- en einddatum."
+  },
+  {
+    "id": "h01-005",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "term": "Operations (dagelijks werk)",
+    "definition": "Routinematige, terugkerende activiteiten zonder uniek eindresultaat of specifieke einddatum. Bijvoorbeeld content updates, template beheer, stijlbewaking.",
+    "hint": "Als het geen project is, is het operations."
+  },
+  {
+    "id": "h01-006",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "resources",
+    "term": "Resource",
+    "definition": "Een element dat nodig is om een bepaalde activiteit te voltooien. Er bestaan materiële, menselijke en financiële resources.",
+    "hint": "Computers, teamleden, budget — het zijn allemaal resources."
+  },
+  {
+    "id": "h01-007",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "term": "Programma",
+    "definition": "Een groep van verschillende projecten die logisch samenhoren. Wordt geleid door een programmamanager en past dikwijls in het kader van een ruimere business strategie.",
+    "hint": "Meerdere samenhangende projecten = programma."
+  },
+  {
+    "id": "h01-008",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "term": "Externe veranderingen",
+    "definition": "Veranderingen die buiten de organisatie gebeuren en niet gecontroleerd kunnen worden door de organisatie. Bijvoorbeeld nieuwe wetgeving, technologische disruptie, marktontwikkelingen.",
+    "hint": "De organisatie heeft er geen controle over."
+  },
+  {
+    "id": "h01-009",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "term": "Interne veranderingen",
+    "definition": "Veranderingen die het gevolg zijn van beslissingen van het management. Strategische doelen vragen vaak ook om operationele wijzigingen.",
+    "hint": "Komen vanuit het management zelf."
+  },
+  {
+    "id": "h01-010",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "kenmerken",
+    "term": "Roll-out projecten",
+    "definition": "Projecten waarbij een implementatie eerst op één locatie wordt gedaan en daarna herhaald op andere locaties. De uitzondering op de uniekheid-regel: ze zijn gelijkaardig maar verlopen toch telkens anders.",
+    "hint": "Denk aan een huisstijl die in verschillende steden wordt uitgerold."
+  },
+  {
+    "id": "h01-011",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "term": "Programmamanager",
+    "definition": "De persoon die een programma leidt. Bewaakt de link tussen projecten en strategie, bepaalt prioriteiten, bewaakt afhankelijkheden tussen projecten, bewaakt de methodologie en rapporteert aan het management.",
+    "hint": "5 verantwoordelijkheden: link strategie, prioriteiten, afhankelijkheden, methodologie, rapportering."
+  },
+  {
+    "id": "h01-012",
+    "type": "definition",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "term": "Activiteiten (in een project)",
+    "definition": "Niet enkel het ontwikkelen of testen, maar ook alle ondersteunende activiteiten: werkplekken regelen, risico's inschatten, teamleden aantrekken, communiceren met gelinkte projecten.",
+    "hint": "Alles wat nodig is, niet alleen het 'echte werk'."
+  },
+  {
+    "id": "h01-013",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "project-vs-operations",
+    "question": "Welke van de volgende activiteiten is een project?",
+    "options": ["Een nieuwe mobile app bouwen", "Regelmatige bugfixes en updates uitvoeren", "Dagelijks social media content plaatsen", "Standaard templates actueel houden"],
+    "correct": 0,
+    "explanation": "Een nieuwe app bouwen is uniek, heeft een specifiek eindresultaat en een start-/einddatum. De andere drie zijn routinematig (operations)."
+  },
+  {
+    "id": "h01-014",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "project-vs-operations",
+    "question": "Welke activiteit is GEEN project?",
+    "options": ["Gebruikerssupport: tickets behandelen en kleine updates doorvoeren", "Een data-dashboard ontwikkelen", "Migratie naar een cloudomgeving", "Nieuwe branding ontwikkelen voor een startup"],
+    "correct": 0,
+    "explanation": "Gebruikerssupport is routinewerk zonder specifiek eindresultaat of einddatum — dat is operations."
+  },
+  {
+    "id": "h01-015",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "kenmerken",
+    "question": "Wat is GEEN kenmerk van een project?",
+    "options": ["Het is routinematig en terugkerend", "Het is uniek", "Het heeft een specifiek eindresultaat", "Het heeft een duidelijke start- en einddatum"],
+    "correct": 0,
+    "explanation": "Routinematig en terugkerend beschrijft operations, niet een project."
+  },
+  {
+    "id": "h01-016",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "resources",
+    "question": "Welk type resource is 'een budget om experten aan te trekken'?",
+    "options": ["Financieel", "Materieel", "Menselijk", "Strategisch"],
+    "correct": 0,
+    "explanation": "Een budget is een financiële resource."
+  },
+  {
+    "id": "h01-017",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "question": "Wat is het verschil tussen een programma en een project?",
+    "options": ["Een programma is een groep logisch samenhorende projecten", "Een programma is een groter project", "Een programma heeft geen einddatum", "Een programma is hetzelfde als een portfolio"],
+    "correct": 0,
+    "explanation": "Een programma bestaat uit meerdere logisch samenhorende projecten die samen een bredere strategie dienen."
+  },
+  {
+    "id": "h01-018",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "question": "Welke is een voorbeeld van een externe verandering?",
+    "options": ["Nieuwe privacywetgeving (GDPR)", "Management beslist tot reorganisatie", "Nieuwe strategische doelen bepalen", "Intern besluit om werkprocessen te optimaliseren"],
+    "correct": 0,
+    "explanation": "Nieuwe wetgeving komt van buiten de organisatie en kan niet gecontroleerd worden — dat is een externe verandering."
+  },
+  {
+    "id": "h01-019",
+    "type": "open",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "question": "Waarom is projectmanagement belangrijk voor programmeurs en designers, zelfs als ze geen projectleider worden?",
+    "answer": "Bijna elk software- of designtraject is een project. Zonder projectmanagement: chaos, deadlines missen, frustratie. Met projectmanagement: duidelijk doel, afspraken, scope, teamwork. Goed kunnen werken in een projectmatige context is belangrijk, ook als je niet de leider bent."
+  },
+  {
+    "id": "h01-020",
+    "type": "open",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "question": "Waarom starten bedrijven projecten op? Noem minstens 3 redenen.",
+    "answer": "De gedigitaliseerde wereld verandert continu (AI, IoT). Bedrijven moeten met veranderingen omgaan om competitief te blijven. Het is geen 'business as usual' — veranderingen vragen een gestructureerde aanpak. Digitale initiatieven zijn een meerwaarde voor bedrijven die willen innoveren en optimaliseren. Om veranderingen te identificeren en er correct op te reageren, is een gefocuste aanpak nodig."
+  },
+  {
+    "id": "h01-021",
+    "type": "open",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "question": "Noem de 5 verantwoordelijkheden van een programmamanager.",
+    "answer": "1) De link tussen projecten en strategie bewaken. 2) Prioriteiten bepalen en consistentie bewaken. 3) Afhankelijkheden tussen activiteiten van verschillende projecten bewaken. 4) De methodologie binnen het project bewaken. 5) Rapporteren aan het management."
+  },
+  {
+    "id": "h01-022",
+    "type": "open",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "question": "Wat is het verschil tussen een product en een project? Geef een voorbeeld.",
+    "answer": "Het product bevat alle functionaliteiten en features — het is het eindresultaat. Het project is de weg ernaartoe — de som van alle activiteiten om het product op te leveren. Voorbeeld: een app (product) wordt gebouwd via een ontwikkeltraject (project)."
+  },
+  {
+    "id": "h01-023",
+    "type": "case",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "project-vs-operations",
+    "situation": "Een designbureau beheert dagelijks de social media van 5 klanten: ze maken standaardposts, passen banners aan en houden templates up-to-date.",
+    "question": "Is dit een project of operations? Leg uit.",
+    "answer": "Dit is operations. Het zijn routinematige, terugkerende activiteiten zonder uniek eindresultaat of specifieke einddatum. Er is geen duidelijke start- en einddatum en het werk herhaalt zich."
+  },
+  {
+    "id": "h01-024",
+    "type": "case",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "project-vs-operations",
+    "situation": "Hogeschool PXL wil de Campus Elfde Linie transformeren met een nieuwe BusinessHUB, groene omgeving en een fietsbrug.",
+    "question": "Is dit een project of een programma? Leg uit.",
+    "answer": "Dit is een programma. Het bestaat uit meerdere logisch samenhorgende projecten: 1) PXL BusinessHUB (gebouw B), 2) Groene omgeving (ontharding en beplanting), 3) Nieuwe fietsbrug/mobiliteit. Samen dienen ze de strategische visie van de campus."
+  },
+  {
+    "id": "h01-025",
+    "type": "case",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "kenmerken",
+    "situation": "Een festivalorganisatie rolt een nieuwe huisstijl uit: eerst in Hasselt, dan Gent, Antwerpen en Luik. Elke stad krijgt lokale accenten maar dezelfde basisstijl.",
+    "question": "Zijn dit projecten, operations of iets anders? Leg uit.",
+    "answer": "Dit zijn roll-out projecten. De implementatie wordt herhaald op meerdere locaties — ze zijn gelijkaardig (niet volledig uniek), maar elke stad verloopt toch op eigen wijze. Het is de uitzondering op de uniekheid-regel van projecten."
+  },
+  {
+    "id": "h01-026",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "kenmerken",
+    "sentence": "Een project is ___, heeft een specifiek eindresultaat en een duidelijke start- en einddatum.",
+    "answer": "uniek",
+    "alternatives": []
+  },
+  {
+    "id": "h01-027",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "sentence": "Een groep van verschillende projecten die logisch samenhoren noemen we een ___.",
+    "answer": "programma",
+    "alternatives": []
+  },
+  {
+    "id": "h01-028",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "resources",
+    "sentence": "Een ___ is een element nodig om een bepaalde activiteit te voltooien.",
+    "answer": "resource",
+    "alternatives": []
+  },
+  {
+    "id": "h01-029",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "sentence": "Projecten zijn het antwoord van bedrijven op ___.",
+    "answer": "veranderingen",
+    "alternatives": ["verandering"]
+  },
+  {
+    "id": "h01-030",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "sentence": "De programmamanager bewaakt de link tussen de projecten en de ___.",
+    "answer": "strategie",
+    "alternatives": ["business strategie"]
+  },
+  {
+    "id": "h01-031",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "sentence": "Als een initiatief niet voldoet aan de drie projectkenmerken, spreken we van dagelijks werk of ___.",
+    "answer": "operations",
+    "alternatives": ["operaties"]
+  },
+  {
+    "id": "h01-032",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "sentence": "___ veranderingen gebeuren buiten de organisatie en kunnen niet gecontroleerd worden.",
+    "answer": "externe",
+    "alternatives": []
+  },
+  {
+    "id": "h01-033",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "sentence": "___ veranderingen zijn het gevolg van beslissingen van het management.",
+    "answer": "interne",
+    "alternatives": []
+  },
+  {
+    "id": "h01-034",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "question": "Welke van de volgende is GEEN voorbeeld van een eindproduct?",
+    "options": ["Een vergadering over het project", "Een app", "Een nieuwe organisatiestructuur", "Kennis"],
+    "correct": 0,
+    "explanation": "Een vergadering is een activiteit, geen eindproduct. Een product kan kennis, een organisatiestructuur of een app zijn."
+  },
+  {
+    "id": "h01-035",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "kenmerken",
+    "question": "Wanneer voldoet een roll-out project NIET aan alle kenmerken van een project?",
+    "options": ["Het is niet volledig uniek omdat de implementatie herhaald wordt", "Het heeft geen einddatum", "Het heeft geen eindresultaat", "Het is te klein om een project te zijn"],
+    "correct": 0,
+    "explanation": "Roll-out projecten zijn de uitzondering op de uniekheid-regel: ze worden herhaald op verschillende locaties maar verlopen toch telkens anders."
+  },
+  {
+    "id": "h01-036",
+    "type": "open",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "resources",
+    "question": "Noem de 3 types resources en geef bij elk een voorbeeld.",
+    "answer": "1) Materieel: computers, werkplekken, servers. 2) Menselijk: teamleden, ondersteunend personeel, externe experten. 3) Financieel: budget om experten aan te trekken, licentiekosten, hardware-budget."
+  },
+  {
+    "id": "h01-037",
+    "type": "open",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "question": "Noem minstens 4 ondersteunende activiteiten in een project (dus niet het bouwen/testen zelf).",
+    "answer": "1) Werkplekken en laptops ter beschikking stellen. 2) Projectrisico's inschatten en mogelijke acties plannen. 3) De juiste teamleden aantrekken. 4) Communiceren met andere gelinkte projecten. 5) Budget beheren. 6) Stakeholders informeren."
+  },
+  {
+    "id": "h01-038",
+    "type": "case",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "project-vs-operations",
+    "situation": "Een softwarebedrijf heeft twee teams: Team A bouwt een compleet nieuw data-dashboard voor een klant (deadline over 4 maanden). Team B behandelt dagelijks supporttickets en voert kleine feature-updates door.",
+    "question": "Welk team werkt aan een project en welk aan operations?",
+    "answer": "Team A werkt aan een project: het data-dashboard is uniek, heeft een specifiek eindresultaat en een deadline (einddatum). Team B doet operations: tickets behandelen is routinematig, terugkerend en heeft geen specifieke einddatum."
+  },
+
+  {
+    "id": "h02-001",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "scope",
+    "term": "Project Scope",
+    "definition": "Een duidelijke en volledige afbakening van wat het project wel en niet gaat doen. Beschreven in het PID (Project Initiation Document).",
+    "hint": "Wat gaan we doen — wat niet."
+  },
+  {
+    "id": "h02-002",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "term": "Deliverable",
+    "definition": "Een tastbaar of ontastbaar (tussentijds) resultaat in een project. Wordt opgeleverd als uitkomst van een project of projectfase aan een klant of stakeholder, intern of extern.",
+    "hint": "Iets dat je oplevert: document, ontwerp, software, opleiding..."
+  },
+  {
+    "id": "h02-003",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "term": "Milestone (mijlpaal)",
+    "definition": "Een checkpoint op de projecttijdlijn. Heeft geen doorlooptijd — het is een momentopname waarop we de status checken en kijken of we 'on track' zijn.",
+    "hint": "Een moment, geen product. Geen doorlooptijd!"
+  },
+  {
+    "id": "h02-004",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "term": "PID (Project Initiation Document)",
+    "definition": "Het document waarin de scope van het project wordt beschreven: welke applicaties worden aangepast, welke activiteiten wel en niet in scope zijn.",
+    "hint": "Het startdocument dat beschrijft wat het project omvat."
+  },
+  {
+    "id": "h02-005",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "execution-vs-management",
+    "term": "Project Execution (projectuitvoering)",
+    "definition": "Alle activiteiten die direct bijdragen tot de oplevering van het product: de analyse, het development, het testen. Via fases wordt het eindproduct opgeleverd.",
+    "hint": "Het 'echte werk' — bouwen, testen, opleveren."
+  },
+  {
+    "id": "h02-006",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "execution-vs-management",
+    "term": "Project Management",
+    "definition": "Het sturen van het project zodat het gewenste resultaat binnen de afgesproken randvoorwaarden bereikt wordt. Zorgen dat het project op de juiste manier georganiseerd en gestuurd wordt.",
+    "hint": "Sturen en bewaken — scope, budget, planning, kwaliteit, risico's, resources."
+  },
+  {
+    "id": "h02-007",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Triple Constraint (duivelsdriehoek)",
+    "definition": "De drie basisvariabelen die elk project beheersen: Tijd (planning, doorlooptijd, deadlines), Geld (budget, personeel, hardware/software) en Scope (omvang). Plus kwaliteit als vierde factor.",
+    "hint": "Tijd + Geld + Scope. Je kunt max 2 van 3 maximaliseren."
+  },
+  {
+    "id": "h02-008",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Projectparameters / constraints",
+    "definition": "Parameters die vertellen hoe het project ervoor staat, terwijl projectfases vertellen waar we zitten. Omvatten: scope, budget, voortgang (planning), kwaliteit, risico's en resources.",
+    "hint": "6 parameters: scope, budget, planning, kwaliteit, risico's, resources."
+  },
+  {
+    "id": "h02-009",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Staffing",
+    "definition": "Heeft betrekking op de teamleden en hun inspanningen. Gradueel komen er meer teamleden bij met een hoogtepunt tijdens design, development en testing. Na positief testen nemen de teamleden af.",
+    "hint": "Opbouw → piek bij development/testing → afbouw na go-live."
+  },
+  {
+    "id": "h02-010",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Veranderingskosten",
+    "definition": "Hoe verder het project vordert, hoe duidelijker de scope wordt en hoe hoger de kost van wijzigingen. Waterfall heeft het grootste risico (geen feedback). Agile lost dit op door kleine stukken op te leveren.",
+    "hint": "Later wijzigen = duurder. Agile vermindert dit risico."
+  },
+  {
+    "id": "h02-011",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Vrijheidsgraden vs. risico's",
+    "definition": "Hoe verder het project vordert, hoe meer beslissingen genomen zijn en hoe minder vrijheden er nog zijn. Dit vermindert het risico omdat de onzekerheid afneemt.",
+    "hint": "Meer beslissingen = minder vrijheid = minder risico."
+  },
+  {
+    "id": "h02-012",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Scope creep",
+    "definition": "Wanneer de scope van het project ongecontroleerd groeit door extra wensen of eisen, zonder dat daar extra tijd of budget tegenover staat.",
+    "hint": "Sluipende groei van de scope — de vijand van elke projectmanager."
+  },
+  {
+    "id": "h02-013",
+    "type": "definition",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "term": "Best practice",
+    "definition": "Een techniek of werkmethode die zich effectief heeft bewezen. Het opvolgen van 6 constraints wordt als best practice gezien.",
+    "hint": "Bewezen effectieve werkwijze."
+  },
+  {
+    "id": "h02-014",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "question": "Welke van de volgende is een deliverable?",
+    "options": ["Een UX design document", "De goedkeuring van het ontwerp", "De datum waarop testen starten", "Het moment dat het project halverwege is"],
+    "correct": 0,
+    "explanation": "Een UX design document is een tastbaar resultaat dat opgeleverd wordt. De andere opties zijn milestones (checkpoints zonder doorlooptijd)."
+  },
+  {
+    "id": "h02-015",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "question": "Welke van de volgende is een milestone?",
+    "options": ["Ontwerp is goedgekeurd", "Wireframes", "Customer journey map", "Testrapport"],
+    "correct": 0,
+    "explanation": "'Ontwerp is goedgekeurd' is een momentopname (checkpoint) zonder doorlooptijd. Wireframes, customer journey maps en testrapporten zijn deliverables (op te leveren producten)."
+  },
+  {
+    "id": "h02-016",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Hoeveel van de 3 hoofdfactoren (tijd, geld, scope) kun je maximaal tegelijk maximaliseren?",
+    "options": ["2, ten koste van de derde", "Alle 3 als je goed plant", "1, de andere twee lijden altijd", "0, er is altijd een trade-off"],
+    "correct": 0,
+    "explanation": "Je kunt maximaal 2 van de 3 maximaliseren ten koste van de derde. Alle drie perfect halen is 'wishful thinking'."
+  },
+  {
+    "id": "h02-017",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Wat gebeurt er met veranderingskosten naarmate het project vordert?",
+    "options": ["Ze worden hoger", "Ze blijven gelijk", "Ze worden lager", "Ze zijn alleen relevant bij agile"],
+    "correct": 0,
+    "explanation": "Hoe verder het project vordert, hoe duidelijker de scope en hoe hoger de kost van wijzigingen. Het product is bijna afgewerkt, dus aanpassingen zijn ingrijpender."
+  },
+  {
+    "id": "h02-018",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Welke methodologie heeft het GROOTSTE risico op hoge veranderingskosten?",
+    "options": ["Waterfall, want er is geen feedback tussen fases", "Agile, want er wordt constant gewijzigd", "Beide even groot", "Geen van beide, het hangt af van het team"],
+    "correct": 0,
+    "explanation": "Waterfall heeft het grootste risico omdat er geen feedback is tussen de fases. Agile/SCRUM lost dit op door kleine stukken op te leveren en steeds feedback te vragen."
+  },
+  {
+    "id": "h02-019",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "execution-vs-management",
+    "question": "Wat hoort bij project MANAGEMENT en niet bij project execution?",
+    "options": ["Scope, budget en risico's bewaken en bijsturen", "Software code schrijven", "UX designs uitwerken", "Testcases uitvoeren"],
+    "correct": 0,
+    "explanation": "Project management gaat over sturen en bewaken (scope, budget, planning, kwaliteit, risico's, resources). Code schrijven, designs maken en testen zijn projectuitvoering."
+  },
+  {
+    "id": "h02-020",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Waarom is het opvolgen van 6 constraints een best practice?",
+    "options": ["Je detecteert problemen vroeger en maakt betere afwegingen", "Het is verplicht volgens de wet", "Het maakt het project goedkoper", "Het versnelt de development fase"],
+    "correct": 0,
+    "explanation": "Met 6 constraints detecteer je problemen vroeger, maak je beslissingen transparanter, kun je gevolgen van wijzigingen beter inschatten en beheer je verwachtingen van stakeholders beter."
+  },
+  {
+    "id": "h02-021",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Leg de duivelsdriehoek uit: wat zijn de 3 factoren en hoe werken ze samen?",
+    "answer": "De drie factoren zijn Tijd, Geld (budget/middelen) en Scope (omvang). Je kunt maximaal 2 van de 3 maximaliseren, ten koste van de derde. Voorbeeld: wordt de scope groter, dan heb je meer tijd of geld nodig. Wil de opdrachtgever sneller klaar, dan kost het meer geld of levert het minder scope/kwaliteit op. Kwaliteit is de vierde factor die door de balans bepaald wordt."
+  },
+  {
+    "id": "h02-022",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "scope",
+    "question": "Waarom is een duidelijke project scope belangrijk? Noem minstens 3 redenen.",
+    "answer": "1) Het helpt verwachtingen te managen van eindgebruikers. 2) Het voorkomt verrassingen voor klanten en projectmedewerkers. 3) Het geeft inzicht in hoe scope, tijd, kosten, kwaliteit, risico's en resources elkaar beïnvloeden. 4) Je weet wat de projectmanager nodig heeft bij rapportering. 5) Je krijgt meer grip op je eigen werk: makkelijker prioriteiten stellen en tijdsinschatting maken."
+  },
+  {
+    "id": "h02-023",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "execution-vs-management",
+    "question": "Wat is het verschil tussen project execution en project management?",
+    "answer": "Project execution omvat alle activiteiten die direct bijdragen tot de oplevering van het product (analyse, development, testen). Project management gaat over het sturen en bewaken van het project: scope, budget, voortgang, kwaliteit, risico's en resources opvolgen, escaleren en bijsturen. Beide lopen parallel maar hebben elk een aparte set activiteiten."
+  },
+  {
+    "id": "h02-024",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "question": "Wat is het verschil tussen een deliverable en een milestone? Geef van elk een voorbeeld.",
+    "answer": "Een deliverable is een tastbaar of ontastbaar resultaat dat opgeleverd wordt (bijv. een UX design, wireframes, testrapport). Een milestone is een checkpoint op de tijdlijn zonder doorlooptijd — een momentopname om te kijken of je 'on track' bent (bijv. 'ontwerp goedgekeurd', 'testen afgerond'). Een deliverable levert iets op, een milestone markeert een moment."
+  },
+  {
+    "id": "h02-025",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Noem de 6 uitgebreide constraints en leg uit waarom het opvolgen ervan een best practice is.",
+    "answer": "De 6 constraints zijn: 1) Scope, 2) Budget/kosten, 3) Planning/tijd, 4) Kwaliteit, 5) Risico's, 6) Resources. Het opvolgen is een best practice omdat je: problemen vroeger detecteert, beslissingen transparanter maakt, gevolgen van wijzigingen beter kunt inschatten, verwachtingen van stakeholders beter beheert, en bewuste afwegingen kunt maken in plaats van ad-hoc beslissingen."
+  },
+  {
+    "id": "h02-026",
+    "type": "case",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "situation": "De opdrachtgever van jouw app-project wil dat het 2 maanden eerder klaar is dan gepland.",
+    "question": "Wat zijn de mogelijke gevolgen op de andere constraints?",
+    "answer": "Bij minder tijd: 1) Het kost meer geld (extra mensen inhuren). 2) De scope moet kleiner (minder features). 3) De kwaliteit kan dalen (minder tijd voor testen). 4) De risico's nemen toe (meer kans op fouten). De projectmanager moet bespreken wat het belangrijkst is en welke trade-off acceptabel is."
+  },
+  {
+    "id": "h02-027",
+    "type": "case",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "situation": "De sponsor beslist om 30% minder budget te geven voor het development van een webapplicatie.",
+    "question": "Wat zijn de gevolgen op de andere constraints?",
+    "answer": "Met minder budget: 1) Minder developers kunnen ingezet worden (resources ↓). 2) Het project duurt langer (tijd ↑). 3) De scope moet kleiner (minder features). 4) De kwaliteit kan dalen als men toch alles probeert te doen met minder middelen. De PM moet de scope heronderhandelen met de opdrachtgever."
+  },
+  {
+    "id": "h02-028",
+    "type": "case",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "situation": "Halverwege een project valt een key developer langdurig ziek uit.",
+    "question": "Welke constraints worden geraakt en wat kan de projectmanager doen?",
+    "answer": "Resources ↓ direct. Mogelijke gevolgen: 1) Tijd: project duurt langer. 2) Geld: vervanger inhuren kost extra. 3) Scope: kan verkleind worden. 4) Kwaliteit: risico op daling als werk overgenomen wordt door minder ervaren teamlid. 5) Risico's: stijgen door afhankelijkheid van één persoon. De PM moet escaleren, alternatieven zoeken en de planning herzien."
+  },
+  {
+    "id": "h02-029",
+    "type": "case",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "situation": "In een webdesign-project heeft het team de volgende items: wireframes, 'kleurenpalet gekozen', customer journey maps, 'ontwerp goedgekeurd', testrapport, 'testen uitgevoerd'.",
+    "question": "Sorteer deze in deliverables en milestones.",
+    "answer": "Deliverables (tastbare resultaten): wireframes, customer journey maps, testrapport. Milestones (checkpoints): 'kleurenpalet gekozen', 'ontwerp goedgekeurd', 'testen uitgevoerd'. Deliverables lever je op, milestones markeer je op de tijdlijn."
+  },
+  {
+    "id": "h02-030",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "sentence": "Een deliverable is een tastbaar of ___ (tussentijds) resultaat in een project.",
+    "answer": "ontastbaar",
+    "alternatives": []
+  },
+  {
+    "id": "h02-031",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "sentence": "De drie basisvariabelen van de duivelsdriehoek zijn: tijd, ___ en scope.",
+    "answer": "geld",
+    "alternatives": ["budget", "kosten", "kost", "middelen"]
+  },
+  {
+    "id": "h02-032",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "sentence": "Een milestone heeft geen ___ — het is een momentopname op de projecttijdlijn.",
+    "answer": "doorlooptijd",
+    "alternatives": ["duur", "looptijd"]
+  },
+  {
+    "id": "h02-033",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "sentence": "Hoe verder het project vordert, hoe ___ de kost bij wijzigingen.",
+    "answer": "hoger",
+    "alternatives": ["groter", "duurder"]
+  },
+  {
+    "id": "h02-034",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "sentence": "Je kunt maximaal ___ van de 3 hoofdfactoren maximaliseren ten koste van de derde.",
+    "answer": "2",
+    "alternatives": ["twee"]
+  },
+  {
+    "id": "h02-035",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "execution-vs-management",
+    "sentence": "Project ___ gaat over het sturen van het project zodat het gewenste resultaat binnen de afgesproken randvoorwaarden bereikt wordt.",
+    "answer": "management",
+    "alternatives": ["projectmanagement"]
+  },
+  {
+    "id": "h02-036",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "sentence": "Wanneer de scope ongecontroleerd groeit door extra wensen, noemen we dat scope ___.",
+    "answer": "creep",
+    "alternatives": []
+  },
+  {
+    "id": "h02-037",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "scope",
+    "sentence": "De scope wordt beschreven in het ___ (Project Initiation Document).",
+    "answer": "PID",
+    "alternatives": ["project initiation document"]
+  },
+  {
+    "id": "h02-038",
+    "type": "order",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "projectfases",
+    "question": "Zet de projectfases in de juiste volgorde:",
+    "items": ["Initiatie", "Analyse", "Design", "Development", "Testing", "Implementatie"],
+    "explanation": "Dit is de standaard volgorde van projectfases in de watervalmethode."
+  },
+  {
+    "id": "h02-039",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "question": "Welke van de volgende is GEEN deliverable?",
+    "options": ["Testen zijn uitgevoerd", "Wireframes", "Customer journey map", "Vergaderverslag"],
+    "correct": 0,
+    "explanation": "'Testen zijn uitgevoerd' is een milestone (checkpoint). Wireframes, customer journey maps en vergaderverslagen zijn deliverables (opgeleverde producten)."
+  },
+  {
+    "id": "h02-040",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Wanneer zijn de meeste teamleden aan het werk op een project?",
+    "options": ["Tijdens design, development en testing", "Bij de start van het project", "Tijdens de implementatie", "Na de oplevering"],
+    "correct": 0,
+    "explanation": "De staffing curve laat zien dat er gradueel meer teamleden bijkomen met een hoogtepunt tijdens design, development en testing. Daarna neemt het af."
+  },
+  {
+    "id": "h02-041",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Leg uit hoe Agile/SCRUM het probleem van hoge veranderingskosten vermindert vergeleken met Waterfall.",
+    "answer": "Bij Waterfall is er geen feedback tussen de fases — wijzigingen worden pas laat ontdekt en zijn dan duur. Agile/SCRUM lost dit op door: 1) Kleine stukken (increments) op te leveren. 2) Na elk increment feedback te vragen van de klant/stakeholder. 3) Hierdoor worden wijzigingen vroeg ontdekt wanneer de kosten nog laag zijn. 4) De scope kan bijgestuurd worden per iteratie."
+  },
+  {
+    "id": "h02-042",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Beschrijf de staffing curve van een typisch project: hoe evolueert het aantal teamleden?",
+    "answer": "Vanaf het begin komt er gradueel steeds meer personeel bij. Het hoogtepunt is tijdens design, development en testing — dan zijn de meeste mensen aan het werk. Nadat de oplossing positief getest is, zien we dat er minder teamleden zijn, tot iedereen van het project verdwenen is na de oplevering."
+  }
+]

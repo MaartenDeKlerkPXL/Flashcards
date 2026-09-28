@@ -1,17 +1,46 @@
-const STATE_KEY = "espanol_v2";
-const DAILY_GOAL = 20;
-const LEVELS = 10;
-const WORDS_PER_LEVEL = 100;
-const REVIEW_PERCENT = 0.15;
-const VACATION_DATE = "2027-04-01";
-const LEITNER_INTERVALS = [0, 1, 2, 4, 7, 14];
+// ─── Subject Config ───
+const SUBJECTS = {
+  espanol: {
+    stateKey: "espanol_v2",
+    dataFile: "data.json",
+    title: "Español",
+    goalType: "daily",
+    dailyGoal: 20,
+    targetDate: "2027-04-01",
+    targetLabel: "vakantie",
+    targetStart: "2026-09-23",
+    leitnerIntervals: [0, 1, 2, 4, 7, 14],
+    hasMic: true,
+    hasLevels: true,
+    levelCount: 10,
+    wordsPerLevel: 100,
+    reviewPercent: 0.15,
+  },
+  pm: {
+    stateKey: "pm_v1",
+    dataFile: "pm-data.json",
+    title: "Project Management",
+    goalType: "weekly",
+    weeklyGoalMin: 2,
+    weeklyGoalRec: 3,
+    cardsPerSession: 35,
+    targetDate: "2027-01-01",
+    targetLabel: "examen",
+    targetStart: "2026-09-23",
+    leitnerIntervals: [0, 2, 5, 10, 21, 42],
+    hasMic: false,
+    hasLevels: false,
+    reviewPercent: 0.30,
+  },
+};
 
+let currentSubject = "espanol";
 let allWords = [];
 let queue = [];
 let currentIndex = 0;
 let revealed = false;
 let mode = "practice";
-let practiceMode = "flashcard"; // flashcard | type | reverse | cloze
+let practiceMode = "flashcard";
 let micMode = false;
 let activeCategory = null;
 let quizWords = [];
@@ -19,10 +48,14 @@ let quizIndex = 0;
 let quizErrors = 0;
 let activeLevel = 1;
 let isListening = false;
+let clozeTimer = null;
+let sessionCards = 0;
 
 const $ = (id) => document.getElementById(id);
 
-// ─── Date utils (timezone-safe) ───
+function cfg() { return SUBJECTS[currentSubject]; }
+
+// ─── Date utils ───
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -40,55 +73,100 @@ function daysBetween(a, b) {
   return Math.round((db - da) / 86400000);
 }
 
+function getWeekStart(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 // ─── State ───
 function loadState() {
-  try { return migrateState(JSON.parse(localStorage.getItem(STATE_KEY)) || defaultState()); }
+  try { return migrateState(JSON.parse(localStorage.getItem(cfg().stateKey)) || defaultState()); }
   catch { return defaultState(); }
 }
 
 function defaultState() {
+  if (currentSubject === "pm") {
+    return { wordProgress: {}, sessions: [], history: [], weekStats: { week: getWeekStart(todayStr()), sessionCount: 0 }, todayStats: { date: todayStr(), correctCount: 0 } };
+  }
   return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 }, history: [] };
 }
 
 function migrateState(state) {
-  if (state.streak.lastDate && !state.streak.lastCompletedDate) {
-    if (state.todayStats.correctCount >= DAILY_GOAL) {
-      state.streak.lastCompletedDate = state.todayStats.date;
+  if (currentSubject === "espanol") {
+    if (state.streak && state.streak.lastDate && !state.streak.lastCompletedDate) {
+      if (state.todayStats.correctCount >= cfg().dailyGoal) {
+        state.streak.lastCompletedDate = state.todayStats.date;
+      }
+      delete state.streak.lastDate;
     }
-    delete state.streak.lastDate;
   }
   if (!state.history) state.history = [];
+  if (currentSubject === "pm") {
+    if (!state.sessions) state.sessions = [];
+    if (!state.weekStats) state.weekStats = { week: getWeekStart(todayStr()), sessionCount: 0 };
+  }
+  if (!state.todayStats) state.todayStats = { date: todayStr(), correctCount: 0 };
   return state;
 }
 
 function saveState(s) {
-  try { localStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch {}
+  try { localStorage.setItem(cfg().stateKey, JSON.stringify(s)); } catch {}
 }
 
 function getWP(state, id) {
   return state.wordProgress[id] || { box: 0, nextReview: todayStr(), lastReviewed: null, correctCount: 0, pronouncedCorrectly: false };
 }
 
-// ─── Streak ───
+// ─── Streak / Weekly goal ───
 function updateStreak(state) {
   const today = todayStr();
-  const s = state.streak;
-  if (state.todayStats.date !== today) {
-    const yesterday = addDays(today, -1);
-    if (s.lastCompletedDate && s.lastCompletedDate !== yesterday && s.lastCompletedDate !== today) {
-      s.count = 0;
+  if (currentSubject === "espanol") {
+    const s = state.streak;
+    if (state.todayStats.date !== today) {
+      const yesterday = addDays(today, -1);
+      if (s.lastCompletedDate && s.lastCompletedDate !== yesterday && s.lastCompletedDate !== today) {
+        s.count = 0;
+      }
+      state.todayStats = { date: today, correctCount: 0 };
     }
-    state.todayStats = { date: today, correctCount: 0 };
+  } else {
+    if (state.todayStats.date !== today) {
+      state.todayStats = { date: today, correctCount: 0 };
+    }
+    const currentWeek = getWeekStart(today);
+    if (state.weekStats.week !== currentWeek) {
+      state.weekStats = { week: currentWeek, sessionCount: 0 };
+    }
   }
 }
 
 function checkStreakGoal(state) {
+  if (currentSubject === "espanol") {
+    const today = todayStr();
+    const s = state.streak;
+    if (state.todayStats.correctCount >= cfg().dailyGoal && s.lastCompletedDate !== today) {
+      s.count++;
+      s.lastCompletedDate = today;
+      addHistory(state, today, state.todayStats.correctCount);
+    }
+  }
+}
+
+function checkPMSession(state) {
+  if (currentSubject !== "pm") return;
   const today = todayStr();
-  const s = state.streak;
-  if (state.todayStats.correctCount >= DAILY_GOAL && s.lastCompletedDate !== today) {
-    s.count++;
-    s.lastCompletedDate = today;
-    addHistory(state, today, state.todayStats.correctCount);
+  const alreadyToday = state.sessions.some((s) => s.date === today);
+  if (!alreadyToday && sessionCards >= cfg().cardsPerSession) {
+    state.sessions.push({ date: today, cards: sessionCards });
+    const currentWeek = getWeekStart(today);
+    if (state.weekStats.week === currentWeek) {
+      state.weekStats.sessionCount++;
+    }
+    if (state.sessions.length > 100) state.sessions = state.sessions.slice(-50);
+    saveState(state);
   }
 }
 
@@ -99,26 +177,33 @@ function addHistory(state, date, count) {
   if (state.history.length > 90) state.history.shift();
 }
 
-// ─── Level helpers ───
+// ─── Level/Chapter helpers ───
+function getChapters() {
+  const chapters = new Set();
+  allWords.forEach((w) => chapters.add(w.chapter || w.level));
+  return [...chapters].sort((a, b) => a - b);
+}
+
 function wordsForLevel(lvl) {
+  if (currentSubject === "pm") return allWords.filter((w) => w.chapter === lvl);
   return allWords.filter((w) => w.level === lvl);
 }
 
 function isLevelUnlocked(state, lvl) {
-  return lvl <= state.currentLevel;
+  if (currentSubject === "pm") return wordsForLevel(lvl).length > 0;
+  return lvl <= (state.currentLevel || 1);
 }
 
 function isLevelCompleted(state, lvl) {
-  return state.completedLevels.includes(lvl);
+  if (currentSubject === "pm") return false;
+  return (state.completedLevels || []).includes(lvl);
 }
 
 function isQuizReady(state, lvl) {
+  if (currentSubject === "pm") return false;
   if (isLevelCompleted(state, lvl)) return false;
   const words = wordsForLevel(lvl);
-  return words.length > 0 && words.every((w) => {
-    const wp = getWP(state, w.id);
-    return wp.box >= 3;
-  });
+  return words.length > 0 && words.every((w) => getWP(state, w.id).box >= 3);
 }
 
 function getCategoriesForLevel(lvl) {
@@ -130,35 +215,28 @@ function getCategoriesForLevel(lvl) {
 // ─── Queue building ───
 function buildQueue(state, lvl) {
   const today = todayStr();
-  let levelWords;
 
+  if (currentSubject === "pm") {
+    return buildPMQueue(state, lvl);
+  }
+
+  let levelWords;
   if (micMode) {
     levelWords = wordsForLevel(lvl).filter((w) => !getWP(state, w.id).pronouncedCorrectly);
     levelWords.sort((a, b) => getWP(state, b.id).box - getWP(state, a.id).box);
   } else {
-    levelWords = wordsForLevel(lvl).filter((w) => {
-      const wp = getWP(state, w.id);
-      return wp.nextReview <= today;
-    });
+    levelWords = wordsForLevel(lvl).filter((w) => getWP(state, w.id).nextReview <= today);
   }
 
-  if (activeCategory) {
-    levelWords = levelWords.filter((w) => w.category === activeCategory);
-  }
-
-  if (micMode) {
-    return levelWords;
-  }
+  if (activeCategory) levelWords = levelWords.filter((w) => w.category === activeCategory);
+  if (micMode) return levelWords;
 
   let reviewWords = [];
   if (lvl > 1 && !activeCategory) {
     const prevWords = allWords.filter((w) => w.level < lvl && isLevelUnlocked(state, w.level));
-    const dueReview = prevWords.filter((w) => {
-      const wp = getWP(state, w.id);
-      return wp.nextReview <= today;
-    });
+    const dueReview = prevWords.filter((w) => getWP(state, w.id).nextReview <= today);
     shuffle(dueReview);
-    const reviewCount = Math.max(2, Math.ceil(levelWords.length * REVIEW_PERCENT));
+    const reviewCount = Math.max(2, Math.ceil(levelWords.length * cfg().reviewPercent));
     reviewWords = dueReview.slice(0, reviewCount);
   }
 
@@ -168,6 +246,31 @@ function buildQueue(state, lvl) {
   return unique;
 }
 
+function buildPMQueue(state, lvl) {
+  const today = todayStr();
+  let cards;
+
+  if (lvl === 0) {
+    cards = allWords.filter((w) => getWP(state, w.id).nextReview <= today);
+  } else {
+    const chapterCards = wordsForLevel(lvl).filter((w) => getWP(state, w.id).nextReview <= today);
+    const otherCards = allWords.filter((w) => w.chapter !== lvl && getWP(state, w.id).nextReview <= today);
+    shuffle(otherCards);
+    const reviewCount = Math.max(3, Math.ceil(chapterCards.length * cfg().reviewPercent));
+    cards = [...chapterCards, ...otherCards.slice(0, reviewCount)];
+  }
+
+  if (activeCategory) cards = cards.filter((w) => w.category === activeCategory);
+
+  if (practiceMode === "begrippen") cards = cards.filter((w) => w.type === "definition");
+  else if (practiceMode === "vragen") cards = cards.filter((w) => ["open", "case", "multichoice"].includes(w.type));
+  else if (practiceMode === "invullen") cards = cards.filter((w) => ["fillin", "order"].includes(w.type));
+
+  const unique = [...new Map(cards.map((w) => [w.id, w])).values()];
+  shuffle(unique);
+  return unique.slice(0, cfg().cardsPerSession);
+}
+
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -175,7 +278,7 @@ function shuffle(arr) {
   }
 }
 
-// ─── Audio ───
+// ─── Audio (Español only) ───
 function playAudio(word) {
   const audio = new Audio(`audio/audio-${word.id}.mp3`);
   audio.play().catch(() => {
@@ -192,28 +295,19 @@ function playAudio(word) {
   });
 }
 
-// ─── Speech Recognition ───
+// ─── Speech Recognition (Español only) ───
 function levenshtein(a, b) {
   const m = a.length, n = b.length;
-  const dp = Array.from({ length: m + 1 }, (_, i) => {
-    const row = new Array(n + 1);
-    row[0] = i;
-    return row;
-  });
+  const dp = Array.from({ length: m + 1 }, (_, i) => { const row = new Array(n + 1); row[0] = i; return row; });
   for (let j = 1; j <= n; j++) dp[0][j] = j;
   for (let i = 1; i <= m; i++)
     for (let j = 1; j <= n; j++)
-      dp[i][j] = a[i - 1] === b[j - 1]
-        ? dp[i - 1][j - 1]
-        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
   return dp[m][n];
 }
 
 function normalizeSpanish(s) {
-  return s.toLowerCase()
-    .replace(/^(el |la |los |las |un |una )/, "")
-    .replace(/^[¿¡]+|[?!.,]+$/g, "")
-    .trim();
+  return s.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.,]+$/g, "").trim();
 }
 
 function fuzzyMatch(heard, target) {
@@ -228,74 +322,36 @@ function fuzzyMatch(heard, target) {
 
 function showMicFeedback(micBtn, type, message) {
   let fb = $("micFeedback");
-  if (!fb) {
-    fb = document.createElement("div");
-    fb.id = "micFeedback";
-    fb.className = "mic-feedback";
-    micBtn.parentNode.appendChild(fb);
-  }
+  if (!fb) { fb = document.createElement("div"); fb.id = "micFeedback"; fb.className = "mic-feedback"; micBtn.parentNode.appendChild(fb); }
   fb.textContent = message;
   fb.className = "mic-feedback " + type;
   fb.classList.remove("hidden");
-  if (type !== "listening") {
-    setTimeout(() => fb.classList.add("hidden"), 3000);
-  }
+  if (type !== "listening") setTimeout(() => fb.classList.add("hidden"), 3000);
 }
 
 function startRecognition(word, state, onDone) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    const micBtn = $("btnMic");
-    if (micBtn) showMicFeedback(micBtn, "error", "Mic niet beschikbaar in deze browser");
-    return;
-  }
+  if (!SR) { const micBtn = $("btnMic"); if (micBtn) showMicFeedback(micBtn, "error", "Mic niet beschikbaar"); return; }
   if (isListening) return;
-
   const recognition = new SR();
-  recognition.lang = "es-ES";
-  recognition.interimResults = true;
-  recognition.maxAlternatives = 5;
-  recognition.continuous = false;
+  recognition.lang = "es-ES"; recognition.interimResults = true; recognition.maxAlternatives = 5; recognition.continuous = false;
   isListening = true;
-
   const micBtn = $("btnMic");
-  if (micBtn) {
-    micBtn.classList.add("active", "listening");
-    showMicFeedback(micBtn, "listening", "Luisteren...");
-  }
-
-  let matched = false;
-  let bestHeard = "";
-  const timeout = setTimeout(() => {
-    if (isListening) recognition.stop();
-  }, 6000);
-
+  if (micBtn) { micBtn.classList.add("active", "listening"); showMicFeedback(micBtn, "listening", "Luisteren..."); }
+  let matched = false, bestHeard = "";
+  const timeout = setTimeout(() => { if (isListening) recognition.stop(); }, 6000);
   recognition.onresult = (e) => {
-    const allTranscripts = [];
-    for (let i = 0; i < e.results.length; i++) {
-      for (let j = 0; j < e.results[i].length; j++) {
-        allTranscripts.push(e.results[i][j].transcript);
-      }
-    }
-
-    bestHeard = allTranscripts[0] || "";
-    matched = allTranscripts.some((t) => fuzzyMatch(t, word.spanish));
-
-    if (e.results[0] && !e.results[0].isFinal) {
-      if (micBtn) showMicFeedback(micBtn, "listening", `"${bestHeard.trim()}..."`);
-    }
+    const all = [];
+    for (let i = 0; i < e.results.length; i++) for (let j = 0; j < e.results[i].length; j++) all.push(e.results[i][j].transcript);
+    bestHeard = all[0] || "";
+    matched = all.some((t) => fuzzyMatch(t, word.spanish));
+    if (e.results[0] && !e.results[0].isFinal && micBtn) showMicFeedback(micBtn, "listening", `"${bestHeard.trim()}..."`);
   };
-
   recognition.onend = () => {
-    clearTimeout(timeout);
-    isListening = false;
+    clearTimeout(timeout); isListening = false;
     if (micBtn) micBtn.classList.remove("active", "listening");
-
     if (matched) {
-      const wp = getWP(state, word.id);
-      wp.pronouncedCorrectly = true;
-      state.wordProgress[word.id] = wp;
-      saveState(state);
+      const wp = getWP(state, word.id); wp.pronouncedCorrectly = true; state.wordProgress[word.id] = wp; saveState(state);
       if (micBtn) micBtn.classList.add("success");
       showMicFeedback(micBtn, "success", "Correct!");
       updatePronunciationUI(state);
@@ -308,37 +364,86 @@ function startRecognition(word, state, onDone) {
       if (onDone) onDone(false);
     }
   };
-
   recognition.onerror = (e) => {
-    clearTimeout(timeout);
-    isListening = false;
+    clearTimeout(timeout); isListening = false;
     if (micBtn) micBtn.classList.remove("active", "listening");
-    const messages = {
-      "not-allowed": "Microfoon geblokkeerd — sta toegang toe",
-      "no-speech": "Geen spraak gedetecteerd — probeer opnieuw",
-      "audio-capture": "Geen microfoon gevonden",
-      "network": "Netwerkfout — check je verbinding"
-    };
-    showMicFeedback(micBtn, "error", messages[e.error] || "Fout — probeer opnieuw");
+    const msgs = { "not-allowed": "Microfoon geblokkeerd", "no-speech": "Geen spraak gedetecteerd", "audio-capture": "Geen microfoon gevonden", "network": "Netwerkfout" };
+    showMicFeedback(micBtn, "error", msgs[e.error] || "Fout — probeer opnieuw");
     if (onDone) onDone(false);
   };
-
   recognition.start();
 }
 
 // ─── UI Updates ───
 function renderModeBar() {
-  document.querySelectorAll(".mode-btn:not(.mic-toggle)").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.mode === practiceMode);
-  });
-  $("modeMic").classList.toggle("active", micMode);
+  const bar = $("modeBar");
+  if (currentSubject === "pm") {
+    bar.innerHTML = "";
+    const pmModes = [
+      { mode: "mix", label: "Mix" },
+      { mode: "begrippen", label: "Begrippen" },
+      { mode: "vragen", label: "Vragen" },
+      { mode: "invullen", label: "Invullen" },
+    ];
+    pmModes.forEach((m) => {
+      const btn = document.createElement("button");
+      btn.className = "mode-btn" + (practiceMode === m.mode ? " active" : "");
+      btn.dataset.mode = m.mode;
+      btn.textContent = m.label;
+      btn.addEventListener("click", () => {
+        practiceMode = m.mode;
+        renderModeBar();
+        const state = loadState();
+        currentIndex = 0;
+        queue = buildQueue(state, activeLevel);
+        showNext(state);
+      });
+      bar.appendChild(btn);
+    });
+  } else {
+    bar.innerHTML = "";
+    const esModes = [
+      { mode: "flashcard", label: "Flashcards" },
+      { mode: "type", label: "Typen" },
+      { mode: "reverse", label: "NL → ES" },
+      { mode: "cloze", label: "Zinnen" },
+    ];
+    esModes.forEach((m) => {
+      const btn = document.createElement("button");
+      btn.className = "mode-btn" + (practiceMode === m.mode ? " active" : "");
+      btn.dataset.mode = m.mode;
+      btn.textContent = m.label;
+      btn.addEventListener("click", () => {
+        practiceMode = m.mode;
+        renderModeBar();
+        const state = loadState();
+        currentIndex = 0;
+        queue = buildQueue(state, activeLevel);
+        showNext(state);
+      });
+      bar.appendChild(btn);
+    });
+    const micBtn = document.createElement("button");
+    micBtn.className = "mode-btn mic-toggle" + (micMode ? " active" : "");
+    micBtn.id = "modeMic";
+    micBtn.dataset.mode = "mic";
+    micBtn.textContent = "🎤 Mic";
+    micBtn.addEventListener("click", () => {
+      micMode = !micMode;
+      renderModeBar();
+      const state = loadState();
+      currentIndex = 0;
+      queue = buildQueue(state, activeLevel);
+      showNext(state);
+    });
+    bar.appendChild(micBtn);
+  }
 }
 
 function renderCategoryBar(state) {
-  const cats = getCategoriesForLevel(activeLevel);
+  const cats = activeLevel === 0 ? getAllCategories() : getCategoriesForLevel(activeLevel);
   const bar = $("categoryBar");
   if (cats.length <= 1) { bar.classList.add("hidden"); return; }
-
   bar.classList.remove("hidden");
   bar.innerHTML = "";
   const allBtn = document.createElement("button");
@@ -346,7 +451,6 @@ function renderCategoryBar(state) {
   allBtn.textContent = "Alles";
   allBtn.addEventListener("click", () => { activeCategory = null; rebuildAndShow(state); });
   bar.appendChild(allBtn);
-
   cats.forEach((cat) => {
     const btn = document.createElement("button");
     btn.className = "cat-btn" + (activeCategory === cat ? " active" : "");
@@ -354,6 +458,12 @@ function renderCategoryBar(state) {
     btn.addEventListener("click", () => { activeCategory = cat; rebuildAndShow(state); });
     bar.appendChild(btn);
   });
+}
+
+function getAllCategories() {
+  const cats = new Set();
+  allWords.forEach((w) => cats.add(w.category));
+  return [...cats].sort();
 }
 
 function rebuildAndShow(state) {
@@ -366,7 +476,51 @@ function rebuildAndShow(state) {
 function renderLevelNav(state) {
   const nav = $("levelNav");
   nav.innerHTML = "";
-  for (let i = 1; i <= LEVELS; i++) {
+
+  if (currentSubject === "pm") {
+    const chapters = getChapters();
+    const allBtn = document.createElement("button");
+    allBtn.className = "level-btn" + (activeLevel === 0 ? " active" : "");
+    allBtn.textContent = "∀";
+    allBtn.title = "Alle hoofdstukken";
+    allBtn.addEventListener("click", () => {
+      activeLevel = 0;
+      activeCategory = null;
+      mode = "practice";
+      currentIndex = 0;
+      queue = buildQueue(state, 0);
+      renderLevelNav(state);
+      renderCategoryBar(state);
+      showNext(state);
+    });
+    nav.appendChild(allBtn);
+
+    chapters.forEach((ch) => {
+      const btn = document.createElement("button");
+      btn.className = "level-btn" + (activeLevel === ch ? " active" : "");
+      btn.textContent = "H" + ch;
+      btn.title = allWords.find((w) => w.chapter === ch)?.chapterName || `Hoofdstuk ${ch}`;
+
+      const words = wordsForLevel(ch);
+      const mastered = words.filter((w) => getWP(state, w.id).box >= 3).length;
+      if (mastered === words.length && words.length > 0) btn.classList.add("completed");
+
+      btn.addEventListener("click", () => {
+        activeLevel = ch;
+        activeCategory = null;
+        mode = "practice";
+        currentIndex = 0;
+        queue = buildQueue(state, ch);
+        renderLevelNav(state);
+        renderCategoryBar(state);
+        showNext(state);
+      });
+      nav.appendChild(btn);
+    });
+    return;
+  }
+
+  for (let i = 1; i <= cfg().levelCount; i++) {
     const btn = document.createElement("button");
     btn.className = "level-btn";
     btn.textContent = i;
@@ -374,7 +528,6 @@ function renderLevelNav(state) {
     if (isLevelCompleted(state, i)) btn.classList.add("completed");
     else if (!isLevelUnlocked(state, i)) btn.classList.add("locked");
     else if (isQuizReady(state, i)) btn.classList.add("quiz-ready");
-
     btn.addEventListener("click", () => {
       if (!isLevelUnlocked(state, i) && !isLevelCompleted(state, i)) return;
       activeLevel = i;
@@ -391,46 +544,72 @@ function renderLevelNav(state) {
 }
 
 function updateStreakUI(state) {
-  $("streakCount").textContent = state.streak.count;
+  if (currentSubject === "espanol") {
+    $("streakIcon").textContent = "🔥";
+    $("streakCount").textContent = state.streak?.count || 0;
+  } else {
+    $("streakIcon").textContent = "📅";
+    const ws = state.weekStats || { sessionCount: 0 };
+    $("streakCount").textContent = `${ws.sessionCount}/${cfg().weeklyGoalMin}`;
+  }
 }
 
 function updateDailyUI(state) {
-  const count = state.todayStats.date === todayStr() ? state.todayStats.correctCount : 0;
-  $("dailyCount").textContent = count;
-  const chip = $("dailyGoal");
-  if (count >= DAILY_GOAL) chip.style.background = "rgba(46,204,113,.2)";
-  else chip.style.background = "";
+  if (currentSubject === "espanol") {
+    const count = state.todayStats.date === todayStr() ? state.todayStats.correctCount : 0;
+    $("goalLabel").innerHTML = `<span id="dailyCount">${count}</span>/${cfg().dailyGoal} vandaag`;
+    const chip = $("dailyGoal");
+    if (count >= cfg().dailyGoal) chip.style.background = "rgba(46,204,113,.2)";
+    else chip.style.background = "";
+    $("pronGoal").classList.remove("hidden");
+  } else {
+    $("goalLabel").innerHTML = `${sessionCards}/${cfg().cardsPerSession} deze sessie`;
+    const chip = $("dailyGoal");
+    if (sessionCards >= cfg().cardsPerSession) chip.style.background = "rgba(46,204,113,.2)";
+    else chip.style.background = "";
+    $("pronGoal").classList.add("hidden");
+  }
 }
 
 function updateVacationUI() {
-  const days = daysBetween(todayStr(), VACATION_DATE);
-  const total = daysBetween("2026-09-23", VACATION_DATE);
+  const days = daysBetween(todayStr(), cfg().targetDate);
+  const total = daysBetween(cfg().targetStart, cfg().targetDate);
   const elapsed = total - days;
   const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
-  $("vacationLabel").textContent = days > 0 ? `${days} dagen tot vakantie` : "Vakantie!";
+  $("vacationLabel").textContent = days > 0 ? `${days} dagen tot ${cfg().targetLabel}` : `${cfg().targetLabel[0].toUpperCase() + cfg().targetLabel.slice(1)}!`;
   $("vacationFill").style.width = pct + "%";
 }
 
 function updatePronunciationUI(state) {
+  if (currentSubject !== "espanol") return;
   const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
   const pronounced = unlocked.filter((w) => getWP(state, w.id).pronouncedCorrectly).length;
   $("pronCount").textContent = pronounced;
   $("pronTotal").textContent = unlocked.length;
 }
 
+function updateSessionProgress() {
+  const sp = $("sessionProgress");
+  if (currentSubject !== "pm") { sp.classList.add("hidden"); return; }
+  sp.classList.remove("hidden");
+  const pct = Math.min(100, (sessionCards / cfg().cardsPerSession) * 100);
+  $("sessionLabel").textContent = `${sessionCards}/${cfg().cardsPerSession} deze sessie`;
+  $("sessionFill").style.width = pct + "%";
+}
+
 function updateStatsUI(state) {
-  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
+  const items = currentSubject === "pm" ? allWords : allWords.filter((w) => isLevelUnlocked(state, w.level));
   let nNew = 0, nLearn = 0, nMaster = 0;
-  unlocked.forEach((w) => {
+  items.forEach((w) => {
     const b = getWP(state, w.id).box;
     if (b === 0) nNew++;
-    else if (b < 2) nLearn++;
+    else if (b < 3) nLearn++;
     else nMaster++;
   });
   $("statNew").textContent = nNew;
   $("statLearning").textContent = nLearn;
   $("statMastered").textContent = nMaster;
-  $("statTotal").textContent = unlocked.length;
+  $("statTotal").textContent = items.length;
 }
 
 // ─── Stats Panel ───
@@ -445,12 +624,11 @@ function showStatsPanel(state) {
 
 function renderLeitnerChart(state) {
   const counts = [0, 0, 0, 0, 0, 0];
-  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
-  unlocked.forEach((w) => { counts[getWP(state, w.id).box]++; });
+  const items = currentSubject === "pm" ? allWords : allWords.filter((w) => isLevelUnlocked(state, w.level));
+  items.forEach((w) => { counts[getWP(state, w.id).box]++; });
   const max = Math.max(...counts, 1);
   const labels = ["Nieuw", "Box 1", "Box 2", "Box 3", "Box 4", "Box 5"];
   const colors = ["var(--text-muted)", "#e74c3c", "#e67e22", "#f1c40f", "#2ecc71", "#27ae60"];
-
   $("leitnerChart").innerHTML = counts.map((c, i) => `
     <div class="leitner-bar-wrap">
       <div class="leitner-bar-count">${c}</div>
@@ -462,145 +640,149 @@ function renderLeitnerChart(state) {
 
 function renderLevelChart(state) {
   $("levelChart").innerHTML = "";
-  for (let i = 1; i <= LEVELS; i++) {
-    const words = wordsForLevel(i);
-    if (!isLevelUnlocked(state, i)) continue;
-    const mastered = words.filter((w) => getWP(state, w.id).box >= 3).length;
-    const pct = Math.round((mastered / words.length) * 100);
-    const color = isLevelCompleted(state, i) ? "var(--easy)" : "var(--accent)";
-    $("levelChart").innerHTML += `
-      <div class="level-chart-row">
-        <div class="level-chart-label">${i}</div>
-        <div class="level-chart-bar-bg">
-          <div class="level-chart-bar-fill" style="width:${pct}%;background:${color}"></div>
+  if (currentSubject === "pm") {
+    $("levelChartTitle").textContent = "Voortgang per Hoofdstuk";
+    getChapters().forEach((ch) => {
+      const words = wordsForLevel(ch);
+      const mastered = words.filter((w) => getWP(state, w.id).box >= 3).length;
+      const pct = Math.round((mastered / words.length) * 100);
+      const name = allWords.find((w) => w.chapter === ch)?.chapterName || `H${ch}`;
+      $("levelChart").innerHTML += `
+        <div class="level-chart-row">
+          <div class="level-chart-label" style="width:auto">${name}</div>
+          <div class="level-chart-bar-bg">
+            <div class="level-chart-bar-fill" style="width:${pct}%;background:var(--accent)"></div>
+          </div>
+          <div class="level-chart-pct">${pct}%</div>
         </div>
-        <div class="level-chart-pct">${pct}%</div>
-      </div>
-    `;
+      `;
+    });
+  } else {
+    $("levelChartTitle").textContent = "Voortgang per Level";
+    for (let i = 1; i <= cfg().levelCount; i++) {
+      if (!isLevelUnlocked(state, i)) continue;
+      const words = wordsForLevel(i);
+      const mastered = words.filter((w) => getWP(state, w.id).box >= 3).length;
+      const pct = Math.round((mastered / words.length) * 100);
+      const color = isLevelCompleted(state, i) ? "var(--easy)" : "var(--accent)";
+      $("levelChart").innerHTML += `
+        <div class="level-chart-row">
+          <div class="level-chart-label">${i}</div>
+          <div class="level-chart-bar-bg">
+            <div class="level-chart-bar-fill" style="width:${pct}%;background:${color}"></div>
+          </div>
+          <div class="level-chart-pct">${pct}%</div>
+        </div>
+      `;
+    }
   }
 }
 
 function renderCategoryChart(state) {
   const catStats = {};
-  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
-  unlocked.forEach((w) => {
+  const items = currentSubject === "pm" ? allWords : allWords.filter((w) => isLevelUnlocked(state, w.level));
+  items.forEach((w) => {
     if (!catStats[w.category]) catStats[w.category] = { total: 0, hard: 0 };
     catStats[w.category].total++;
     const wp = getWP(state, w.id);
     if (wp.box < 2 && wp.lastReviewed) catStats[w.category].hard++;
   });
-
   const sorted = Object.entries(catStats)
     .map(([cat, s]) => ({ cat, pct: s.total > 0 ? Math.round((s.hard / s.total) * 100) : 0, hard: s.hard }))
     .filter((c) => c.hard > 0)
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 8);
-
   if (sorted.length === 0) {
     $("categoryChart").innerHTML = '<div style="font-size:.85rem;color:var(--text-muted)">Nog geen data — begin met oefenen!</div>';
     return;
   }
-
   $("categoryChart").innerHTML = sorted.map((c) => `
     <div class="cat-chart-row">
       <div class="cat-chart-label">${c.cat}</div>
-      <div class="cat-chart-bar-bg">
-        <div class="cat-chart-bar-fill" style="width:${c.pct}%"></div>
-      </div>
+      <div class="cat-chart-bar-bg"><div class="cat-chart-bar-fill" style="width:${c.pct}%"></div></div>
       <div class="cat-chart-pct">${c.pct}%</div>
     </div>
   `).join("");
 }
 
 function renderStreakInfo(state) {
-  const s = state.streak;
-  const todayDone = state.todayStats.date === todayStr() ? state.todayStats.correctCount : 0;
-  $("streakInfo").innerHTML = `
-    <div class="streak-info-row">
-      <span class="streak-info-label">Huidige streak</span>
-      <span class="streak-info-value">🔥 ${s.count} ${s.count === 1 ? "dag" : "dagen"}</span>
-    </div>
-    <div class="streak-info-row">
-      <span class="streak-info-label">Vandaag</span>
-      <span class="streak-info-value">${todayDone} / ${DAILY_GOAL} woorden</span>
-    </div>
-    <div class="streak-info-row">
-      <span class="streak-info-label">Laatste voltooide dag</span>
-      <span class="streak-info-value">${s.lastCompletedDate || "—"}</span>
-    </div>
-  `;
+  if (currentSubject === "espanol") {
+    $("streakTitle").textContent = "Streak Historie";
+    const s = state.streak || { count: 0 };
+    const todayDone = state.todayStats.date === todayStr() ? state.todayStats.correctCount : 0;
+    $("streakInfo").innerHTML = `
+      <div class="streak-info-row"><span class="streak-info-label">Huidige streak</span><span class="streak-info-value">🔥 ${s.count} ${s.count === 1 ? "dag" : "dagen"}</span></div>
+      <div class="streak-info-row"><span class="streak-info-label">Vandaag</span><span class="streak-info-value">${todayDone} / ${cfg().dailyGoal} woorden</span></div>
+      <div class="streak-info-row"><span class="streak-info-label">Laatste voltooide dag</span><span class="streak-info-value">${s.lastCompletedDate || "—"}</span></div>
+    `;
+  } else {
+    $("streakTitle").textContent = "Week Overzicht";
+    const ws = state.weekStats || { sessionCount: 0 };
+    const totalSessions = state.sessions?.length || 0;
+    $("streakInfo").innerHTML = `
+      <div class="streak-info-row"><span class="streak-info-label">Deze week</span><span class="streak-info-value">📅 ${ws.sessionCount}/${cfg().weeklyGoalMin} sessies</span></div>
+      <div class="streak-info-row"><span class="streak-info-label">Aanbevolen</span><span class="streak-info-value">${cfg().weeklyGoalRec}x per week</span></div>
+      <div class="streak-info-row"><span class="streak-info-label">Totaal sessies</span><span class="streak-info-value">${totalSessions}</span></div>
+      <div class="streak-info-row"><span class="streak-info-label">Kaarten per sessie</span><span class="streak-info-value">${cfg().cardsPerSession}</span></div>
+    `;
+  }
 }
 
 function renderOverviewStats(state) {
-  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
+  const items = currentSubject === "pm" ? allWords : allWords.filter((w) => isLevelUnlocked(state, w.level));
   const total = allWords.length;
-  const reviewed = unlocked.filter((w) => getWP(state, w.id).lastReviewed).length;
-  const mastered = unlocked.filter((w) => getWP(state, w.id).box >= 3).length;
-  const pronounced = unlocked.filter((w) => getWP(state, w.id).pronouncedCorrectly).length;
-  const daysLeft = daysBetween(todayStr(), VACATION_DATE);
-  const levelsComplete = state.completedLevels.length;
+  const reviewed = items.filter((w) => getWP(state, w.id).lastReviewed).length;
+  const mastered = items.filter((w) => getWP(state, w.id).box >= 3).length;
+  const daysLeft = daysBetween(todayStr(), cfg().targetDate);
 
-  $("overviewStats").innerHTML = `
-    <div class="overview-stat">
-      <div class="overview-stat-value">${reviewed}</div>
-      <div class="overview-stat-label">Geoefend</div>
-    </div>
-    <div class="overview-stat">
-      <div class="overview-stat-value">${mastered}</div>
-      <div class="overview-stat-label">Beheerst</div>
-    </div>
-    <div class="overview-stat">
-      <div class="overview-stat-value">${pronounced}</div>
-      <div class="overview-stat-label">Uitgesproken</div>
-    </div>
-    <div class="overview-stat">
-      <div class="overview-stat-value">${levelsComplete}/${LEVELS}</div>
-      <div class="overview-stat-label">Levels klaar</div>
-    </div>
-    <div class="overview-stat">
-      <div class="overview-stat-value">${total}</div>
-      <div class="overview-stat-label">Totaal woorden</div>
-    </div>
-    <div class="overview-stat">
-      <div class="overview-stat-value">${daysLeft > 0 ? daysLeft : "0"}</div>
-      <div class="overview-stat-label">Dagen tot vakantie</div>
-    </div>
-  `;
+  if (currentSubject === "espanol") {
+    const pronounced = items.filter((w) => getWP(state, w.id).pronouncedCorrectly).length;
+    const levelsComplete = (state.completedLevels || []).length;
+    $("overviewStats").innerHTML = `
+      <div class="overview-stat"><div class="overview-stat-value">${reviewed}</div><div class="overview-stat-label">Geoefend</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${mastered}</div><div class="overview-stat-label">Beheerst</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${pronounced}</div><div class="overview-stat-label">Uitgesproken</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${levelsComplete}/${cfg().levelCount}</div><div class="overview-stat-label">Levels klaar</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${total}</div><div class="overview-stat-label">Totaal woorden</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${daysLeft > 0 ? daysLeft : "0"}</div><div class="overview-stat-label">Dagen tot ${cfg().targetLabel}</div></div>
+    `;
+  } else {
+    const chapters = getChapters();
+    $("overviewStats").innerHTML = `
+      <div class="overview-stat"><div class="overview-stat-value">${reviewed}</div><div class="overview-stat-label">Geoefend</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${mastered}</div><div class="overview-stat-label">Beheerst</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${chapters.length}</div><div class="overview-stat-label">Hoofdstukken</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${total}</div><div class="overview-stat-label">Totaal kaarten</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${daysLeft > 0 ? daysLeft : "0"}</div><div class="overview-stat-label">Dagen tot ${cfg().targetLabel}</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${state.sessions?.length || 0}</div><div class="overview-stat-label">Sessies totaal</div></div>
+    `;
+  }
 }
 
-// ─── Card Rendering ───
-function renderCard(word, state) {
+// ─── Card Rendering: Español ───
+function renderEspanolCard(word, state) {
   revealed = false;
   if (clozeTimer) { clearTimeout(clozeTimer); clozeTimer = null; }
-  $("ratingContainer").classList.add("hidden");
-  $("quizContainer").classList.add("hidden");
-  $("typeContainer").classList.add("hidden");
-  $("clozeContainer").classList.add("hidden");
+  hideAllContainers();
 
   const wp = getWP(state, word.id);
   const isReverse = practiceMode === "reverse";
-
   const showWord = isReverse ? word.dutch : word.spanish;
   const hiddenWord = isReverse ? word.spanish : word.dutch;
 
   $("cardContainer").innerHTML = `
     <div class="flashcard">
-      <img class="card-image" src="${word.image}" alt="${word.spanish}" loading="eager"
-           onerror="this.style.display='none'">
+      <img class="card-image" src="${word.image}" alt="${word.spanish}" loading="eager" onerror="this.style.display='none'">
       <div class="card-body">
         <div class="word-spanish">${showWord}</div>
         <div class="word-dutch hidden" id="dutchWord">${hiddenWord}</div>
         <div class="word-example hidden" id="exampleWord">${word.example || ""}</div>
         <div class="card-actions">
           <button class="btn-icon" id="btnAudio" aria-label="Audio">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
           </button>
           <button class="btn-icon mic ${wp.pronouncedCorrectly ? "success" : ""}" id="btnMic" aria-label="Microfoon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
           </button>
           <button class="btn-reveal" id="btnReveal">Toon vertaling</button>
         </div>
@@ -611,11 +793,7 @@ function renderCard(word, state) {
   $("btnAudio").addEventListener("click", () => playAudio(word));
   $("btnMic").addEventListener("click", () => {
     startRecognition(word, state, (success) => {
-      if (success && micMode) {
-        setTimeout(() => {
-          rateWord("easy", loadState());
-        }, 600);
-      }
+      if (success && micMode) setTimeout(() => rateWord("easy", loadState()), 600);
     });
   });
   $("btnReveal").addEventListener("click", () => revealCard());
@@ -630,16 +808,238 @@ function renderCard(word, state) {
     renderCloze(word, state);
   } else if (micMode) {
     setTimeout(() => startRecognition(word, state, (success) => {
-      if (success) {
-        revealCard();
-        setTimeout(() => rateWord("easy", loadState()), 600);
-      }
+      if (success) { revealCard(); setTimeout(() => rateWord("easy", loadState()), 600); }
     }), 300);
   }
 }
 
-let clozeTimer = null;
+// ─── Card Rendering: PM ───
+function renderPMCard(card, state) {
+  revealed = false;
+  hideAllContainers();
 
+  const chapterLabel = card.chapterName ? `H${card.chapter}: ${card.chapterName}` : `Hoofdstuk ${card.chapter}`;
+
+  switch (card.type) {
+    case "definition": renderPMDefinition(card, chapterLabel); break;
+    case "multichoice": renderPMMultichoice(card, state, chapterLabel); break;
+    case "open": renderPMOpen(card, chapterLabel); break;
+    case "case": renderPMCase(card, chapterLabel); break;
+    case "fillin": renderPMFillin(card, chapterLabel); break;
+    case "order": renderPMOrder(card, state, chapterLabel); break;
+    default: renderPMDefinition(card, chapterLabel); break;
+  }
+}
+
+function renderPMDefinition(card, chapterLabel) {
+  $("cardContainer").innerHTML = `
+    <div class="pm-card">
+      <div class="pm-card-body">
+        <div class="pm-chapter-tag">${chapterLabel}</div>
+        <span class="pm-card-type">Begrip</span>
+        <div class="pm-question">${card.term}</div>
+        ${card.hint ? `<div class="pm-hint">💡 ${card.hint}</div>` : ""}
+        <div class="pm-answer hidden" id="pmAnswer">${card.definition}</div>
+        <div class="card-actions" style="margin-top:16px">
+          <button class="btn-reveal" id="btnReveal">Toon definitie</button>
+        </div>
+      </div>
+    </div>
+  `;
+  $("btnReveal").addEventListener("click", () => revealPMCard());
+}
+
+function renderPMOpen(card, chapterLabel) {
+  $("cardContainer").innerHTML = `
+    <div class="pm-card">
+      <div class="pm-card-body">
+        <div class="pm-chapter-tag">${chapterLabel}</div>
+        <span class="pm-card-type type-open">Open vraag</span>
+        <div class="pm-question">${card.question}</div>
+        <div class="pm-answer hidden" id="pmAnswer">${card.answer}</div>
+        <div class="card-actions" style="margin-top:16px">
+          <button class="btn-reveal" id="btnReveal">Toon antwoord</button>
+        </div>
+      </div>
+    </div>
+  `;
+  $("btnReveal").addEventListener("click", () => revealPMCard("self"));
+}
+
+function renderPMCase(card, chapterLabel) {
+  $("cardContainer").innerHTML = `
+    <div class="pm-card">
+      <div class="pm-card-body">
+        <div class="pm-chapter-tag">${chapterLabel}</div>
+        <span class="pm-card-type type-case">Casus</span>
+        <div class="pm-situation">${card.situation}</div>
+        <div class="pm-question">${card.question}</div>
+        <div class="pm-answer hidden" id="pmAnswer">${card.answer}</div>
+        <div class="card-actions" style="margin-top:16px">
+          <button class="btn-reveal" id="btnReveal">Toon antwoord</button>
+        </div>
+      </div>
+    </div>
+  `;
+  $("btnReveal").addEventListener("click", () => revealPMCard("self"));
+}
+
+function renderPMMultichoice(card, state, chapterLabel) {
+  const letters = ["A", "B", "C", "D"];
+  $("cardContainer").innerHTML = `
+    <div class="pm-card">
+      <div class="pm-card-body">
+        <div class="pm-chapter-tag">${chapterLabel}</div>
+        <span class="pm-card-type type-mc">Meerkeuze</span>
+        <div class="pm-question">${card.question}</div>
+      </div>
+    </div>
+  `;
+  $("mcContainer").classList.remove("hidden");
+  $("mcFeedback").classList.add("hidden");
+
+  const shuffledOptions = card.options.map((opt, i) => ({ text: opt, originalIndex: i }));
+  shuffle(shuffledOptions);
+
+  $("mcOptions").innerHTML = shuffledOptions.map((opt, i) => `
+    <button class="mc-option" data-idx="${opt.originalIndex}">
+      <span class="mc-option-letter">${letters[i]}</span>${opt.text}
+    </button>
+  `).join("");
+
+  $("mcOptions").querySelectorAll(".mc-option").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.idx);
+      const fb = $("mcFeedback");
+      $("mcOptions").querySelectorAll(".mc-option").forEach((b) => b.classList.add("disabled"));
+
+      if (idx === card.correct) {
+        btn.classList.add("correct");
+        fb.textContent = card.explanation || "Correct!";
+        fb.className = "quiz-feedback correct";
+        setTimeout(() => rateWord("easy", loadState()), 1000);
+      } else {
+        btn.classList.add("wrong");
+        $("mcOptions").querySelector(`[data-idx="${card.correct}"]`).classList.add("correct");
+        fb.textContent = card.explanation || "Fout!";
+        fb.className = "quiz-feedback wrong";
+        setTimeout(() => rateWord("hard", loadState()), 1500);
+      }
+    });
+  });
+}
+
+function renderPMFillin(card, chapterLabel) {
+  const sentenceHTML = card.sentence.replace("___", '<span class="pm-fillin-blank">___</span>');
+  $("cardContainer").innerHTML = `
+    <div class="pm-card">
+      <div class="pm-card-body">
+        <div class="pm-chapter-tag">${chapterLabel}</div>
+        <span class="pm-card-type type-fillin">Invullen</span>
+        <div class="pm-fillin-sentence">${sentenceHTML}</div>
+      </div>
+    </div>
+  `;
+  $("fillinContainer").classList.remove("hidden");
+  $("fillinInput").value = "";
+  $("fillinFeedback").classList.add("hidden");
+  $("fillinInput").focus();
+}
+
+function renderPMOrder(card, state, chapterLabel) {
+  $("cardContainer").innerHTML = `
+    <div class="pm-card">
+      <div class="pm-card-body">
+        <div class="pm-chapter-tag">${chapterLabel}</div>
+        <span class="pm-card-type type-order">Volgorde</span>
+        <div class="pm-question">${card.question}</div>
+      </div>
+    </div>
+  `;
+
+  $("orderContainer").classList.remove("hidden");
+  $("orderFeedback").classList.add("hidden");
+  $("orderReset").classList.add("hidden");
+
+  const shuffled = [...card.items];
+  shuffle(shuffled);
+  const placed = [];
+
+  function renderOrderState() {
+    $("orderPlaced").innerHTML = placed.map((item, i) => `
+      <div class="order-slot"><span class="order-slot-num">${i + 1}</span>${item}</div>
+    `).join("");
+
+    $("orderOptions").innerHTML = shuffled
+      .filter((item) => !placed.includes(item))
+      .map((item) => `<button class="order-item">${item}</button>`)
+      .join("");
+
+    $("orderOptions").querySelectorAll(".order-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        placed.push(btn.textContent);
+        renderOrderState();
+        if (placed.length === card.items.length) checkOrderAnswer(card, placed);
+      });
+    });
+  }
+
+  renderOrderState();
+}
+
+function checkOrderAnswer(card, placed) {
+  const correct = placed.every((item, i) => item === card.items[i]);
+  const fb = $("orderFeedback");
+  const container = $("orderPlaced");
+
+  if (correct) {
+    container.classList.add("order-correct");
+    fb.textContent = card.explanation || "Correcte volgorde!";
+    fb.className = "quiz-feedback correct";
+    setTimeout(() => {
+      container.classList.remove("order-correct");
+      rateWord("easy", loadState());
+    }, 1200);
+  } else {
+    container.classList.add("order-wrong");
+    fb.textContent = `Fout! De juiste volgorde is: ${card.items.join(" → ")}`;
+    fb.className = "quiz-feedback wrong";
+    $("orderReset").classList.remove("hidden");
+    $("orderReset").onclick = () => {
+      container.classList.remove("order-wrong");
+      rateWord("hard", loadState());
+    };
+    setTimeout(() => {
+      container.classList.remove("order-wrong");
+      rateWord("hard", loadState());
+    }, 3000);
+  }
+}
+
+function revealPMCard(ratingType) {
+  if (revealed) return;
+  revealed = true;
+  const ans = $("pmAnswer");
+  if (ans) ans.classList.remove("hidden");
+  if (ratingType === "self") {
+    $("ratingContainer3").classList.remove("hidden");
+  } else {
+    $("ratingContainer").classList.remove("hidden");
+  }
+}
+
+function hideAllContainers() {
+  $("ratingContainer").classList.add("hidden");
+  $("ratingContainer3").classList.add("hidden");
+  $("quizContainer").classList.add("hidden");
+  $("typeContainer").classList.add("hidden");
+  $("clozeContainer").classList.add("hidden");
+  $("mcContainer").classList.add("hidden");
+  $("fillinContainer").classList.add("hidden");
+  $("orderContainer").classList.add("hidden");
+}
+
+// ─── Cloze (Español) ───
 function clozeTargetFor(word) {
   return word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.]+$/g, "").trim();
 }
@@ -670,11 +1070,9 @@ function clozeShowSentence(word) {
   $("clozeInput").classList.add("hidden");
   $("clozeSubmit").classList.add("hidden");
   $("btnPeek").classList.add("hidden");
-
   clozeTimer = setTimeout(() => {
     const target = clozeTargetFor(word);
     $("clozeSentence").innerHTML = clozeMakeBlanked(word.example, target);
-    $("clozeSentence").classList.remove("cloze-hidden");
     $("clozeInput").classList.remove("hidden");
     $("clozeSubmit").classList.remove("hidden");
     $("btnPeek").classList.remove("hidden");
@@ -683,90 +1081,82 @@ function clozeShowSentence(word) {
 }
 
 function renderCloze(word, state) {
-  if (!word.example) {
-    revealCard();
-    return;
-  }
-
+  if (!word.example) { revealCard(); return; }
   $("btnReveal").style.display = "none";
   $("clozeContainer").classList.remove("hidden");
   $("clozeTranslation").textContent = word.dutch;
   $("clozeInput").value = "";
   $("clozeFeedback").classList.add("hidden");
-
   $("btnPeek").onclick = () => clozeShowSentence(word);
-
   clozeShowSentence(word);
 }
 
-function escapeRegex(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
 function revealCard() {
   if (revealed) return;
   revealed = true;
-  const d = $("dutchWord");
-  const e = $("exampleWord");
+  const d = $("dutchWord"), e = $("exampleWord");
   if (d) d.classList.remove("hidden");
   if (e) e.classList.remove("hidden");
   $("ratingContainer").classList.remove("hidden");
 }
 
 function animateOut(cb) {
-  const card = document.querySelector(".flashcard");
-  if (card) {
-    card.classList.add("card-out");
-    setTimeout(cb, 250);
-  } else {
-    cb();
-  }
+  const card = document.querySelector(".flashcard, .pm-card");
+  if (card) { card.classList.add("card-out"); setTimeout(cb, 250); }
+  else cb();
 }
 
-// ─── Type mode check ───
+// ─── Check answers ───
 function checkTypeAnswer(state) {
   const word = queue[currentIndex];
   if (!word) return;
-
   const input = $("typeInput").value.trim().toLowerCase();
   const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
   const targetFull = word.spanish.toLowerCase().trim();
   const fb = $("typeFeedback");
-
   if (input === target || input === targetFull) {
-    fb.textContent = "Correct!";
-    fb.className = "quiz-feedback correct";
-    revealCard();
-    setTimeout(() => rateWord("easy", loadState()), 800);
+    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
+    revealCard(); setTimeout(() => rateWord("easy", loadState()), 800);
   } else {
-    fb.textContent = `Fout! Het was: ${word.spanish}`;
-    fb.className = "quiz-feedback wrong";
-    revealCard();
-    setTimeout(() => rateWord("hard", loadState()), 1200);
+    fb.textContent = `Fout! Het was: ${word.spanish}`; fb.className = "quiz-feedback wrong";
+    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1200);
   }
 }
 
-// ─── Cloze mode check ───
 function checkClozeAnswer(state) {
   const word = queue[currentIndex];
   if (!word) return;
-
   const input = $("clozeInput").value.trim().toLowerCase();
   const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
   const targetFull = word.spanish.toLowerCase().trim();
   const fb = $("clozeFeedback");
-
   if (input === target || input === targetFull) {
-    fb.textContent = "Correct!";
-    fb.className = "quiz-feedback correct";
+    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
     document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
-    revealCard();
+    revealCard(); setTimeout(() => rateWord("easy", loadState()), 800);
+  } else {
+    fb.textContent = `Fout! Het was: ${target}`; fb.className = "quiz-feedback wrong";
+    document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
+    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1200);
+  }
+}
+
+function checkFillinAnswer(state) {
+  const card = queue[currentIndex];
+  if (!card) return;
+  const input = $("fillinInput").value.trim().toLowerCase();
+  const correct = card.answer.toLowerCase();
+  const alts = (card.alternatives || []).map((a) => a.toLowerCase());
+  const fb = $("fillinFeedback");
+  if (input === correct || alts.includes(input)) {
+    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
+    document.querySelectorAll(".pm-fillin-blank").forEach((el) => el.textContent = card.answer);
     setTimeout(() => rateWord("easy", loadState()), 800);
   } else {
-    fb.textContent = `Fout! Het was: ${target}`;
-    fb.className = "quiz-feedback wrong";
-    document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
-    revealCard();
+    fb.textContent = `Fout! Het was: ${card.answer}`; fb.className = "quiz-feedback wrong";
+    document.querySelectorAll(".pm-fillin-blank").forEach((el) => el.textContent = card.answer);
     setTimeout(() => rateWord("hard", loadState()), 1200);
   }
 }
@@ -778,20 +1168,23 @@ function rateWord(rating, state) {
 
   const today = todayStr();
   const wp = getWP(state, word.id);
+  const intervals = cfg().leitnerIntervals;
 
   if (rating === "easy") {
     wp.box = Math.min(5, wp.box + 1);
-    wp.nextReview = addDays(today, LEITNER_INTERVALS[wp.box] || 14);
+    wp.nextReview = addDays(today, intervals[wp.box] || 42);
     const isNew = wp.correctCount === 0;
     wp.correctCount++;
     if (isNew) {
       if (state.todayStats.date === today) state.todayStats.correctCount++;
       else state.todayStats = { date: today, correctCount: 1 };
-      checkStreakGoal(state);
+      if (currentSubject === "espanol") checkStreakGoal(state);
     }
-  } else {
-    wp.box = 1;
+  } else if (rating === "partial") {
     wp.nextReview = addDays(today, 1);
+  } else {
+    wp.box = Math.max(1, wp.box - 1);
+    wp.nextReview = addDays(today, intervals[1] || 1);
   }
 
   wp.lastReviewed = today;
@@ -799,62 +1192,55 @@ function rateWord(rating, state) {
   addHistory(state, today, state.todayStats.correctCount);
   saveState(state);
 
+  if (currentSubject === "pm") {
+    sessionCards++;
+    checkPMSession(state);
+    updateSessionProgress();
+  }
+
   updateDailyUI(state);
   updateStatsUI(state);
   updateStreakUI(state);
 
-  animateOut(() => {
-    currentIndex++;
-    showNext(state);
-  });
+  animateOut(() => { currentIndex++; showNext(state); });
 }
 
-// ─── Quiz ───
+// ─── Quiz (Español only) ───
 function startQuiz(state, lvl) {
   mode = "quiz";
-  quizWords = [...wordsForLevel(lvl)];
-  shuffle(quizWords);
-  quizIndex = 0;
-  quizErrors = 0;
-  $("ratingContainer").classList.add("hidden");
-  $("typeContainer").classList.add("hidden");
-  $("clozeContainer").classList.add("hidden");
+  quizWords = [...wordsForLevel(lvl)]; shuffle(quizWords);
+  quizIndex = 0; quizErrors = 0;
+  hideAllContainers();
   showQuizWord(state);
 }
 
 function showQuizWord(state) {
   if (quizIndex >= quizWords.length) {
     if (quizErrors === 0) {
-      if (!state.completedLevels.includes(activeLevel)) {
+      if (!(state.completedLevels || []).includes(activeLevel)) {
+        if (!state.completedLevels) state.completedLevels = [];
         state.completedLevels.push(activeLevel);
       }
-      if (activeLevel < LEVELS) {
-        state.currentLevel = Math.max(state.currentLevel, activeLevel + 1);
-      }
+      if (activeLevel < cfg().levelCount) state.currentLevel = Math.max(state.currentLevel || 1, activeLevel + 1);
       saveState(state);
       renderLevelNav(state);
       showQuizComplete(state);
-    } else {
-      showQuizFailed(state);
-    }
+    } else { showQuizFailed(state); }
     return;
   }
-
   const word = quizWords[quizIndex];
-  renderCard(word, state);
+  renderEspanolCard(word, state);
   $("typeContainer").classList.add("hidden");
   $("clozeContainer").classList.add("hidden");
   $("dutchWord").classList.remove("hidden");
   $("dutchWord").textContent = "???";
   const ex = $("exampleWord");
   if (ex) { ex.classList.remove("hidden"); ex.textContent = word.example || ""; }
-
   $("quizContainer").classList.remove("hidden");
   $("quizProgress").textContent = `Quiz: ${quizIndex + 1}/${quizWords.length} (${quizErrors} fouten)`;
   $("quizInput").value = "";
   $("quizInput").focus();
   $("quizFeedback").classList.add("hidden");
-
   $("btnReveal").style.display = "none";
 }
 
@@ -864,64 +1250,45 @@ function checkQuizAnswer(state) {
   const correct = word.dutch.toLowerCase().replace(/^(de |het |een )/, "").trim();
   const fullCorrect = word.dutch.toLowerCase().trim();
   const fb = $("quizFeedback");
-
   if (input === correct || input === fullCorrect) {
-    fb.textContent = "Correct!";
-    fb.className = "quiz-feedback correct";
+    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
     quizIndex++;
-    setTimeout(() => {
-      animateOut(() => showQuizWord(state));
-    }, 600);
+    setTimeout(() => animateOut(() => showQuizWord(state)), 600);
   } else {
-    fb.textContent = `Fout! Het was: ${word.dutch}`;
-    fb.className = "quiz-feedback wrong";
-    quizErrors++;
-    quizIndex++;
+    fb.textContent = `Fout! Het was: ${word.dutch}`; fb.className = "quiz-feedback wrong";
+    quizErrors++; quizIndex++;
     $("quizProgress").textContent = `Quiz: ${quizIndex}/${quizWords.length} (${quizErrors} fouten)`;
-    setTimeout(() => {
-      animateOut(() => showQuizWord(state));
-    }, 1500);
+    setTimeout(() => animateOut(() => showQuizWord(state)), 1500);
   }
 }
 
 function showQuizComplete(state) {
   $("quizContainer").classList.add("hidden");
   $("cardContainer").innerHTML = `
-    <div class="done-screen">
-      <div class="done-icon">🏆</div>
-      <h2>Level ${activeLevel} voltooid!</h2>
-      <p>Je hebt alle woorden foutloos doorlopen.<br>Level ${activeLevel + 1} is nu ontgrendeld!</p>
-      <button class="btn-action" id="btnNextLevel">Ga naar Level ${activeLevel + 1}</button>
-    </div>
+    <div class="done-screen"><div class="done-icon">🏆</div><h2>Level ${activeLevel} voltooid!</h2>
+    <p>Alle woorden foutloos doorlopen.<br>Level ${activeLevel + 1} is nu ontgrendeld!</p>
+    <button class="btn-action" id="btnNextLevel">Ga naar Level ${activeLevel + 1}</button></div>
   `;
   $("btnNextLevel")?.addEventListener("click", () => {
-    activeLevel = Math.min(LEVELS, activeLevel + 1);
-    mode = "practice";
-    currentIndex = 0;
+    activeLevel = Math.min(cfg().levelCount, activeLevel + 1);
+    mode = "practice"; currentIndex = 0;
     queue = buildQueue(state, activeLevel);
-    renderLevelNav(state);
-    renderCategoryBar(state);
-    showNext(state);
+    renderLevelNav(state); renderCategoryBar(state); showNext(state);
   });
 }
 
 function showQuizFailed(state) {
   $("quizContainer").classList.add("hidden");
   $("cardContainer").innerHTML = `
-    <div class="done-screen">
-      <div class="done-icon">😤</div>
-      <h2>Niet gehaald</h2>
-      <p>${quizErrors} fout${quizErrors > 1 ? "en" : ""} gemaakt. Je moet ze allemaal foutloos doorlopen.<br>Oefen verder en probeer opnieuw!</p>
-      <button class="btn-action" id="btnRetryQuiz">Opnieuw proberen</button>
-      <button class="btn-action" id="btnBackPractice" style="background:var(--surface);margin-left:8px">Terug naar oefenen</button>
-    </div>
+    <div class="done-screen"><div class="done-icon">😤</div><h2>Niet gehaald</h2>
+    <p>${quizErrors} fout${quizErrors > 1 ? "en" : ""} gemaakt. Je moet ze allemaal foutloos doorlopen.</p>
+    <button class="btn-action" id="btnRetryQuiz">Opnieuw</button>
+    <button class="btn-action" id="btnBackPractice" style="background:var(--surface);margin-left:8px">Terug</button></div>
   `;
   $("btnRetryQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
   $("btnBackPractice")?.addEventListener("click", () => {
-    mode = "practice";
-    currentIndex = 0;
-    queue = buildQueue(state, activeLevel);
-    showNext(state);
+    mode = "practice"; currentIndex = 0;
+    queue = buildQueue(state, activeLevel); showNext(state);
   });
 }
 
@@ -929,32 +1296,31 @@ function showQuizFailed(state) {
 function showNext(state) {
   if (mode === "quiz") return;
 
-  const qReady = isQuizReady(state, activeLevel) && !isLevelCompleted(state, activeLevel);
-
   if (currentIndex >= queue.length) {
-    $("ratingContainer").classList.add("hidden");
-    $("quizContainer").classList.add("hidden");
-    $("typeContainer").classList.add("hidden");
-    $("clozeContainer").classList.add("hidden");
-
-    if (qReady && !activeCategory) {
-      $("cardContainer").innerHTML = `
-        <div class="done-screen">
-          <div class="done-icon">📝</div>
-          <h2>Quiz beschikbaar!</h2>
-          <p>Je hebt alle woorden van Level ${activeLevel} geoefend.<br>Doe de quiz om het volgende level te ontgrendelen.</p>
-          <button class="btn-action" id="btnStartQuiz">Start Quiz</button>
-        </div>
-      `;
-      $("btnStartQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
+    hideAllContainers();
+    if (currentSubject === "espanol") {
+      const qReady = isQuizReady(state, activeLevel) && !isLevelCompleted(state, activeLevel);
+      if (qReady && !activeCategory) {
+        $("cardContainer").innerHTML = `
+          <div class="done-screen"><div class="done-icon">📝</div><h2>Quiz beschikbaar!</h2>
+          <p>Alle woorden van Level ${activeLevel} geoefend.<br>Doe de quiz om het volgende level te ontgrendelen.</p>
+          <button class="btn-action" id="btnStartQuiz">Start Quiz</button></div>
+        `;
+        $("btnStartQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
+      } else {
+        $("cardContainer").innerHTML = `
+          <div class="done-screen"><div class="done-icon">🎉</div><h2>Klaar voor vandaag!</h2>
+          <p>Geen woorden meer voor nu${activeCategory ? ` (${activeCategory})` : ""}.<br>Kom morgen terug of kies een ander level.</p></div>
+        `;
+      }
     } else {
-      const extra = micMode ? "<br>Alle woorden in dit level zijn uitgesproken!" : "";
-      const catMsg = activeCategory ? ` (${activeCategory})` : "";
+      const sessionDone = sessionCards >= cfg().cardsPerSession;
       $("cardContainer").innerHTML = `
         <div class="done-screen">
-          <div class="done-icon">🎉</div>
-          <h2>Klaar voor vandaag!</h2>
-          <p>Geen woorden meer voor nu in Level ${activeLevel}${catMsg}.${extra}<br>Kom morgen terug of kies een ander level.</p>
+          <div class="done-icon">${sessionDone ? "🎉" : "✅"}</div>
+          <h2>${sessionDone ? "Sessie voltooid!" : "Alle kaarten gehad!"}</h2>
+          <p>${sessionDone ? `Je hebt ${sessionCards} kaarten geoefend deze sessie.` : "Er zijn geen kaarten meer voor nu."}<br>
+          ${sessionDone ? "Goed bezig! Kom over een paar dagen terug." : "Probeer later opnieuw of wissel van hoofdstuk."}</p>
         </div>
       `;
     }
@@ -962,8 +1328,60 @@ function showNext(state) {
     return;
   }
 
-  renderCard(queue[currentIndex], state);
+  const card = queue[currentIndex];
+  if (currentSubject === "pm") renderPMCard(card, state);
+  else renderEspanolCard(card, state);
   renderLevelNav(state);
+}
+
+// ─── Subject switching ───
+function switchSubject(subject) {
+  if (subject === currentSubject && allWords.length > 0) return;
+  currentSubject = subject;
+
+  document.querySelectorAll(".subject-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.subject === subject);
+  });
+
+  $("pageTitle").innerHTML = `<span class="accent">${cfg().title}</span>`;
+  document.title = `${cfg().title} — Leren`;
+
+  practiceMode = currentSubject === "pm" ? "mix" : "flashcard";
+  micMode = false;
+  activeCategory = null;
+  mode = "practice";
+  currentIndex = 0;
+  sessionCards = 0;
+  allWords = [];
+  queue = [];
+
+  fetch(cfg().dataFile)
+    .then((r) => r.json())
+    .then((data) => {
+      allWords = data;
+      const state = loadState();
+      updateStreak(state);
+      saveState(state);
+
+      if (currentSubject === "pm") {
+        activeLevel = 0;
+      } else {
+        activeLevel = state.currentLevel || 1;
+      }
+
+      queue = buildQueue(state, activeLevel);
+
+      renderModeBar();
+      renderCategoryBar(state);
+      renderLevelNav(state);
+      updateStreakUI(state);
+      updateDailyUI(state);
+      updateVacationUI();
+      updateSessionProgress();
+      if (currentSubject === "espanol") updatePronunciationUI(state);
+      updateStatsUI(state);
+      showNext(state);
+    });
 }
 
 // ─── Keyboard shortcuts ───
@@ -973,28 +1391,27 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  if (mode === "quiz") {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      checkQuizAnswer(loadState());
-    }
+  if (mode === "quiz" && currentSubject === "espanol") {
+    if (e.key === "Enter") { e.preventDefault(); checkQuizAnswer(loadState()); }
     return;
   }
 
-  if (practiceMode === "type" && !revealed) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      checkTypeAnswer(loadState());
-    }
+  if (currentSubject === "espanol" && practiceMode === "type" && !revealed) {
+    if (e.key === "Enter") { e.preventDefault(); checkTypeAnswer(loadState()); }
     return;
   }
 
-  if (practiceMode === "cloze" && !revealed) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      checkClozeAnswer(loadState());
-    }
+  if (currentSubject === "espanol" && practiceMode === "cloze" && !revealed) {
+    if (e.key === "Enter") { e.preventDefault(); checkClozeAnswer(loadState()); }
     return;
+  }
+
+  if (currentSubject === "pm") {
+    const card = queue[currentIndex];
+    if (!card) return;
+    if (card.type === "fillin" && e.key === "Enter") {
+      e.preventDefault(); checkFillinAnswer(loadState()); return;
+    }
   }
 
   const state = loadState();
@@ -1003,7 +1420,8 @@ document.addEventListener("keydown", (e) => {
   switch (e.key) {
     case " ":
       e.preventDefault();
-      if (practiceMode === "flashcard" || practiceMode === "reverse") revealCard();
+      if (currentSubject === "pm") { revealPMCard(["open", "case"].includes(word?.type) ? "self" : undefined); }
+      else if (practiceMode === "flashcard" || practiceMode === "reverse") revealCard();
       break;
     case "ArrowLeft":
       e.preventDefault();
@@ -1015,78 +1433,37 @@ document.addEventListener("keydown", (e) => {
       break;
     case "ArrowDown":
       e.preventDefault();
-      if (word) playAudio(word);
+      if (currentSubject === "espanol" && word) playAudio(word);
+      else if (revealed) rateWord("partial", state);
       break;
     case "ArrowUp":
       e.preventDefault();
-      if (word) startRecognition(word, state);
+      if (currentSubject === "espanol" && word) startRecognition(word, state);
       break;
   }
 });
 
-// ─── Mode switching ───
-document.querySelectorAll(".mode-btn:not(.mic-toggle)").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    practiceMode = btn.dataset.mode;
-    renderModeBar();
-    const state = loadState();
-    currentIndex = 0;
-    queue = buildQueue(state, activeLevel);
-    showNext(state);
-  });
-});
-
-$("modeMic").addEventListener("click", () => {
-  micMode = !micMode;
-  renderModeBar();
-  const state = loadState();
-  currentIndex = 0;
-  queue = buildQueue(state, activeLevel);
-  showNext(state);
-});
-
-// ─── Stats panel ───
+// ─── Event listeners ───
 $("btnStats").addEventListener("click", () => showStatsPanel(loadState()));
 $("btnCloseStats").addEventListener("click", () => $("statsPanel").classList.add("hidden"));
-
-// ─── Init ───
-if ("speechSynthesis" in window) {
-  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-}
-
 $("btnEasy").addEventListener("click", () => rateWord("easy", loadState()));
 $("btnHard").addEventListener("click", () => rateWord("hard", loadState()));
+$("btnGoed").addEventListener("click", () => rateWord("easy", loadState()));
+$("btnDeels").addEventListener("click", () => rateWord("partial", loadState()));
+$("btnNiet").addEventListener("click", () => rateWord("hard", loadState()));
 $("quizSubmit").addEventListener("click", () => checkQuizAnswer(loadState()));
-$("quizInput")?.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); checkQuizAnswer(loadState()); }
-});
+$("quizInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkQuizAnswer(loadState()); } });
 $("typeSubmit").addEventListener("click", () => checkTypeAnswer(loadState()));
-$("typeInput")?.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); checkTypeAnswer(loadState()); }
-});
+$("typeInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkTypeAnswer(loadState()); } });
 $("clozeSubmit").addEventListener("click", () => checkClozeAnswer(loadState()));
-$("clozeInput")?.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); checkClozeAnswer(loadState()); }
+$("clozeInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkClozeAnswer(loadState()); } });
+$("fillinSubmit").addEventListener("click", () => checkFillinAnswer(loadState()));
+$("fillinInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkFillinAnswer(loadState()); } });
+
+document.querySelectorAll(".subject-btn").forEach((btn) => {
+  btn.addEventListener("click", () => switchSubject(btn.dataset.subject));
 });
 
-fetch("data.json")
-  .then((r) => r.json())
-  .then((data) => {
-    allWords = data;
-    const state = loadState();
-    updateStreak(state);
-    saveState(state);
-
-    activeLevel = state.currentLevel;
-    queue = buildQueue(state, activeLevel);
-
-    renderModeBar();
-    renderCategoryBar(state);
-    renderLevelNav(state);
-    updateStreakUI(state);
-    updateDailyUI(state);
-    updateVacationUI();
-    updatePronunciationUI(state);
-    updateStatsUI(state);
-    showNext(state);
-  });
+// ─── Init ───
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+switchSubject("espanol");
