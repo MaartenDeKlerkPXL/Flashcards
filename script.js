@@ -796,32 +796,14 @@ function renderPMCard(card, state) {
   const chapterLabel = card.chapterName ? `H${card.chapter}: ${card.chapterName}` : `Hoofdstuk ${card.chapter}`;
 
   switch (card.type) {
-    case "definition": renderPMDefinition(card, chapterLabel); break;
+    case "definition": renderPMMultichoice(definitionAsMultichoice(card), state, chapterLabel, "Begrip"); break;
     case "multichoice": renderPMMultichoice(card, state, chapterLabel); break;
     case "open": renderPMOpen(card, chapterLabel); break;
     case "case": renderPMCase(card, chapterLabel); break;
     case "fillin": renderPMFillin(card, chapterLabel); break;
     case "order": renderPMOrder(card, state, chapterLabel); break;
-    default: renderPMDefinition(card, chapterLabel); break;
+    default: renderPMOpen(card, chapterLabel); break;
   }
-}
-
-function renderPMDefinition(card, chapterLabel) {
-  $("cardContainer").innerHTML = `
-    <div class="pm-card">
-      <div class="pm-card-body">
-        <div class="pm-chapter-tag">${chapterLabel}</div>
-        <span class="pm-card-type">Begrip</span>
-        <div class="pm-question">${card.term}</div>
-        ${card.hint ? `<div class="pm-hint">💡 ${card.hint}</div>` : ""}
-        <div class="pm-answer hidden" id="pmAnswer">${card.definition}</div>
-        <div class="card-actions" style="margin-top:16px">
-          <button class="btn-reveal" id="btnReveal">Toon definitie</button>
-        </div>
-      </div>
-    </div>
-  `;
-  $("btnReveal").addEventListener("click", () => revealPMCard());
 }
 
 function renderPMOpen(card, chapterLabel) {
@@ -859,13 +841,36 @@ function renderPMCase(card, chapterLabel) {
   $("btnReveal").addEventListener("click", () => revealPMCard("self"));
 }
 
-function renderPMMultichoice(card, state, chapterLabel) {
+// Begrip als meerkeuzevraag: omschrijving tonen, kiezen uit 4 begrippen.
+// Foute opties komen uit hetzelfde hoofdstuk, bij voorkeur dezelfde categorie.
+function definitionAsMultichoice(card) {
+  const others = allWords.filter((w) => w.type === "definition" && w.id !== card.id && w.chapter === card.chapter);
+  const sameCat = others.filter((w) => w.category === card.category);
+  const rest = others.filter((w) => w.category !== card.category);
+  shuffle(sameCat); shuffle(rest);
+  const distractors = [...sameCat, ...rest].slice(0, 3).map((w) => w.term);
+
+  // Woorden uit het begrip zelf in de omschrijving wegmaskeren, anders verraadt die het antwoord
+  let question = card.definition;
+  card.term.split(/[^\p{L}]+/u).filter((t) => t.length >= 4 && !/^project(en)?$/i.test(t)).forEach((t) => {
+    question = question.replace(new RegExp(`(?<!\\p{L})${escapeRegex(t)}(?!\\p{L})`, "giu"), "…");
+  });
+
+  return {
+    question: `<div class="pm-question-label">Welk begrip past bij deze omschrijving?</div>${question}`,
+    options: [card.term, ...distractors],
+    correct: 0,
+    explanation: `${card.term}${card.hint ? ` — ${card.hint}` : ""}`,
+  };
+}
+
+function renderPMMultichoice(card, state, chapterLabel, typeLabel = "Meerkeuze") {
   const letters = ["A", "B", "C", "D"];
   $("cardContainer").innerHTML = `
     <div class="pm-card">
       <div class="pm-card-body">
         <div class="pm-chapter-tag">${chapterLabel}</div>
-        <span class="pm-card-type type-mc">Meerkeuze</span>
+        <span class="pm-card-type type-mc">${typeLabel}</span>
         <div class="pm-question">${card.question}</div>
       </div>
     </div>
@@ -1406,7 +1411,7 @@ document.addEventListener("keydown", (e) => {
   switch (e.key) {
     case " ":
       e.preventDefault();
-      if (currentSubject === "pm") { revealPMCard(["open", "case"].includes(word?.type) ? "self" : undefined); }
+      if (currentSubject === "pm") { if (["open", "case"].includes(word?.type)) revealPMCard("self"); }
       else if (practiceMode === "flashcard" || practiceMode === "reverse") revealCard();
       break;
     case "ArrowLeft":
