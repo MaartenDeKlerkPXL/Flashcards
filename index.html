@@ -6,7 +6,9 @@
   <meta name="theme-color" content="#0f0f13">
   <link rel="manifest" href="manifest.json">
   <title>Leren — mdklerk</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -42,10 +44,6 @@
         <span class="stat-icon">📝</span>
         <span id="goalLabel"><span id="dailyCount">0</span>/20 vandaag</span>
       </div>
-      <div class="stat-chip" id="pronGoal">
-        <span class="stat-icon">🎤</span>
-        <span id="pronCount">0</span>/<span id="pronTotal">0</span> uitspraak
-      </div>
     </div>
   </header>
 
@@ -55,7 +53,6 @@
     <button class="mode-btn" data-mode="type">Typen</button>
     <button class="mode-btn" data-mode="reverse">NL → ES</button>
     <button class="mode-btn" data-mode="cloze">Zinnen</button>
-    <button class="mode-btn mic-toggle" id="modeMic" data-mode="mic">🎤 Mic</button>
   </div>
 
   <!-- Category filter -->
@@ -200,7 +197,6 @@
     <span>← moeilijk</span>
     <span>→ makkelijk</span>
     <span>↓ audio</span>
-    <span>↑ mic</span>
   </div>
 
   <script src="script.js?v=3"></script>
