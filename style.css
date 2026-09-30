@@ -64,8 +64,6 @@ body{
   cursor:pointer;transition:all .2s;white-space:nowrap;
 }
 .mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,.12)}
-.mode-btn.mic-toggle{border-color:transparent}
-.mode-btn.mic-toggle.active{border-color:var(--hard);color:var(--hard);background:rgba(231,76,60,.12)}
 
 /* Category Bar */
 .category-bar{
@@ -133,26 +131,6 @@ body{
   transition:background .2s,color .2s;flex-shrink:0;
 }
 .btn-icon:active,.btn-icon.active{background:var(--accent);color:#fff}
-.btn-icon.mic{border-color:var(--hard)}
-.btn-icon.mic:active,.btn-icon.mic.active{background:var(--hard);color:#fff;border-color:var(--hard)}
-.btn-icon.mic.success{border-color:var(--easy);background:var(--easy);color:#fff}
-.btn-icon.mic.listening{
-  animation:mic-pulse 1.2s ease-in-out infinite;
-}
-@keyframes mic-pulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,.4)}
-  50%{box-shadow:0 0 0 10px rgba(231,76,60,0)}
-}
-.mic-feedback{
-  position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);
-  white-space:nowrap;font-size:.75rem;padding:4px 10px;border-radius:8px;
-  background:var(--surface);color:var(--text-muted);
-  transition:opacity .3s;pointer-events:none;z-index:5;
-}
-.mic-feedback.success{color:var(--easy)}
-.mic-feedback.error{color:var(--hard)}
-.mic-feedback.listening{color:var(--accent)}
-.mic-feedback.hidden{opacity:0}
 .card-actions{position:relative}
 .btn-reveal{
   flex:1;max-width:180px;padding:12px 0;border:none;border-radius:14px;
@@ -321,7 +299,6 @@ body{
 }
 @media(hover:hover){
   .btn-icon:hover{background:var(--accent);color:#fff}
-  .btn-icon.mic:hover{background:var(--hard);color:#fff}
   .btn-reveal:hover{background:var(--accent-hover)}
   .btn-rate.easy:hover{background:var(--easy-hover)}
   .btn-rate.hard:hover{background:var(--hard-hover)}

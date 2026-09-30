@@ -10,10 +10,9 @@ const SUBJECTS = {
     targetLabel: "vakantie",
     targetStart: "2026-09-23",
     leitnerIntervals: [0, 1, 2, 4, 7, 14],
-    hasMic: true,
     hasLevels: true,
-    levelCount: 10,
-    wordsPerLevel: 100,
+    levelCount: 20,
+    levelVersion: 2,
     reviewPercent: 0.15,
   },
   pm: {
@@ -28,7 +27,6 @@ const SUBJECTS = {
     targetLabel: "examen",
     targetStart: "2026-09-23",
     leitnerIntervals: [0, 2, 5, 10, 21, 42],
-    hasMic: false,
     hasLevels: false,
     reviewPercent: 0.30,
   },
@@ -41,15 +39,15 @@ let currentIndex = 0;
 let revealed = false;
 let mode = "practice";
 let practiceMode = "flashcard";
-let micMode = false;
 let activeCategory = null;
 let quizWords = [];
 let quizIndex = 0;
 let quizErrors = 0;
 let activeLevel = 1;
-let isListening = false;
 let clozeTimer = null;
+const clozeCache = new Map();
 let sessionCards = 0;
+let rating = false; // voorkomt dubbele beoordeling van dezelfde kaart
 
 const $ = (id) => document.getElementById(id);
 
@@ -91,7 +89,7 @@ function defaultState() {
   if (currentSubject === "pm") {
     return { wordProgress: {}, sessions: [], history: [], weekStats: { week: getWeekStart(todayStr()), sessionCount: 0 }, todayStats: { date: todayStr(), correctCount: 0 } };
   }
-  return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 }, history: [] };
+  return { wordProgress: {}, currentLevel: 1, completedLevels: [], levelVersion: cfg().levelVersion, streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 }, history: [] };
 }
 
 function migrateState(state) {
@@ -101,6 +99,17 @@ function migrateState(state) {
         state.streak.lastCompletedDate = state.todayStats.date;
       }
       delete state.streak.lastDate;
+    }
+    if (state.levelVersion !== cfg().levelVersion) {
+      // Level indeling is gewijzigd: voltooide levels herberekenen op basis van woordvoortgang
+      state.completedLevels = [];
+      let lvl = 1;
+      while (lvl < cfg().levelCount && wordsForLevel(lvl).every((w) => getWP(state, w.id).box >= 3)) {
+        state.completedLevels.push(lvl);
+        lvl++;
+      }
+      state.currentLevel = lvl;
+      state.levelVersion = cfg().levelVersion;
     }
   }
   if (!state.history) state.history = [];
@@ -117,7 +126,7 @@ function saveState(s) {
 }
 
 function getWP(state, id) {
-  return state.wordProgress[id] || { box: 0, nextReview: todayStr(), lastReviewed: null, correctCount: 0, pronouncedCorrectly: false };
+  return state.wordProgress[id] || { box: 0, nextReview: todayStr(), lastReviewed: null, correctCount: 0 };
 }
 
 // ─── Streak / Weekly goal ───
@@ -220,21 +229,13 @@ function buildQueue(state, lvl) {
     return buildPMQueue(state, lvl);
   }
 
-  let levelWords;
-  if (micMode) {
-    levelWords = wordsForLevel(lvl).filter((w) => !getWP(state, w.id).pronouncedCorrectly);
-    levelWords.sort((a, b) => getWP(state, b.id).box - getWP(state, a.id).box);
-  } else {
-    levelWords = wordsForLevel(lvl).filter((w) => getWP(state, w.id).nextReview <= today);
-  }
-
+  let levelWords = wordsForLevel(lvl).filter((w) => isDue(state, w, today));
   if (activeCategory) levelWords = levelWords.filter((w) => w.category === activeCategory);
-  if (micMode) return levelWords;
 
   let reviewWords = [];
   if (lvl > 1 && !activeCategory) {
     const prevWords = allWords.filter((w) => w.level < lvl && isLevelUnlocked(state, w.level));
-    const dueReview = prevWords.filter((w) => getWP(state, w.id).nextReview <= today);
+    const dueReview = prevWords.filter((w) => isDue(state, w, today));
     shuffle(dueReview);
     const reviewCount = Math.max(2, Math.ceil(levelWords.length * cfg().reviewPercent));
     reviewWords = dueReview.slice(0, reviewCount);
@@ -244,6 +245,23 @@ function buildQueue(state, lvl) {
   const unique = [...new Map(combined.map((w) => [w.id, w])).values()];
   shuffle(unique);
   return unique;
+}
+
+// NL → ES, Typen en Zinnen oefenen alleen woorden die al eens op "makkelijk" zijn gezet
+// (in Flashcards) en hebben hun eigen Leitner-box (revBox/revNext).
+function isProductionMode() {
+  return currentSubject === "espanol" && ["reverse", "type", "cloze"].includes(practiceMode);
+}
+
+function isKnown(state, w) {
+  return getWP(state, w.id).correctCount > 0;
+}
+
+function isDue(state, w, today) {
+  const wp = getWP(state, w.id);
+  if (!isProductionMode()) return wp.nextReview <= today;
+  if (wp.correctCount === 0 || (wp.revNext || today) > today) return false;
+  return practiceMode !== "cloze" || clozeFor(w) !== null;
 }
 
 function buildPMQueue(state, lvl) {
@@ -295,7 +313,7 @@ function playAudio(word) {
   });
 }
 
-// ─── Speech Recognition (Español only) ───
+// ─── Answer checking (Español) ───
 function levenshtein(a, b) {
   const m = a.length, n = b.length;
   const dp = Array.from({ length: m + 1 }, (_, i) => { const row = new Array(n + 1); row[0] = i; return row; });
@@ -306,72 +324,46 @@ function levenshtein(a, b) {
   return dp[m][n];
 }
 
-function normalizeSpanish(s) {
-  return s.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.,]+$/g, "").trim();
+const ARTICLES_ES = /^(el|la|los|las|un|una) /;
+const ARTICLES_NL = /^(de|het|een) /;
+
+function cleanAnswer(s) {
+  return s.toLowerCase().replace(/[¿¡?!.,;:"]/g, "").replace(/\s+/g, " ").trim();
 }
 
-function fuzzyMatch(heard, target) {
-  const h = heard.toLowerCase().trim();
-  const t = normalizeSpanish(target);
-  const tFull = target.toLowerCase().trim();
-  if (h === t || h === tFull || h.includes(t)) return true;
-  const dist = levenshtein(h, t);
-  const threshold = t.length <= 4 ? 1 : Math.ceil(t.length * 0.3);
-  return dist <= threshold;
+function stripAccents(s) {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function showMicFeedback(micBtn, type, message) {
-  let fb = $("micFeedback");
-  if (!fb) { fb = document.createElement("div"); fb.id = "micFeedback"; fb.className = "mic-feedback"; micBtn.parentNode.appendChild(fb); }
-  fb.textContent = message;
-  fb.className = "mic-feedback " + type;
-  fb.classList.remove("hidden");
-  if (type !== "listening") setTimeout(() => fb.classList.add("hidden"), 3000);
+// "warm/heet" → warm, heet · "ik vind het lekker/leuk" → ik vind het lekker, ik vind het leuk · "zijn (toestand)" → zijn
+function answerVariants(target, articles) {
+  const base = target.replace(/\([^)]*\)/g, "");
+  const parts = base.split("/").map(cleanAnswer).filter(Boolean);
+  const variants = new Set([cleanAnswer(target), cleanAnswer(base)]);
+  parts.forEach((part, i) => {
+    if (i > 0 && !part.includes(" ") && parts[0].includes(" ")) variants.add(parts[0].replace(/\S+$/, part));
+    else variants.add(part);
+  });
+  [...variants].forEach((v) => variants.add(v.replace(articles, "")));
+  return [...variants].filter(Boolean);
 }
 
-function startRecognition(word, state, onDone) {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { const micBtn = $("btnMic"); if (micBtn) showMicFeedback(micBtn, "error", "Mic niet beschikbaar"); return; }
-  if (isListening) return;
-  const recognition = new SR();
-  recognition.lang = "es-ES"; recognition.interimResults = true; recognition.maxAlternatives = 5; recognition.continuous = false;
-  isListening = true;
-  const micBtn = $("btnMic");
-  if (micBtn) { micBtn.classList.add("active", "listening"); showMicFeedback(micBtn, "listening", "Luisteren..."); }
-  let matched = false, bestHeard = "";
-  const timeout = setTimeout(() => { if (isListening) recognition.stop(); }, 6000);
-  recognition.onresult = (e) => {
-    const all = [];
-    for (let i = 0; i < e.results.length; i++) for (let j = 0; j < e.results[i].length; j++) all.push(e.results[i][j].transcript);
-    bestHeard = all[0] || "";
-    matched = all.some((t) => fuzzyMatch(t, word.spanish));
-    if (e.results[0] && !e.results[0].isFinal && micBtn) showMicFeedback(micBtn, "listening", `"${bestHeard.trim()}..."`);
-  };
-  recognition.onend = () => {
-    clearTimeout(timeout); isListening = false;
-    if (micBtn) micBtn.classList.remove("active", "listening");
-    if (matched) {
-      const wp = getWP(state, word.id); wp.pronouncedCorrectly = true; state.wordProgress[word.id] = wp; saveState(state);
-      if (micBtn) micBtn.classList.add("success");
-      showMicFeedback(micBtn, "success", "Correct!");
-      updatePronunciationUI(state);
-      if (onDone) onDone(true);
-    } else if (bestHeard.trim()) {
-      showMicFeedback(micBtn, "error", `Ik hoorde "${bestHeard.trim()}" — probeer opnieuw`);
-      if (onDone) onDone(false);
-    } else {
-      showMicFeedback(micBtn, "error", "Niet herkend — spreek duidelijker");
-      if (onDone) onDone(false);
-    }
-  };
-  recognition.onerror = (e) => {
-    clearTimeout(timeout); isListening = false;
-    if (micBtn) micBtn.classList.remove("active", "listening");
-    const msgs = { "not-allowed": "Microfoon geblokkeerd", "no-speech": "Geen spraak gedetecteerd", "audio-capture": "Geen microfoon gevonden", "network": "Netwerkfout" };
-    showMicFeedback(micBtn, "error", msgs[e.error] || "Fout — probeer opnieuw");
-    if (onDone) onDone(false);
-  };
-  recognition.start();
+// Returns "exact", "accent" (alleen accenten fout), "typo" (1 letter fout) of null
+function checkAnswer(input, targets, articles) {
+  const given = cleanAnswer(input);
+  if (!given) return null;
+  const variants = targets.flatMap((t) => answerVariants(t, articles));
+  if (variants.includes(given)) return "exact";
+  const plain = stripAccents(given);
+  if (variants.some((v) => stripAccents(v) === plain)) return "accent";
+  if (variants.some((v) => v.length >= 5 && levenshtein(stripAccents(v), plain) <= 1)) return "typo";
+  return null;
+}
+
+function answerFeedback(result, correct) {
+  if (result === "exact") return "Correct!";
+  if (result === "accent") return `Goed! Let op de accenten: ${correct}`;
+  return `Bijna goed! Het is: ${correct}`;
 }
 
 // ─── UI Updates ───
@@ -392,6 +384,7 @@ function renderModeBar() {
       btn.textContent = m.label;
       btn.addEventListener("click", () => {
         practiceMode = m.mode;
+        mode = "practice";
         renderModeBar();
         const state = loadState();
         currentIndex = 0;
@@ -415,6 +408,7 @@ function renderModeBar() {
       btn.textContent = m.label;
       btn.addEventListener("click", () => {
         practiceMode = m.mode;
+        mode = "practice";
         renderModeBar();
         const state = loadState();
         currentIndex = 0;
@@ -423,20 +417,6 @@ function renderModeBar() {
       });
       bar.appendChild(btn);
     });
-    const micBtn = document.createElement("button");
-    micBtn.className = "mode-btn mic-toggle" + (micMode ? " active" : "");
-    micBtn.id = "modeMic";
-    micBtn.dataset.mode = "mic";
-    micBtn.textContent = "🎤 Mic";
-    micBtn.addEventListener("click", () => {
-      micMode = !micMode;
-      renderModeBar();
-      const state = loadState();
-      currentIndex = 0;
-      queue = buildQueue(state, activeLevel);
-      showNext(state);
-    });
-    bar.appendChild(micBtn);
   }
 }
 
@@ -541,6 +521,8 @@ function renderLevelNav(state) {
     });
     nav.appendChild(btn);
   }
+  const activeBtn = nav.querySelector(".level-btn.active");
+  if (activeBtn) nav.scrollLeft = activeBtn.offsetLeft - nav.offsetLeft - (nav.clientWidth - activeBtn.offsetWidth) / 2;
 }
 
 function updateStreakUI(state) {
@@ -561,13 +543,11 @@ function updateDailyUI(state) {
     const chip = $("dailyGoal");
     if (count >= cfg().dailyGoal) chip.style.background = "rgba(46,204,113,.2)";
     else chip.style.background = "";
-    $("pronGoal").classList.remove("hidden");
   } else {
     $("goalLabel").innerHTML = `${sessionCards}/${cfg().cardsPerSession} deze sessie`;
     const chip = $("dailyGoal");
     if (sessionCards >= cfg().cardsPerSession) chip.style.background = "rgba(46,204,113,.2)";
     else chip.style.background = "";
-    $("pronGoal").classList.add("hidden");
   }
 }
 
@@ -578,14 +558,6 @@ function updateVacationUI() {
   const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
   $("vacationLabel").textContent = days > 0 ? `${days} dagen tot ${cfg().targetLabel}` : `${cfg().targetLabel[0].toUpperCase() + cfg().targetLabel.slice(1)}!`;
   $("vacationFill").style.width = pct + "%";
-}
-
-function updatePronunciationUI(state) {
-  if (currentSubject !== "espanol") return;
-  const unlocked = allWords.filter((w) => isLevelUnlocked(state, w.level));
-  const pronounced = unlocked.filter((w) => getWP(state, w.id).pronouncedCorrectly).length;
-  $("pronCount").textContent = pronounced;
-  $("pronTotal").textContent = unlocked.length;
 }
 
 function updateSessionProgress() {
@@ -743,12 +715,12 @@ function renderOverviewStats(state) {
   const daysLeft = daysBetween(todayStr(), cfg().targetDate);
 
   if (currentSubject === "espanol") {
-    const pronounced = items.filter((w) => getWP(state, w.id).pronouncedCorrectly).length;
+    const active = items.filter((w) => (getWP(state, w.id).revBox || 0) >= 3).length;
     const levelsComplete = (state.completedLevels || []).length;
     $("overviewStats").innerHTML = `
       <div class="overview-stat"><div class="overview-stat-value">${reviewed}</div><div class="overview-stat-label">Geoefend</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${mastered}</div><div class="overview-stat-label">Beheerst</div></div>
-      <div class="overview-stat"><div class="overview-stat-value">${pronounced}</div><div class="overview-stat-label">Uitgesproken</div></div>
+      <div class="overview-stat"><div class="overview-stat-value">${active}</div><div class="overview-stat-label">Actief (NL → ES)</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${levelsComplete}/${cfg().levelCount}</div><div class="overview-stat-label">Levels klaar</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${total}</div><div class="overview-stat-label">Totaal woorden</div></div>
       <div class="overview-stat"><div class="overview-stat-value">${daysLeft > 0 ? daysLeft : "0"}</div><div class="overview-stat-label">Dagen tot ${cfg().targetLabel}</div></div>
@@ -774,29 +746,26 @@ function renderOverviewStats(state) {
 }
 
 // ─── Card Rendering: Español ───
-function renderEspanolCard(word, state) {
+// quiz = true: altijd Spaans tonen, zonder de invoer van de gekozen oefenmodus
+function renderEspanolCard(word, state, quiz = false) {
   revealed = false;
   if (clozeTimer) { clearTimeout(clozeTimer); clozeTimer = null; }
   hideAllContainers();
 
-  const wp = getWP(state, word.id);
-  const isReverse = practiceMode === "reverse";
-  const showWord = isReverse ? word.dutch : word.spanish;
-  const hiddenWord = isReverse ? word.spanish : word.dutch;
+  const toSpanish = !quiz && isProductionMode();
+  const showWord = toSpanish ? word.dutch : word.spanish;
+  const hiddenWord = toSpanish ? word.spanish : word.dutch;
 
   $("cardContainer").innerHTML = `
     <div class="flashcard">
-      <img class="card-image" src="${word.image}" alt="${word.spanish}" loading="eager" onerror="this.style.display='none'">
+      <img class="card-image" src="${word.image}" alt="" loading="eager" onerror="this.style.display='none'">
       <div class="card-body">
         <div class="word-spanish">${showWord}</div>
         <div class="word-dutch hidden" id="dutchWord">${hiddenWord}</div>
         <div class="word-example hidden" id="exampleWord">${word.example || ""}</div>
         <div class="card-actions">
-          <button class="btn-icon" id="btnAudio" aria-label="Audio">
+          <button class="btn-icon${toSpanish ? " hidden" : ""}" id="btnAudio" aria-label="Audio">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-          </button>
-          <button class="btn-icon mic ${wp.pronouncedCorrectly ? "success" : ""}" id="btnMic" aria-label="Microfoon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
           </button>
           <button class="btn-reveal" id="btnReveal">Toon vertaling</button>
         </div>
@@ -805,12 +774,8 @@ function renderEspanolCard(word, state) {
   `;
 
   $("btnAudio").addEventListener("click", () => playAudio(word));
-  $("btnMic").addEventListener("click", () => {
-    startRecognition(word, state, (success) => {
-      if (success && micMode) setTimeout(() => rateWord("easy", loadState()), 600);
-    });
-  });
   $("btnReveal").addEventListener("click", () => revealCard());
+  if (quiz) return;
 
   if (practiceMode === "type") {
     $("btnReveal").style.display = "none";
@@ -819,11 +784,7 @@ function renderEspanolCard(word, state) {
     $("typeFeedback").classList.add("hidden");
     $("typeInput").focus();
   } else if (practiceMode === "cloze") {
-    renderCloze(word, state);
-  } else if (micMode) {
-    setTimeout(() => startRecognition(word, state, (success) => {
-      if (success) { revealCard(); setTimeout(() => rateWord("easy", loadState()), 600); }
-    }), 300);
+    renderCloze(word);
   }
 }
 
@@ -1054,39 +1015,39 @@ function hideAllContainers() {
 }
 
 // ─── Cloze (Español) ───
-function clozeTargetFor(word) {
-  return word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").replace(/^[¿¡]+|[?!.]+$/g, "").trim();
-}
-
-function clozeMakeBlanked(sentence, target) {
-  const regex = new RegExp(`(${escapeRegex(target)})`, "gi");
-  let html = sentence.replace(regex, '<span class="cloze-blank">____</span>');
-  if (!html.includes("cloze-blank")) {
-    const words = target.split(/\s+/);
-    const mainWord = words.length > 1 ? words[words.length - 1] : words[0];
-    const fallback = new RegExp(`(${escapeRegex(mainWord)})`, "gi");
-    html = sentence.replace(fallback, '<span class="cloze-blank">____</span>');
-  }
-  if (!html.includes("cloze-blank")) {
-    const stem = target.replace(/[oa]s?$/, "");
-    if (stem.length >= 3) {
-      const stemRegex = new RegExp(`\\b(${escapeRegex(stem)}[a-záéíóúñ]*)\\b`, "gi");
-      html = sentence.replace(stemRegex, '<span class="cloze-blank">____</span>');
+// Zoekt het woord in de voorbeeldzin. Geeft { html, answer } terug, of null als het woord
+// (bv. een vervoegd werkwoord: "ser" → "Soy holandés") niet in de zin te vinden is.
+function clozeFor(word) {
+  if (clozeCache.has(word.id)) return clozeCache.get(word.id);
+  let result = null;
+  if (word.example) {
+    const target = cleanAnswer(word.spanish).replace(ARTICLES_ES, "");
+    const words = target.split(" ");
+    const stem = target.replace(/(os|as|es|o|a|e)$/, "");
+    const patterns = [words.map(escapeRegex).join("[\\s,]+") + "(?:e?s)?"];
+    if (words.length > 1 && words[words.length - 1].length >= 3) patterns.push(escapeRegex(words[words.length - 1]));
+    if (words.length === 1 && stem.length >= 3) patterns.push(escapeRegex(stem) + "\\p{L}*");
+    for (const pat of patterns) {
+      const m = new RegExp(`(?<!\\p{L})${pat}(?!\\p{L})`, "iu").exec(word.example);
+      if (m) {
+        const before = word.example.slice(0, m.index), after = word.example.slice(m.index + m[0].length);
+        result = { html: `${before}<span class="cloze-blank">____</span>${after}`, answer: m[0] };
+        break;
+      }
     }
   }
-  return html;
+  clozeCache.set(word.id, result);
+  return result;
 }
 
 function clozeShowSentence(word) {
   if (clozeTimer) clearTimeout(clozeTimer);
   $("clozeSentence").textContent = word.example;
-  $("clozeSentence").classList.remove("cloze-hidden");
   $("clozeInput").classList.add("hidden");
   $("clozeSubmit").classList.add("hidden");
   $("btnPeek").classList.add("hidden");
   clozeTimer = setTimeout(() => {
-    const target = clozeTargetFor(word);
-    $("clozeSentence").innerHTML = clozeMakeBlanked(word.example, target);
+    $("clozeSentence").innerHTML = clozeFor(word).html;
     $("clozeInput").classList.remove("hidden");
     $("clozeSubmit").classList.remove("hidden");
     $("btnPeek").classList.remove("hidden");
@@ -1094,11 +1055,11 @@ function clozeShowSentence(word) {
   }, 5000);
 }
 
-function renderCloze(word, state) {
-  if (!word.example) { revealCard(); return; }
+function renderCloze(word) {
+  if (!clozeFor(word)) { revealCard(); return; }
   $("btnReveal").style.display = "none";
   $("clozeContainer").classList.remove("hidden");
-  $("clozeTranslation").textContent = word.dutch;
+  $("clozeTranslation").textContent = "";
   $("clozeInput").value = "";
   $("clozeFeedback").classList.add("hidden");
   $("btnPeek").onclick = () => clozeShowSentence(word);
@@ -1110,9 +1071,11 @@ function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 function revealCard() {
   if (revealed) return;
   revealed = true;
-  const d = $("dutchWord"), e = $("exampleWord");
+  if (clozeTimer) { clearTimeout(clozeTimer); clozeTimer = null; }
+  const d = $("dutchWord"), e = $("exampleWord"), a = $("btnAudio");
   if (d) d.classList.remove("hidden");
   if (e) e.classList.remove("hidden");
+  if (a) a.classList.remove("hidden");
   $("ratingContainer").classList.remove("hidden");
 }
 
@@ -1125,35 +1088,31 @@ function animateOut(cb) {
 // ─── Check answers ───
 function checkTypeAnswer(state) {
   const word = queue[currentIndex];
-  if (!word) return;
-  const input = $("typeInput").value.trim().toLowerCase();
-  const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
-  const targetFull = word.spanish.toLowerCase().trim();
+  if (!word || revealed) return;
+  const result = checkAnswer($("typeInput").value, [word.spanish], ARTICLES_ES);
   const fb = $("typeFeedback");
-  if (input === target || input === targetFull) {
-    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
-    revealCard(); setTimeout(() => rateWord("easy", loadState()), 800);
+  if (result) {
+    fb.textContent = answerFeedback(result, word.spanish); fb.className = "quiz-feedback correct";
+    revealCard(); setTimeout(() => rateWord("easy", loadState()), result === "exact" ? 800 : 1800);
   } else {
     fb.textContent = `Fout! Het was: ${word.spanish}`; fb.className = "quiz-feedback wrong";
-    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1200);
+    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1500);
   }
 }
 
 function checkClozeAnswer(state) {
   const word = queue[currentIndex];
-  if (!word) return;
-  const input = $("clozeInput").value.trim().toLowerCase();
-  const target = word.spanish.toLowerCase().replace(/^(el |la |los |las |un |una )/, "").trim();
-  const targetFull = word.spanish.toLowerCase().trim();
+  const cloze = word && clozeFor(word);
+  if (!cloze || revealed) return;
+  const result = checkAnswer($("clozeInput").value, [cloze.answer, word.spanish], ARTICLES_ES);
   const fb = $("clozeFeedback");
-  if (input === target || input === targetFull) {
-    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
-    document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
-    revealCard(); setTimeout(() => rateWord("easy", loadState()), 800);
+  document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = cloze.answer);
+  if (result) {
+    fb.textContent = answerFeedback(result, cloze.answer); fb.className = "quiz-feedback correct";
+    revealCard(); setTimeout(() => rateWord("easy", loadState()), result === "exact" ? 800 : 1800);
   } else {
-    fb.textContent = `Fout! Het was: ${target}`; fb.className = "quiz-feedback wrong";
-    document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = target);
-    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1200);
+    fb.textContent = `Fout! Het was: ${cloze.answer}`; fb.className = "quiz-feedback wrong";
+    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1500);
   }
 }
 
@@ -1176,15 +1135,21 @@ function checkFillinAnswer(state) {
 }
 
 // ─── Rating ───
-function rateWord(rating, state) {
+function rateWord(result, state) {
   const word = queue[currentIndex];
-  if (!word) return;
+  if (!word || rating) return;
+  rating = true;
 
+  updateStreak(state); // dag kan omgeslagen zijn terwijl de app openstond
   const today = todayStr();
   const wp = getWP(state, word.id);
   const intervals = cfg().leitnerIntervals;
 
-  if (rating === "easy") {
+  if (isProductionMode()) {
+    const box = wp.revBox || 0;
+    wp.revBox = result === "easy" ? Math.min(5, box + 1) : Math.max(1, box - 1);
+    wp.revNext = addDays(today, result === "easy" ? intervals[wp.revBox] : intervals[1]);
+  } else if (result === "easy") {
     wp.box = Math.min(5, wp.box + 1);
     wp.nextReview = addDays(today, intervals[wp.box] || 42);
     const isNew = wp.correctCount === 0;
@@ -1194,7 +1159,7 @@ function rateWord(rating, state) {
       else state.todayStats = { date: today, correctCount: 1 };
       if (currentSubject === "espanol") checkStreakGoal(state);
     }
-  } else if (rating === "partial") {
+  } else if (result === "partial") {
     wp.nextReview = addDays(today, 1);
   } else {
     wp.box = Math.max(1, wp.box - 1);
@@ -1229,6 +1194,7 @@ function startQuiz(state, lvl) {
 }
 
 function showQuizWord(state) {
+  rating = false;
   if (quizIndex >= quizWords.length) {
     if (quizErrors === 0) {
       if (!(state.completedLevels || []).includes(activeLevel)) {
@@ -1243,9 +1209,7 @@ function showQuizWord(state) {
     return;
   }
   const word = quizWords[quizIndex];
-  renderEspanolCard(word, state);
-  $("typeContainer").classList.add("hidden");
-  $("clozeContainer").classList.add("hidden");
+  renderEspanolCard(word, state, true);
   $("dutchWord").classList.remove("hidden");
   $("dutchWord").textContent = "???";
   const ex = $("exampleWord");
@@ -1260,14 +1224,14 @@ function showQuizWord(state) {
 
 function checkQuizAnswer(state) {
   const word = quizWords[quizIndex];
-  const input = $("quizInput").value.trim().toLowerCase();
-  const correct = word.dutch.toLowerCase().replace(/^(de |het |een )/, "").trim();
-  const fullCorrect = word.dutch.toLowerCase().trim();
+  if (!word || rating) return;
+  rating = true;
+  const result = checkAnswer($("quizInput").value, [word.dutch], ARTICLES_NL);
   const fb = $("quizFeedback");
-  if (input === correct || input === fullCorrect) {
-    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
+  if (result) {
+    fb.textContent = answerFeedback(result, word.dutch); fb.className = "quiz-feedback correct";
     quizIndex++;
-    setTimeout(() => animateOut(() => showQuizWord(state)), 600);
+    setTimeout(() => animateOut(() => showQuizWord(state)), result === "exact" ? 600 : 1500);
   } else {
     fb.textContent = `Fout! Het was: ${word.dutch}`; fb.className = "quiz-feedback wrong";
     quizErrors++; quizIndex++;
@@ -1309,6 +1273,7 @@ function showQuizFailed(state) {
 // ─── Show Next ───
 function showNext(state) {
   if (mode === "quiz") return;
+  rating = false;
 
   if (currentIndex >= queue.length) {
     hideAllContainers();
@@ -1321,6 +1286,11 @@ function showNext(state) {
           <button class="btn-action" id="btnStartQuiz">Start Quiz</button></div>
         `;
         $("btnStartQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
+      } else if (isProductionMode() && !wordsForLevel(activeLevel).some((w) => isKnown(state, w))) {
+        $("cardContainer").innerHTML = `
+          <div class="done-screen"><div class="done-icon">📚</div><h2>Nog geen woorden geleerd</h2>
+          <p>Hier oefen je alleen woorden die je bij Flashcards op <b>makkelijk</b> hebt gezet.<br>Leer eerst een paar woorden van Level ${activeLevel}.</p></div>
+        `;
       } else {
         $("cardContainer").innerHTML = `
           <div class="done-screen"><div class="done-icon">🎉</div><h2>Klaar voor vandaag!</h2>
@@ -1363,7 +1333,6 @@ function switchSubject(subject) {
   updateKeyHints();
 
   practiceMode = currentSubject === "pm" ? "mix" : "flashcard";
-  micMode = false;
   activeCategory = null;
   mode = "practice";
   currentIndex = 0;
@@ -1394,7 +1363,6 @@ function switchSubject(subject) {
       updateDailyUI(state);
       updateVacationUI();
       updateSessionProgress();
-      if (currentSubject === "espanol") updatePronunciationUI(state);
       updateStatsUI(state);
       showNext(state);
     });
@@ -1430,6 +1398,8 @@ document.addEventListener("keydown", (e) => {
     }
   }
 
+  if (e.target.tagName === "INPUT") return; // spaties/pijltjes in invoervelden niet afvangen
+
   const state = loadState();
   const word = queue[currentIndex];
 
@@ -1449,12 +1419,8 @@ document.addEventListener("keydown", (e) => {
       break;
     case "ArrowDown":
       e.preventDefault();
-      if (currentSubject === "espanol" && word) playAudio(word);
+      if (currentSubject === "espanol") { if (word && (revealed || !isProductionMode())) playAudio(word); }
       else if (revealed) rateWord("partial", state);
-      break;
-    case "ArrowUp":
-      e.preventDefault();
-      if (currentSubject === "espanol" && word) startRecognition(word, state);
       break;
   }
 });
@@ -1468,13 +1434,9 @@ $("btnGoed").addEventListener("click", () => rateWord("easy", loadState()));
 $("btnDeels").addEventListener("click", () => rateWord("partial", loadState()));
 $("btnNiet").addEventListener("click", () => rateWord("hard", loadState()));
 $("quizSubmit").addEventListener("click", () => checkQuizAnswer(loadState()));
-$("quizInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkQuizAnswer(loadState()); } });
 $("typeSubmit").addEventListener("click", () => checkTypeAnswer(loadState()));
-$("typeInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkTypeAnswer(loadState()); } });
 $("clozeSubmit").addEventListener("click", () => checkClozeAnswer(loadState()));
-$("clozeInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkClozeAnswer(loadState()); } });
 $("fillinSubmit").addEventListener("click", () => checkFillinAnswer(loadState()));
-$("fillinInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkFillinAnswer(loadState()); } });
 
 document.querySelectorAll(".subject-btn").forEach((btn) => {
   btn.addEventListener("click", () => switchSubject(btn.dataset.subject));
@@ -1486,7 +1448,7 @@ function updateKeyHints() {
   if (currentSubject === "pm") {
     hints.innerHTML = "<span>Spatie = toon</span><span>← niet geweten</span><span>↓ deels</span><span>→ goed</span>";
   } else {
-    hints.innerHTML = "<span>Spatie = toon</span><span>← moeilijk</span><span>→ makkelijk</span><span>↓ audio</span><span>↑ mic</span>";
+    hints.innerHTML = "<span>Spatie = toon</span><span>← moeilijk</span><span>→ makkelijk</span><span>↓ audio</span>";
   }
 }
 
