@@ -64,6 +64,7 @@ body{
   cursor:pointer;transition:all .2s;white-space:nowrap;
 }
 .mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,.12)}
+.mode-btn.locked{opacity:.55}
 
 /* Category Bar */
 .category-bar{
@@ -98,7 +99,7 @@ body{
 .level-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,.15)}
 .level-btn.completed{border-color:var(--easy);color:var(--easy);background:rgba(46,204,113,.1)}
 .level-btn.locked{opacity:.35;cursor:default}
-.level-btn.quiz-ready{border-color:#f1c40f;color:#f1c40f;animation:quizPulse 2s infinite}
+.level-btn.phase-two{border-color:#f1c40f;color:#f1c40f;animation:quizPulse 2s infinite}
 @keyframes quizPulse{0%,100%{box-shadow:0 0 0 0 rgba(241,196,15,.4)}50%{box-shadow:0 0 0 6px rgba(241,196,15,0)}}
 
 /* Main */
@@ -152,6 +153,16 @@ body{
 .btn-rate.easy:active{background:var(--easy-hover)}
 .btn-rate.hard{background:var(--hard)}
 .btn-rate.hard:active{background:var(--hard-hover)}
+.btn-rate.primary{background:var(--accent)}
+.btn-rate.primary:active{background:var(--accent-hover)}
+.btn-rate.neutral{background:var(--surface);color:var(--text-muted)}
+
+/* Kaart-label: voortgang ES → NL (bolletjes) of modus */
+.card-tag-row{display:flex;justify-content:center;min-height:18px;margin-bottom:6px}
+.card-tag{font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:rgba(108,99,255,.12);padding:3px 10px;border-radius:10px}
+.word-progress{display:flex;gap:6px;align-items:center}
+.word-progress .dot{width:9px;height:9px;border-radius:50%;background:var(--surface);border:1.5px solid var(--text-muted)}
+.word-progress .dot.on{background:var(--easy);border-color:var(--easy)}
 .key-hint{font-size:.7rem;opacity:.6;margin:0 2px}
 
 /* Quiz */

@@ -8,7 +8,7 @@
   <title>Leren — mdklerk</title>
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -49,9 +49,8 @@
 
   <!-- Mode toggles (Español) -->
   <div class="mode-bar" id="modeBar">
-    <button class="mode-btn active" data-mode="flashcard">Flashcards</button>
-    <button class="mode-btn" data-mode="type">Typen</button>
-    <button class="mode-btn" data-mode="reverse">NL → ES</button>
+    <button class="mode-btn active" data-mode="es-nl">ES → NL</button>
+    <button class="mode-btn" data-mode="nl-es">NL → ES</button>
     <button class="mode-btn" data-mode="cloze">Zinnen</button>
   </div>
 
@@ -88,17 +87,7 @@
       <button class="btn-rate easy" id="btnGoed">Goed</button>
     </div>
 
-    <!-- Quiz container (Español level quiz) -->
-    <div class="quiz-container hidden" id="quizContainer">
-      <div class="quiz-progress" id="quizProgress"></div>
-      <div class="quiz-input-wrap">
-        <input type="text" class="quiz-input" id="quizInput" placeholder="Type de vertaling..." autocomplete="off" autocapitalize="off">
-        <button class="btn-quiz-submit" id="quizSubmit">Check</button>
-      </div>
-      <div class="quiz-feedback hidden" id="quizFeedback"></div>
-    </div>
-
-    <!-- Type mode input (Español) -->
+    <!-- Typ-invoer (Español: ES → NL en NL → ES) -->
     <div class="type-container hidden" id="typeContainer">
       <div class="quiz-input-wrap">
         <input type="text" class="quiz-input" id="typeInput" placeholder="Type het Spaanse woord..." autocomplete="off" autocapitalize="off">
@@ -117,6 +106,12 @@
         <button class="btn-quiz-submit" id="clozeSubmit">Check</button>
       </div>
       <div class="quiz-feedback hidden" id="clozeFeedback"></div>
+    </div>
+
+    <!-- Na een fout antwoord (Español) -->
+    <div class="rating-container hidden" id="wrongActions">
+      <button class="btn-rate neutral" id="btnOverride">Ik had het goed</button>
+      <button class="btn-rate primary" id="btnContinue">Verder <span class="key-hint">⏎</span></button>
     </div>
 
     <!-- PM: Multichoice options -->
@@ -193,12 +188,11 @@
   </footer>
 
   <div class="keyboard-hints" id="keyHints">
-    <span>Spatie = toon</span>
-    <span>← moeilijk</span>
-    <span>→ makkelijk</span>
+    <span>Enter = controleer / verder</span>
+    <span>leeg + Enter = weet ik niet</span>
     <span>↓ audio</span>
   </div>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

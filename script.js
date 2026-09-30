@@ -9,11 +9,12 @@ const SUBJECTS = {
     targetDate: "2027-04-01",
     targetLabel: "vakantie",
     targetStart: "2026-09-23",
-    leitnerIntervals: [0, 1, 2, 4, 7, 14],
     hasLevels: true,
     levelCount: 20,
     levelVersion: 2,
-    reviewPercent: 0.15,
+    esNlTarget: 3,        // zo vaak goed bij ES → NL voordat een woord naar NL → ES gaat
+    requeueWrong: 3,      // fout woord komt na zoveel kaarten terug
+    requeueCorrect: 6,    // goed (maar nog niet klaar) woord komt na zoveel kaarten terug
   },
   pm: {
     stateKey: "pm_v1",
@@ -37,13 +38,13 @@ let allWords = [];
 let queue = [];
 let currentIndex = 0;
 let revealed = false;
-let mode = "practice";
-let practiceMode = "flashcard";
+let practiceMode = "es-nl";
 let activeCategory = null;
-let quizWords = [];
-let quizIndex = 0;
-let quizErrors = 0;
 let activeLevel = 1;
+let reviewMode = false;          // Español: fase-doel gehaald, eindeloos herhalen
+let answered = false;            // Español: huidige kaart is al nagekeken
+let pendingWrong = false;        // Español: fout antwoord, wacht op "Verder"
+let pendingTransition = null;    // Español: "phase1" of "level" na het laatste antwoord
 let clozeTimer = null;
 const clozeCache = new Map();
 let sessionCards = 0;
@@ -126,7 +127,14 @@ function saveState(s) {
 }
 
 function getWP(state, id) {
-  return state.wordProgress[id] || { box: 0, nextReview: todayStr(), lastReviewed: null, correctCount: 0 };
+  const wp = state.wordProgress[id] || { box: 0, nextReview: todayStr(), lastReviewed: null, correctCount: 0 };
+  if (currentSubject === "espanol") {
+    // esCorrect: aantal keer goed bij ES → NL · nlCorrect: aantal keer goed bij NL → ES
+    // Oude voortgang: keren "makkelijk" in Flashcards tellen mee voor ES → NL
+    if (wp.esCorrect === undefined) wp.esCorrect = Math.min(cfg().esNlTarget, wp.correctCount || 0);
+    if (wp.nlCorrect === undefined) wp.nlCorrect = 0;
+  }
+  return wp;
 }
 
 // ─── Streak / Weekly goal ───
@@ -208,11 +216,29 @@ function isLevelCompleted(state, lvl) {
   return (state.completedLevels || []).includes(lvl);
 }
 
-function isQuizReady(state, lvl) {
-  if (currentSubject === "pm") return false;
-  if (isLevelCompleted(state, lvl)) return false;
-  const words = wordsForLevel(lvl);
-  return words.length > 0 && words.every((w) => getWP(state, w.id).box >= 3);
+// Español: fase 1 = elk woord 3× goed bij ES → NL, fase 2 = elk woord 1× goed bij NL → ES
+function phase1Done(state, lvl) {
+  return wordsForLevel(lvl).every((w) => getWP(state, w.id).esCorrect >= cfg().esNlTarget);
+}
+
+function phase2Done(state, lvl) {
+  return wordsForLevel(lvl).every((w) => getWP(state, w.id).nlCorrect >= 1);
+}
+
+function isNlUnlocked(state, lvl) {
+  return isLevelCompleted(state, lvl) || phase1Done(state, lvl);
+}
+
+function defaultPracticeMode(state, lvl) {
+  if (!phase1Done(state, lvl)) return "es-nl";
+  if (!phase2Done(state, lvl)) return "nl-es";
+  return "es-nl";
+}
+
+function isMastered(state, w) {
+  const wp = getWP(state, w.id);
+  if (currentSubject === "pm") return wp.box >= 3;
+  return wp.esCorrect >= cfg().esNlTarget && wp.nlCorrect >= 1;
 }
 
 function getCategoriesForLevel(lvl) {
@@ -223,45 +249,52 @@ function getCategoriesForLevel(lvl) {
 
 // ─── Queue building ───
 function buildQueue(state, lvl) {
-  const today = todayStr();
-
   if (currentSubject === "pm") {
     return buildPMQueue(state, lvl);
   }
 
-  let levelWords = wordsForLevel(lvl).filter((w) => isDue(state, w, today));
-  if (activeCategory) levelWords = levelWords.filter((w) => w.category === activeCategory);
-
-  let reviewWords = [];
-  if (lvl > 1 && !activeCategory) {
-    const prevWords = allWords.filter((w) => w.level < lvl && isLevelUnlocked(state, w.level));
-    const dueReview = prevWords.filter((w) => isDue(state, w, today));
-    shuffle(dueReview);
-    const reviewCount = Math.max(2, Math.ceil(levelWords.length * cfg().reviewPercent));
-    reviewWords = dueReview.slice(0, reviewCount);
-  }
-
-  const combined = [...levelWords, ...reviewWords];
-  const unique = [...new Map(combined.map((w) => [w.id, w])).values()];
-  shuffle(unique);
-  return unique;
+  return buildEspanolQueue(state, lvl);
 }
 
-// NL → ES, Typen en Zinnen oefenen alleen woorden die al eens op "makkelijk" zijn gezet
-// (in Flashcards) en hebben hun eigen Leitner-box (revBox/revNext).
-function isProductionMode() {
-  return currentSubject === "espanol" && ["reverse", "type", "cloze"].includes(practiceMode);
-}
-
-function isKnown(state, w) {
-  return getWP(state, w.id).correctCount > 0;
-}
-
-function isDue(state, w, today) {
+function phaseGoalMet(state, w) {
   const wp = getWP(state, w.id);
-  if (!isProductionMode()) return wp.nextReview <= today;
-  if (wp.correctCount === 0 || (wp.revNext || today) > today) return false;
-  return practiceMode !== "cloze" || clozeFor(w) !== null;
+  return practiceMode === "nl-es" ? wp.nlCorrect >= 1 : wp.esCorrect >= cfg().esNlTarget;
+}
+
+// Fase-modus: alleen woorden die het doel nog niet halen (al begonnen woorden eerst).
+// Is het doel voor alle woorden gehaald, dan eindeloos herhalen (zwakste woorden eerst).
+function buildEspanolQueue(state, lvl) {
+  let words = wordsForLevel(lvl);
+  if (activeCategory) words = words.filter((w) => w.category === activeCategory);
+
+  if (practiceMode === "cloze") {
+    reviewMode = false;
+    words = words.filter((w) => getWP(state, w.id).esCorrect >= cfg().esNlTarget && clozeFor(w));
+    shuffle(words);
+    return words;
+  }
+  if (practiceMode === "nl-es" && !isNlUnlocked(state, lvl)) { reviewMode = false; return []; }
+
+  const open = words.filter((w) => !phaseGoalMet(state, w));
+  reviewMode = open.length === 0;
+  if (!reviewMode) {
+    const started = open.filter((w) => getWP(state, w.id).lastReviewed);
+    const fresh = open.filter((w) => !getWP(state, w.id).lastReviewed);
+    shuffle(started); shuffle(fresh);
+    return [...started, ...fresh];
+  }
+  const all = [...words];
+  shuffle(all);
+  all.sort((a, b) => getWP(state, a.id).box - getWP(state, b.id).box);
+  return all;
+}
+
+// Woord na het antwoord terug in de wachtrij zetten als het doel nog niet gehaald is
+function requeue(state, word, correct) {
+  const done = practiceMode === "cloze" || reviewMode ? correct : phaseGoalMet(state, word);
+  if (done) return;
+  const gap = correct ? cfg().requeueCorrect : cfg().requeueWrong;
+  queue.splice(Math.min(currentIndex + 1 + gap, queue.length), 0, word);
 }
 
 function buildPMQueue(state, lvl) {
@@ -384,7 +417,6 @@ function renderModeBar() {
       btn.textContent = m.label;
       btn.addEventListener("click", () => {
         practiceMode = m.mode;
-        mode = "practice";
         renderModeBar();
         const state = loadState();
         currentIndex = 0;
@@ -395,29 +427,32 @@ function renderModeBar() {
     });
   } else {
     bar.innerHTML = "";
+    const state = loadState();
+    const nlLocked = !isNlUnlocked(state, activeLevel);
     const esModes = [
-      { mode: "flashcard", label: "Flashcards" },
-      { mode: "type", label: "Typen" },
-      { mode: "reverse", label: "NL → ES" },
+      { mode: "es-nl", label: "ES → NL" },
+      { mode: "nl-es", label: nlLocked ? "🔒 NL → ES" : "NL → ES", locked: nlLocked },
       { mode: "cloze", label: "Zinnen" },
     ];
     esModes.forEach((m) => {
       const btn = document.createElement("button");
-      btn.className = "mode-btn" + (practiceMode === m.mode ? " active" : "");
+      btn.className = "mode-btn" + (practiceMode === m.mode ? " active" : "") + (m.locked ? " locked" : "");
       btn.dataset.mode = m.mode;
       btn.textContent = m.label;
-      btn.addEventListener("click", () => {
-        practiceMode = m.mode;
-        mode = "practice";
-        renderModeBar();
-        const state = loadState();
-        currentIndex = 0;
-        queue = buildQueue(state, activeLevel);
-        showNext(state);
-      });
+      btn.addEventListener("click", () => setEspanolMode(m.mode));
       bar.appendChild(btn);
     });
   }
+}
+
+function setEspanolMode(newMode) {
+  practiceMode = newMode;
+  pendingTransition = null;
+  renderModeBar();
+  const state = loadState();
+  currentIndex = 0;
+  queue = buildQueue(state, activeLevel);
+  showNext(state);
 }
 
 function renderCategoryBar(state) {
@@ -466,7 +501,6 @@ function renderLevelNav(state) {
     allBtn.addEventListener("click", () => {
       activeLevel = 0;
       activeCategory = null;
-      mode = "practice";
       currentIndex = 0;
       queue = buildQueue(state, 0);
       renderLevelNav(state);
@@ -488,7 +522,6 @@ function renderLevelNav(state) {
       btn.addEventListener("click", () => {
         activeLevel = ch;
         activeCategory = null;
-        mode = "practice";
         currentIndex = 0;
         queue = buildQueue(state, ch);
         renderLevelNav(state);
@@ -507,22 +540,30 @@ function renderLevelNav(state) {
     if (i === activeLevel) btn.classList.add("active");
     if (isLevelCompleted(state, i)) btn.classList.add("completed");
     else if (!isLevelUnlocked(state, i)) btn.classList.add("locked");
-    else if (isQuizReady(state, i)) btn.classList.add("quiz-ready");
+    else if (phase1Done(state, i)) btn.classList.add("phase-two");
     btn.addEventListener("click", () => {
       if (!isLevelUnlocked(state, i) && !isLevelCompleted(state, i)) return;
-      activeLevel = i;
-      activeCategory = null;
-      mode = "practice";
-      currentIndex = 0;
-      queue = buildQueue(state, i);
-      renderLevelNav(state);
-      renderCategoryBar(state);
-      showNext(state);
+      goToLevel(i);
     });
     nav.appendChild(btn);
   }
   const activeBtn = nav.querySelector(".level-btn.active");
   if (activeBtn) nav.scrollLeft = activeBtn.offsetLeft - nav.offsetLeft - (nav.clientWidth - activeBtn.offsetWidth) / 2;
+}
+
+function goToLevel(lvl) {
+  const state = loadState();
+  activeLevel = lvl;
+  activeCategory = null;
+  pendingTransition = null;
+  practiceMode = defaultPracticeMode(state, lvl);
+  currentIndex = 0;
+  queue = buildQueue(state, lvl);
+  renderModeBar();
+  renderLevelNav(state);
+  renderCategoryBar(state);
+  updateSessionProgress(state);
+  showNext(state);
 }
 
 function updateStreakUI(state) {
@@ -560,10 +601,22 @@ function updateVacationUI() {
   $("vacationFill").style.width = pct + "%";
 }
 
-function updateSessionProgress() {
+function updateSessionProgress(state) {
   const sp = $("sessionProgress");
-  if (currentSubject !== "pm") { sp.classList.add("hidden"); return; }
   sp.classList.remove("hidden");
+  if (currentSubject === "espanol") {
+    state = state || loadState();
+    const words = wordsForLevel(activeLevel);
+    const es = words.filter((w) => getWP(state, w.id).esCorrect >= cfg().esNlTarget).length;
+    const nl = words.filter((w) => getWP(state, w.id).nlCorrect >= 1).length;
+    let label, pct;
+    if (isLevelCompleted(state, activeLevel)) { label = `Level ${activeLevel} voltooid ✓ — blijf herhalen`; pct = 100; }
+    else if (es < words.length) { label = `Stap 1 · ES → NL: ${es}/${words.length} woorden ${cfg().esNlTarget}× goed`; pct = es / words.length * 50; }
+    else { label = `Stap 2 · NL → ES: ${nl}/${words.length} woorden goed`; pct = 50 + nl / words.length * 50; }
+    $("sessionLabel").textContent = label;
+    $("sessionFill").style.width = pct + "%";
+    return;
+  }
   const pct = Math.min(100, (sessionCards / cfg().cardsPerSession) * 100);
   $("sessionLabel").textContent = `${sessionCards}/${cfg().cardsPerSession} deze sessie`;
   $("sessionFill").style.width = pct + "%";
@@ -573,10 +626,9 @@ function updateStatsUI(state) {
   const items = currentSubject === "pm" ? allWords : allWords.filter((w) => isLevelUnlocked(state, w.level));
   let nNew = 0, nLearn = 0, nMaster = 0;
   items.forEach((w) => {
-    const b = getWP(state, w.id).box;
-    if (b === 0) nNew++;
-    else if (b < 3) nLearn++;
-    else nMaster++;
+    if (isMastered(state, w)) nMaster++;
+    else if (getWP(state, w.id).box === 0) nNew++;
+    else nLearn++;
   });
   $("statNew").textContent = nNew;
   $("statLearning").textContent = nLearn;
@@ -634,7 +686,7 @@ function renderLevelChart(state) {
     for (let i = 1; i <= cfg().levelCount; i++) {
       if (!isLevelUnlocked(state, i)) continue;
       const words = wordsForLevel(i);
-      const mastered = words.filter((w) => getWP(state, w.id).box >= 3).length;
+      const mastered = words.filter((w) => isMastered(state, w)).length;
       const pct = Math.round((mastered / words.length) * 100);
       const color = isLevelCompleted(state, i) ? "var(--easy)" : "var(--accent)";
       $("levelChart").innerHTML += `
@@ -711,11 +763,11 @@ function renderOverviewStats(state) {
   const items = currentSubject === "pm" ? allWords : allWords.filter((w) => isLevelUnlocked(state, w.level));
   const total = allWords.length;
   const reviewed = items.filter((w) => getWP(state, w.id).lastReviewed).length;
-  const mastered = items.filter((w) => getWP(state, w.id).box >= 3).length;
+  const mastered = items.filter((w) => isMastered(state, w)).length;
   const daysLeft = daysBetween(todayStr(), cfg().targetDate);
 
   if (currentSubject === "espanol") {
-    const active = items.filter((w) => (getWP(state, w.id).revBox || 0) >= 3).length;
+    const active = items.filter((w) => getWP(state, w.id).nlCorrect >= 1).length;
     const levelsComplete = (state.completedLevels || []).length;
     $("overviewStats").innerHTML = `
       <div class="overview-stat"><div class="overview-stat-value">${reviewed}</div><div class="overview-stat-label">Geoefend</div></div>
@@ -746,20 +798,33 @@ function renderOverviewStats(state) {
 }
 
 // ─── Card Rendering: Español ───
-// quiz = true: altijd Spaans tonen, zonder de invoer van de gekozen oefenmodus
-function renderEspanolCard(word, state, quiz = false) {
+// ES → NL: Spaans tonen, Nederlands typen · NL → ES en Zinnen: Nederlands tonen, Spaans typen
+function renderEspanolCard(word, state) {
   revealed = false;
+  answered = false;
+  pendingWrong = false;
   if (clozeTimer) { clearTimeout(clozeTimer); clozeTimer = null; }
   hideAllContainers();
 
-  const toSpanish = !quiz && isProductionMode();
+  const toSpanish = practiceMode !== "es-nl";
   const showWord = toSpanish ? word.dutch : word.spanish;
   const hiddenWord = toSpanish ? word.spanish : word.dutch;
+  const wp = getWP(state, word.id);
+
+  let tag;
+  if (reviewMode) tag = '<span class="card-tag">Herhaling</span>';
+  else if (practiceMode === "es-nl") {
+    const target = cfg().esNlTarget;
+    const dots = Array.from({ length: target }, (_, i) => `<span class="dot${i < wp.esCorrect ? " on" : ""}"></span>`).join("");
+    tag = `<span class="word-progress" title="${wp.esCorrect}/${target} keer goed">${dots}</span>`;
+  } else if (practiceMode === "nl-es") tag = '<span class="card-tag">NL → ES</span>';
+  else tag = '<span class="card-tag">Zinnen</span>';
 
   $("cardContainer").innerHTML = `
     <div class="flashcard">
       <img class="card-image" src="${word.image}" alt="" loading="eager" onerror="this.style.display='none'">
       <div class="card-body">
+        <div class="card-tag-row">${tag}</div>
         <div class="word-spanish">${showWord}</div>
         <div class="word-dutch hidden" id="dutchWord">${hiddenWord}</div>
         <div class="word-example hidden" id="exampleWord">${word.example || ""}</div>
@@ -767,25 +832,19 @@ function renderEspanolCard(word, state, quiz = false) {
           <button class="btn-icon${toSpanish ? " hidden" : ""}" id="btnAudio" aria-label="Audio">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
           </button>
-          <button class="btn-reveal" id="btnReveal">Toon vertaling</button>
         </div>
       </div>
     </div>
   `;
-
   $("btnAudio").addEventListener("click", () => playAudio(word));
-  $("btnReveal").addEventListener("click", () => revealCard());
-  if (quiz) return;
 
-  if (practiceMode === "type") {
-    $("btnReveal").style.display = "none";
-    $("typeContainer").classList.remove("hidden");
-    $("typeInput").value = "";
-    $("typeFeedback").classList.add("hidden");
-    $("typeInput").focus();
-  } else if (practiceMode === "cloze") {
-    renderCloze(word);
-  }
+  if (practiceMode === "cloze") { renderCloze(word); return; }
+  $("typeContainer").classList.remove("hidden");
+  $("typeInput").value = "";
+  $("typeInput").readOnly = false;
+  $("typeInput").placeholder = toSpanish ? "Typ het Spaanse woord..." : "Typ de Nederlandse vertaling...";
+  $("typeFeedback").classList.add("hidden");
+  $("typeInput").focus();
 }
 
 // ─── Card Rendering: PM ───
@@ -1011,7 +1070,7 @@ function revealPMCard(ratingType) {
 function hideAllContainers() {
   $("ratingContainer").classList.add("hidden");
   $("ratingContainer3").classList.add("hidden");
-  $("quizContainer").classList.add("hidden");
+  $("wrongActions").classList.add("hidden");
   $("typeContainer").classList.add("hidden");
   $("clozeContainer").classList.add("hidden");
   $("mcContainer").classList.add("hidden");
@@ -1061,11 +1120,10 @@ function clozeShowSentence(word) {
 }
 
 function renderCloze(word) {
-  if (!clozeFor(word)) { revealCard(); return; }
-  $("btnReveal").style.display = "none";
   $("clozeContainer").classList.remove("hidden");
   $("clozeTranslation").textContent = "";
   $("clozeInput").value = "";
+  $("clozeInput").readOnly = false;
   $("clozeFeedback").classList.add("hidden");
   $("btnPeek").onclick = () => clozeShowSentence(word);
   clozeShowSentence(word);
@@ -1073,15 +1131,14 @@ function renderCloze(word) {
 
 function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
-function revealCard() {
-  if (revealed) return;
+// Español: vertaling, voorbeeldzin en audio tonen na het nakijken
+function revealAnswer() {
   revealed = true;
   if (clozeTimer) { clearTimeout(clozeTimer); clozeTimer = null; }
   const d = $("dutchWord"), e = $("exampleWord"), a = $("btnAudio");
   if (d) d.classList.remove("hidden");
   if (e) e.classList.remove("hidden");
   if (a) a.classList.remove("hidden");
-  $("ratingContainer").classList.remove("hidden");
 }
 
 function animateOut(cb) {
@@ -1091,34 +1148,46 @@ function animateOut(cb) {
 }
 
 // ─── Check answers ───
-function checkTypeAnswer(state) {
-  const word = queue[currentIndex];
-  if (!word || revealed) return;
-  const result = checkAnswer($("typeInput").value, [word.spanish], ARTICLES_ES);
-  const fb = $("typeFeedback");
+// Goed → na korte pauze "makkelijk". Fout → antwoord tonen en wachten op "Verder" ("moeilijk")
+// of "Ik had het goed" (bv. een synoniem dat niet in de lijst staat).
+function handleResult(word, result, correctText, feedbackEl, inputEl) {
+  answered = true;
+  inputEl.readOnly = true;
+  revealAnswer();
   if (result) {
-    fb.textContent = answerFeedback(result, word.spanish); fb.className = "quiz-feedback correct";
-    revealCard(); setTimeout(() => rateWord("easy", loadState()), result === "exact" ? 800 : 1800);
+    feedbackEl.textContent = answerFeedback(result, correctText); feedbackEl.className = "quiz-feedback correct";
+    setTimeout(() => recordAnswer(word, true), result === "exact" ? 900 : 1800);
   } else {
-    fb.textContent = `Fout! Het was: ${word.spanish}`; fb.className = "quiz-feedback wrong";
-    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1500);
+    feedbackEl.textContent = inputEl.value.trim() ? `Fout! Het is: ${correctText}` : `Het is: ${correctText}`;
+    feedbackEl.className = "quiz-feedback wrong";
+    pendingWrong = true;
+    $("wrongActions").classList.remove("hidden");
   }
 }
 
-function checkClozeAnswer(state) {
+function checkTypedAnswer() {
+  const word = queue[currentIndex];
+  if (!word || answered) return;
+  const toSpanish = practiceMode === "nl-es";
+  const correctText = toSpanish ? word.spanish : word.dutch;
+  const result = checkAnswer($("typeInput").value, [correctText], toSpanish ? ARTICLES_ES : ARTICLES_NL);
+  handleResult(word, result, correctText, $("typeFeedback"), $("typeInput"));
+}
+
+function checkClozeAnswer() {
   const word = queue[currentIndex];
   const cloze = word && clozeFor(word);
-  if (!cloze || revealed) return;
+  if (!cloze || answered || $("clozeInput").classList.contains("hidden")) return;
   const result = checkAnswer($("clozeInput").value, [cloze.answer, word.spanish], ARTICLES_ES);
-  const fb = $("clozeFeedback");
   document.querySelectorAll(".cloze-blank").forEach((el) => el.textContent = cloze.answer);
-  if (result) {
-    fb.textContent = answerFeedback(result, cloze.answer); fb.className = "quiz-feedback correct";
-    revealCard(); setTimeout(() => rateWord("easy", loadState()), result === "exact" ? 800 : 1800);
-  } else {
-    fb.textContent = `Fout! Het was: ${cloze.answer}`; fb.className = "quiz-feedback wrong";
-    revealCard(); setTimeout(() => rateWord("hard", loadState()), 1500);
-  }
+  handleResult(word, result, cloze.answer, $("clozeFeedback"), $("clozeInput"));
+}
+
+function continueAfterWrong(override) {
+  if (!pendingWrong) return;
+  pendingWrong = false;
+  $("wrongActions").classList.add("hidden");
+  recordAnswer(queue[currentIndex], override);
 }
 
 function checkFillinAnswer(state) {
@@ -1150,11 +1219,7 @@ function rateWord(result, state) {
   const wp = getWP(state, word.id);
   const intervals = cfg().leitnerIntervals;
 
-  if (isProductionMode()) {
-    const box = wp.revBox || 0;
-    wp.revBox = result === "easy" ? Math.min(5, box + 1) : Math.max(1, box - 1);
-    wp.revNext = addDays(today, result === "easy" ? intervals[wp.revBox] : intervals[1]);
-  } else if (result === "easy") {
+  if (result === "easy") {
     wp.box = Math.min(5, wp.box + 1);
     wp.nextReview = addDays(today, intervals[wp.box] || 42);
     const isNew = wp.correctCount === 0;
@@ -1162,7 +1227,6 @@ function rateWord(result, state) {
     if (isNew) {
       if (state.todayStats.date === today) state.todayStats.correctCount++;
       else state.todayStats = { date: today, correctCount: 1 };
-      if (currentSubject === "espanol") checkStreakGoal(state);
     }
   } else if (result === "partial") {
     wp.nextReview = addDays(today, 1);
@@ -1176,12 +1240,9 @@ function rateWord(result, state) {
   addHistory(state, today, state.todayStats.correctCount);
   saveState(state);
 
-  if (currentSubject === "pm") {
-    sessionCards++;
-    checkPMSession(state);
-    updateSessionProgress();
-  }
-
+  sessionCards++;
+  checkPMSession(state);
+  updateSessionProgress();
   updateDailyUI(state);
   updateStatsUI(state);
   updateStreakUI(state);
@@ -1189,138 +1250,148 @@ function rateWord(result, state) {
   animateOut(() => { currentIndex++; showNext(state); });
 }
 
-// ─── Quiz (Español only) ───
-function startQuiz(state, lvl) {
-  mode = "quiz";
-  quizWords = [...wordsForLevel(lvl)]; shuffle(quizWords);
-  quizIndex = 0; quizErrors = 0;
-  hideAllContainers();
-  showQuizWord(state);
-}
-
-function showQuizWord(state) {
-  rating = false;
-  if (quizIndex >= quizWords.length) {
-    if (quizErrors === 0) {
-      if (!(state.completedLevels || []).includes(activeLevel)) {
-        if (!state.completedLevels) state.completedLevels = [];
-        state.completedLevels.push(activeLevel);
-      }
-      if (activeLevel < cfg().levelCount) state.currentLevel = Math.max(state.currentLevel || 1, activeLevel + 1);
-      saveState(state);
-      renderLevelNav(state);
-      showQuizComplete(state);
-    } else { showQuizFailed(state); }
-    return;
-  }
-  const word = quizWords[quizIndex];
-  renderEspanolCard(word, state, true);
-  $("dutchWord").classList.remove("hidden");
-  $("dutchWord").textContent = "???";
-  const ex = $("exampleWord");
-  if (ex) { ex.classList.remove("hidden"); ex.textContent = word.example || ""; }
-  $("quizContainer").classList.remove("hidden");
-  $("quizProgress").textContent = `Quiz: ${quizIndex + 1}/${quizWords.length} (${quizErrors} fouten)`;
-  $("quizInput").value = "";
-  $("quizInput").focus();
-  $("quizFeedback").classList.add("hidden");
-  $("btnReveal").style.display = "none";
-}
-
-function checkQuizAnswer(state) {
-  const word = quizWords[quizIndex];
-  if (!word || rating) return;
+// Español: goed = makkelijk (box omhoog), fout = moeilijk (box omlaag)
+function recordAnswer(word, correct) {
+  if (!word || rating || queue[currentIndex] !== word) return;
   rating = true;
-  const result = checkAnswer($("quizInput").value, [word.dutch], ARTICLES_NL);
-  const fb = $("quizFeedback");
-  if (result) {
-    fb.textContent = answerFeedback(result, word.dutch); fb.className = "quiz-feedback correct";
-    quizIndex++;
-    setTimeout(() => animateOut(() => showQuizWord(state)), result === "exact" ? 600 : 1500);
+
+  const state = loadState();
+  updateStreak(state); // dag kan omgeslagen zijn terwijl de app openstond
+  const today = todayStr();
+  const wasPhase1 = phase1Done(state, activeLevel);
+  const wp = getWP(state, word.id);
+
+  if (correct) {
+    wp.box = Math.min(5, wp.box + 1);
+    if (wp.correctCount === 0) {
+      state.todayStats.correctCount++; // dagdoel telt nieuwe woorden
+      checkStreakGoal(state);
+    }
+    wp.correctCount++;
+    if (practiceMode === "es-nl") wp.esCorrect++;
+    if (practiceMode === "nl-es") wp.nlCorrect++;
   } else {
-    fb.textContent = `Fout! Het was: ${word.dutch}`; fb.className = "quiz-feedback wrong";
-    quizErrors++; quizIndex++;
-    $("quizProgress").textContent = `Quiz: ${quizIndex}/${quizWords.length} (${quizErrors} fouten)`;
-    setTimeout(() => animateOut(() => showQuizWord(state)), 1500);
+    wp.box = Math.max(1, wp.box - 1);
   }
+  wp.lastReviewed = today;
+  state.wordProgress[word.id] = wp;
+
+  if (practiceMode === "es-nl" && !wasPhase1 && phase1Done(state, activeLevel)) {
+    pendingTransition = "phase1";
+  } else if (practiceMode === "nl-es" && !isLevelCompleted(state, activeLevel) && phase2Done(state, activeLevel)) {
+    if (!state.completedLevels) state.completedLevels = [];
+    state.completedLevels.push(activeLevel);
+    state.currentLevel = Math.min(cfg().levelCount, Math.max(state.currentLevel || 1, activeLevel + 1));
+    pendingTransition = "level";
+  }
+
+  addHistory(state, today, state.todayStats.correctCount);
+  saveState(state);
+  requeue(state, word, correct);
+
+  updateDailyUI(state);
+  updateStatsUI(state);
+  updateStreakUI(state);
+  updateSessionProgress(state);
+
+  animateOut(() => { currentIndex++; showNext(state); });
 }
 
-function showQuizComplete(state) {
-  $("quizContainer").classList.add("hidden");
+// ─── Tussenschermen (Español) ───
+function showPhase1Complete() {
+  const n = wordsForLevel(activeLevel).length;
+  $("cardContainer").innerHTML = `
+    <div class="done-screen"><div class="done-icon">🎯</div><h2>Je hebt alle woorden gehad!</h2>
+    <p>Alle ${n} woorden van Level ${activeLevel} heb je ${cfg().esNlTarget}× goed vertaald.<br>
+    Nu andersom: je ziet het Nederlandse woord en typt het Spaans.<br>Heb je ze allemaal 1× goed, dan gaat Level ${activeLevel + 1} open.</p>
+    <button class="btn-action" id="btnTransition">Volgende: NL → ES</button></div>
+  `;
+  $("btnTransition").addEventListener("click", () => setEspanolMode("nl-es"));
+}
+
+function showLevelComplete() {
+  const last = activeLevel >= cfg().levelCount;
   $("cardContainer").innerHTML = `
     <div class="done-screen"><div class="done-icon">🏆</div><h2>Level ${activeLevel} voltooid!</h2>
-    <p>Alle woorden foutloos doorlopen.<br>Level ${activeLevel + 1} is nu ontgrendeld!</p>
-    <button class="btn-action" id="btnNextLevel">Ga naar Level ${activeLevel + 1}</button></div>
+    <p>Je kent alle woorden in beide richtingen.<br>${last ? "Dat was het laatste level — ¡felicidades!" : `Level ${activeLevel + 1} is nu ontgrendeld!`}</p>
+    <button class="btn-action" id="btnTransition">${last ? "Blijf herhalen" : `Ga naar Level ${activeLevel + 1}`}</button></div>
   `;
-  $("btnNextLevel")?.addEventListener("click", () => {
-    activeLevel = Math.min(cfg().levelCount, activeLevel + 1);
-    mode = "practice"; currentIndex = 0;
-    queue = buildQueue(state, activeLevel);
-    renderLevelNav(state); renderCategoryBar(state); showNext(state);
-  });
+  showSessionCelebration();
+  $("btnTransition").addEventListener("click", () => goToLevel(Math.min(cfg().levelCount, activeLevel + 1)));
 }
 
-function showQuizFailed(state) {
-  $("quizContainer").classList.add("hidden");
+function showEspanolEmpty(state) {
+  let icon = "📚", title, text, button = null;
+  if (practiceMode === "nl-es") {
+    const words = wordsForLevel(activeLevel);
+    const es = words.filter((w) => getWP(state, w.id).esCorrect >= cfg().esNlTarget).length;
+    icon = "🔒"; title = "NL → ES is nog op slot";
+    text = `Vertaal eerst alle woorden van Level ${activeLevel} ${cfg().esNlTarget}× goed bij ES → NL.<br>Je bent op ${es}/${words.length}.`;
+    button = { label: "Naar ES → NL", action: () => setEspanolMode("es-nl") };
+  } else if (practiceMode === "cloze") {
+    title = "Nog geen zinnen";
+    text = `Zinnen gebruikt woorden die je al ${cfg().esNlTarget}× goed hebt bij ES → NL${activeCategory ? ` (${activeCategory})` : ""}.`;
+    button = { label: "Naar ES → NL", action: () => setEspanolMode("es-nl") };
+  } else {
+    icon = "✅"; title = `Alle woorden van ${activeCategory} gehad`;
+    text = "Ga verder met de andere woorden van dit level.";
+    button = { label: "Verder met alle woorden", action: () => { activeCategory = null; rebuildAndShow(loadState()); } };
+  }
   $("cardContainer").innerHTML = `
-    <div class="done-screen"><div class="done-icon">😤</div><h2>Niet gehaald</h2>
-    <p>${quizErrors} fout${quizErrors > 1 ? "en" : ""} gemaakt. Je moet ze allemaal foutloos doorlopen.</p>
-    <button class="btn-action" id="btnRetryQuiz">Opnieuw</button>
-    <button class="btn-action" id="btnBackPractice" style="background:var(--surface);margin-left:8px">Terug</button></div>
+    <div class="done-screen"><div class="done-icon">${icon}</div><h2>${title}</h2><p>${text}</p>
+    ${button ? `<button class="btn-action" id="btnTransition">${button.label}</button>` : ""}</div>
   `;
-  $("btnRetryQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
-  $("btnBackPractice")?.addEventListener("click", () => {
-    mode = "practice"; currentIndex = 0;
-    queue = buildQueue(state, activeLevel); showNext(state);
-  });
+  if (button) $("btnTransition").addEventListener("click", button.action);
 }
 
 // ─── Show Next ───
 function showNext(state) {
-  if (mode === "quiz") return;
   rating = false;
 
-  if (currentIndex >= queue.length) {
-    hideAllContainers();
-    if (currentSubject === "espanol") {
-      const qReady = isQuizReady(state, activeLevel) && !isLevelCompleted(state, activeLevel);
-      if (qReady && !activeCategory) {
-        $("cardContainer").innerHTML = `
-          <div class="done-screen"><div class="done-icon">📝</div><h2>Quiz beschikbaar!</h2>
-          <p>Alle woorden van Level ${activeLevel} geoefend.<br>Doe de quiz om het volgende level te ontgrendelen.</p>
-          <button class="btn-action" id="btnStartQuiz">Start Quiz</button></div>
-        `;
-        $("btnStartQuiz")?.addEventListener("click", () => startQuiz(state, activeLevel));
-      } else if (isProductionMode() && !wordsForLevel(activeLevel).some((w) => isKnown(state, w))) {
-        $("cardContainer").innerHTML = `
-          <div class="done-screen"><div class="done-icon">📚</div><h2>Nog geen woorden geleerd</h2>
-          <p>Hier oefen je alleen woorden die je bij Flashcards op <b>makkelijk</b> hebt gezet.<br>Leer eerst een paar woorden van Level ${activeLevel}.</p></div>
-        `;
-      } else {
-        $("cardContainer").innerHTML = `
-          <div class="done-screen"><div class="done-icon">🎉</div><h2>Klaar voor vandaag!</h2>
-          <p>Geen woorden meer voor nu${activeCategory ? ` (${activeCategory})` : ""}.<br>Kom morgen terug of kies een ander level.</p></div>
-        `;
-      }
-    } else {
-      const sessionDone = sessionCards >= cfg().cardsPerSession;
-      $("cardContainer").innerHTML = `
-        <div class="done-screen">
-          <div class="done-icon">${sessionDone ? "🎉" : "✅"}</div>
-          <h2>${sessionDone ? "Sessie voltooid!" : "Alle kaarten gehad!"}</h2>
-          <p>${sessionDone ? `Je hebt ${sessionCards} kaarten geoefend deze sessie.` : "Er zijn geen kaarten meer voor nu."}<br>
-          ${sessionDone ? "Goed bezig! Kom over een paar dagen terug." : "Probeer later opnieuw of wissel van hoofdstuk."}</p>
-        </div>
-      `;
-      if (sessionDone) showSessionCelebration();
+  if (currentSubject === "espanol") {
+    if (pendingTransition) {
+      hideAllContainers();
+      const t = pendingTransition;
+      pendingTransition = null;
+      renderModeBar();
+      renderLevelNav(state);
+      if (t === "phase1") showPhase1Complete();
+      else showLevelComplete();
+      return;
     }
+    // Nooit "klaar voor vandaag": is de ronde op, dan begint een nieuwe ronde
+    if (currentIndex >= queue.length) {
+      currentIndex = 0;
+      queue = buildQueue(state, activeLevel);
+    }
+    if (queue.length === 0) {
+      hideAllContainers();
+      showEspanolEmpty(state);
+      renderLevelNav(state);
+      return;
+    }
+    renderEspanolCard(queue[currentIndex], state);
     renderLevelNav(state);
     return;
   }
 
-  const card = queue[currentIndex];
-  if (currentSubject === "pm") renderPMCard(card, state);
-  else renderEspanolCard(card, state);
+  if (currentIndex >= queue.length) {
+    hideAllContainers();
+    const sessionDone = sessionCards >= cfg().cardsPerSession;
+    $("cardContainer").innerHTML = `
+      <div class="done-screen">
+        <div class="done-icon">${sessionDone ? "🎉" : "✅"}</div>
+        <h2>${sessionDone ? "Sessie voltooid!" : "Alle kaarten gehad!"}</h2>
+        <p>${sessionDone ? `Je hebt ${sessionCards} kaarten geoefend deze sessie.` : "Er zijn geen kaarten meer voor nu."}<br>
+        ${sessionDone ? "Goed bezig! Kom over een paar dagen terug." : "Probeer later opnieuw of wissel van hoofdstuk."}</p>
+      </div>
+    `;
+    if (sessionDone) showSessionCelebration();
+    renderLevelNav(state);
+    return;
+  }
+
+  renderPMCard(queue[currentIndex], state);
   renderLevelNav(state);
 }
 
@@ -1337,9 +1408,9 @@ function switchSubject(subject) {
   document.title = `${cfg().title} — Leren`;
   updateKeyHints();
 
-  practiceMode = currentSubject === "pm" ? "mix" : "flashcard";
+  practiceMode = "mix";
   activeCategory = null;
-  mode = "practice";
+  pendingTransition = null;
   currentIndex = 0;
   sessionCards = 0;
   allWords = [];
@@ -1357,6 +1428,7 @@ function switchSubject(subject) {
         activeLevel = 0;
       } else {
         activeLevel = state.currentLevel || 1;
+        practiceMode = defaultPracticeMode(state, activeLevel);
       }
 
       queue = buildQueue(state, activeLevel);
@@ -1367,7 +1439,7 @@ function switchSubject(subject) {
       updateStreakUI(state);
       updateDailyUI(state);
       updateVacationUI();
-      updateSessionProgress();
+      updateSessionProgress(state);
       updateStatsUI(state);
       showNext(state);
     });
@@ -1380,39 +1452,34 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  if (mode === "quiz" && currentSubject === "espanol") {
-    if (e.key === "Enter") { e.preventDefault(); checkQuizAnswer(loadState()); }
-    return;
-  }
-
-  if (currentSubject === "espanol" && practiceMode === "type" && !revealed) {
-    if (e.key === "Enter") { e.preventDefault(); checkTypeAnswer(loadState()); }
-    return;
-  }
-
-  if (currentSubject === "espanol" && practiceMode === "cloze" && !revealed) {
-    if (e.key === "Enter") { e.preventDefault(); checkClozeAnswer(loadState()); }
-    return;
-  }
-
-  if (currentSubject === "pm") {
-    const card = queue[currentIndex];
-    if (!card) return;
-    if (card.type === "fillin" && e.key === "Enter") {
-      e.preventDefault(); checkFillinAnswer(loadState()); return;
+  if (currentSubject === "espanol") {
+    const word = queue[currentIndex];
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const transition = $("btnTransition");
+      if (transition) transition.click();
+      else if (pendingWrong) continueAfterWrong(false);
+      else if (practiceMode === "cloze") checkClozeAnswer();
+      else checkTypedAnswer();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (word && (answered || practiceMode === "es-nl")) playAudio(word);
     }
+    return;
+  }
+
+  const card = queue[currentIndex];
+  if (card?.type === "fillin" && e.key === "Enter") {
+    e.preventDefault(); checkFillinAnswer(loadState()); return;
   }
 
   if (e.target.tagName === "INPUT") return; // spaties/pijltjes in invoervelden niet afvangen
 
   const state = loadState();
-  const word = queue[currentIndex];
-
   switch (e.key) {
     case " ":
       e.preventDefault();
-      if (currentSubject === "pm") { if (["open", "case"].includes(word?.type)) revealPMCard("self"); }
-      else if (practiceMode === "flashcard" || practiceMode === "reverse") revealCard();
+      if (["open", "case"].includes(card?.type)) revealPMCard("self");
       break;
     case "ArrowLeft":
       e.preventDefault();
@@ -1424,8 +1491,7 @@ document.addEventListener("keydown", (e) => {
       break;
     case "ArrowDown":
       e.preventDefault();
-      if (currentSubject === "espanol") { if (word && (revealed || !isProductionMode())) playAudio(word); }
-      else if (revealed) rateWord("partial", state);
+      if (revealed) rateWord("partial", state);
       break;
   }
 });
@@ -1438,9 +1504,10 @@ $("btnHard").addEventListener("click", () => rateWord("hard", loadState()));
 $("btnGoed").addEventListener("click", () => rateWord("easy", loadState()));
 $("btnDeels").addEventListener("click", () => rateWord("partial", loadState()));
 $("btnNiet").addEventListener("click", () => rateWord("hard", loadState()));
-$("quizSubmit").addEventListener("click", () => checkQuizAnswer(loadState()));
-$("typeSubmit").addEventListener("click", () => checkTypeAnswer(loadState()));
-$("clozeSubmit").addEventListener("click", () => checkClozeAnswer(loadState()));
+$("typeSubmit").addEventListener("click", () => checkTypedAnswer());
+$("clozeSubmit").addEventListener("click", () => checkClozeAnswer());
+$("btnContinue").addEventListener("click", () => continueAfterWrong(false));
+$("btnOverride").addEventListener("click", () => continueAfterWrong(true));
 $("fillinSubmit").addEventListener("click", () => checkFillinAnswer(loadState()));
 
 document.querySelectorAll(".subject-btn").forEach((btn) => {
@@ -1453,7 +1520,7 @@ function updateKeyHints() {
   if (currentSubject === "pm") {
     hints.innerHTML = "<span>Spatie = toon</span><span>← niet geweten</span><span>↓ deels</span><span>→ goed</span>";
   } else {
-    hints.innerHTML = "<span>Spatie = toon</span><span>← moeilijk</span><span>→ makkelijk</span><span>↓ audio</span>";
+    hints.innerHTML = "<span>Enter = controleer / verder</span><span>leeg + Enter = weet ik niet</span><span>↓ audio</span>";
   }
 }
 
