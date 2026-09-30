@@ -12,8 +12,8 @@ const SUBJECTS = {
     leitnerIntervals: [0, 1, 2, 4, 7, 14],
     hasMic: true,
     hasLevels: true,
-    levelCount: 10,
-    wordsPerLevel: 100,
+    levelCount: 20,
+    levelVersion: 2,
     reviewPercent: 0.15,
   },
   pm: {
@@ -91,7 +91,7 @@ function defaultState() {
   if (currentSubject === "pm") {
     return { wordProgress: {}, sessions: [], history: [], weekStats: { week: getWeekStart(todayStr()), sessionCount: 0 }, todayStats: { date: todayStr(), correctCount: 0 } };
   }
-  return { wordProgress: {}, currentLevel: 1, completedLevels: [], streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 }, history: [] };
+  return { wordProgress: {}, currentLevel: 1, completedLevels: [], levelVersion: cfg().levelVersion, streak: { count: 0, lastCompletedDate: null }, todayStats: { date: todayStr(), correctCount: 0 }, history: [] };
 }
 
 function migrateState(state) {
@@ -101,6 +101,17 @@ function migrateState(state) {
         state.streak.lastCompletedDate = state.todayStats.date;
       }
       delete state.streak.lastDate;
+    }
+    if (state.levelVersion !== cfg().levelVersion) {
+      // Level indeling is gewijzigd: voltooide levels herberekenen op basis van woordvoortgang
+      state.completedLevels = [];
+      let lvl = 1;
+      while (lvl < cfg().levelCount && wordsForLevel(lvl).every((w) => getWP(state, w.id).box >= 3)) {
+        state.completedLevels.push(lvl);
+        lvl++;
+      }
+      state.currentLevel = lvl;
+      state.levelVersion = cfg().levelVersion;
     }
   }
   if (!state.history) state.history = [];
@@ -541,6 +552,8 @@ function renderLevelNav(state) {
     });
     nav.appendChild(btn);
   }
+  const activeBtn = nav.querySelector(".level-btn.active");
+  if (activeBtn) nav.scrollLeft = activeBtn.offsetLeft - nav.offsetLeft - (nav.clientWidth - activeBtn.offsetWidth) / 2;
 }
 
 function updateStreakUI(state) {
