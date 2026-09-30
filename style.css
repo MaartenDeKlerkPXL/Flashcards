@@ -385,6 +385,7 @@ body{
 .mc-container{width:100%;padding:8px 0}
 .mc-container.hidden{display:none}
 .mc-options{display:flex;flex-direction:column;gap:8px}
+.pm-question-label{font-size:.8rem;font-weight:600;color:var(--text-muted);margin-bottom:8px}
 .mc-option{
   width:100%;padding:14px 16px;border:2px solid var(--surface);
   background:var(--surface);border-radius:14px;
