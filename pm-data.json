@@ -126,7 +126,12 @@
     "chapterName": "Opstarten",
     "category": "project-vs-operations",
     "question": "Welke van de volgende activiteiten is een project?",
-    "options": ["Een nieuwe mobile app bouwen", "Regelmatige bugfixes en updates uitvoeren", "Dagelijks social media content plaatsen", "Standaard templates actueel houden"],
+    "options": [
+      "Een nieuwe mobile app bouwen",
+      "Regelmatige bugfixes en updates uitvoeren",
+      "Dagelijks social media content plaatsen",
+      "Standaard templates actueel houden"
+    ],
     "correct": 0,
     "explanation": "Een nieuwe app bouwen is uniek, heeft een specifiek eindresultaat en een start-/einddatum. De andere drie zijn routinematig (operations)."
   },
@@ -137,7 +142,12 @@
     "chapterName": "Opstarten",
     "category": "project-vs-operations",
     "question": "Welke activiteit is GEEN project?",
-    "options": ["Gebruikerssupport: tickets behandelen en kleine updates doorvoeren", "Een data-dashboard ontwikkelen", "Migratie naar een cloudomgeving", "Nieuwe branding ontwikkelen voor een startup"],
+    "options": [
+      "Gebruikerssupport: tickets behandelen en kleine updates doorvoeren",
+      "Een data-dashboard ontwikkelen",
+      "Migratie naar een cloudomgeving",
+      "Nieuwe branding ontwikkelen voor een startup"
+    ],
     "correct": 0,
     "explanation": "Gebruikerssupport is routinewerk zonder specifiek eindresultaat of einddatum — dat is operations."
   },
@@ -148,7 +158,12 @@
     "chapterName": "Opstarten",
     "category": "kenmerken",
     "question": "Wat is GEEN kenmerk van een project?",
-    "options": ["Het is routinematig en terugkerend", "Het is uniek", "Het heeft een specifiek eindresultaat", "Het heeft een duidelijke start- en einddatum"],
+    "options": [
+      "Het is routinematig en terugkerend",
+      "Het is uniek",
+      "Het heeft een specifiek eindresultaat",
+      "Het heeft een duidelijke start- en einddatum"
+    ],
     "correct": 0,
     "explanation": "Routinematig en terugkerend beschrijft operations, niet een project."
   },
@@ -159,7 +174,12 @@
     "chapterName": "Opstarten",
     "category": "resources",
     "question": "Welk type resource is 'een budget om experten aan te trekken'?",
-    "options": ["Financieel", "Materieel", "Menselijk", "Strategisch"],
+    "options": [
+      "Financieel",
+      "Materieel",
+      "Menselijk",
+      "Strategisch"
+    ],
     "correct": 0,
     "explanation": "Een budget is een financiële resource."
   },
@@ -170,7 +190,12 @@
     "chapterName": "Opstarten",
     "category": "programma",
     "question": "Wat is het verschil tussen een programma en een project?",
-    "options": ["Een programma is een groep logisch samenhorende projecten", "Een programma is een groter project", "Een programma heeft geen einddatum", "Een programma is hetzelfde als een portfolio"],
+    "options": [
+      "Een programma is een groep logisch samenhorende projecten",
+      "Een programma is een groter project",
+      "Een programma heeft geen einddatum",
+      "Een programma is hetzelfde als een portfolio"
+    ],
     "correct": 0,
     "explanation": "Een programma bestaat uit meerdere logisch samenhorende projecten die samen een bredere strategie dienen."
   },
@@ -181,7 +206,12 @@
     "chapterName": "Opstarten",
     "category": "veranderingen",
     "question": "Welke is een voorbeeld van een externe verandering?",
-    "options": ["Nieuwe privacywetgeving (GDPR)", "Management beslist tot reorganisatie", "Nieuwe strategische doelen bepalen", "Intern besluit om werkprocessen te optimaliseren"],
+    "options": [
+      "Nieuwe privacywetgeving (GDPR)",
+      "Management beslist tot reorganisatie",
+      "Nieuwe strategische doelen bepalen",
+      "Intern besluit om werkprocessen te optimaliseren"
+    ],
     "correct": 0,
     "explanation": "Nieuwe wetgeving komt van buiten de organisatie en kan niet gecontroleerd worden — dat is een externe verandering."
   },
@@ -289,7 +319,9 @@
     "category": "veranderingen",
     "sentence": "Projecten zijn het antwoord van bedrijven op ___.",
     "answer": "veranderingen",
-    "alternatives": ["verandering"]
+    "alternatives": [
+      "verandering"
+    ]
   },
   {
     "id": "h01-030",
@@ -299,7 +331,9 @@
     "category": "programma",
     "sentence": "De programmamanager bewaakt de link tussen de projecten en de ___.",
     "answer": "strategie",
-    "alternatives": ["business strategie"]
+    "alternatives": [
+      "business strategie"
+    ]
   },
   {
     "id": "h01-031",
@@ -309,7 +343,9 @@
     "category": "basisbegrippen",
     "sentence": "Als een initiatief niet voldoet aan de drie projectkenmerken, spreken we van dagelijks werk of ___.",
     "answer": "operations",
-    "alternatives": ["operaties"]
+    "alternatives": [
+      "operaties"
+    ]
   },
   {
     "id": "h01-032",
@@ -338,7 +374,12 @@
     "chapterName": "Opstarten",
     "category": "basisbegrippen",
     "question": "Welke van de volgende is GEEN voorbeeld van een eindproduct?",
-    "options": ["Een vergadering over het project", "Een app", "Een nieuwe organisatiestructuur", "Kennis"],
+    "options": [
+      "Een vergadering over het project",
+      "Een app",
+      "Een nieuwe organisatiestructuur",
+      "Kennis"
+    ],
     "correct": 0,
     "explanation": "Een vergadering is een activiteit, geen eindproduct. Een product kan kennis, een organisatiestructuur of een app zijn."
   },
@@ -349,7 +390,12 @@
     "chapterName": "Opstarten",
     "category": "kenmerken",
     "question": "Wanneer voldoet een roll-out project NIET aan alle kenmerken van een project?",
-    "options": ["Het is niet volledig uniek omdat de implementatie herhaald wordt", "Het heeft geen einddatum", "Het heeft geen eindresultaat", "Het is te klein om een project te zijn"],
+    "options": [
+      "Het is niet volledig uniek omdat de implementatie herhaald wordt",
+      "Het heeft geen einddatum",
+      "Het heeft geen eindresultaat",
+      "Het is te klein om een project te zijn"
+    ],
     "correct": 0,
     "explanation": "Roll-out projecten zijn de uitzondering op de uniekheid-regel: ze worden herhaald op verschillende locaties maar verlopen toch telkens anders."
   },
@@ -381,7 +427,138 @@
     "question": "Welk team werkt aan een project en welk aan operations?",
     "answer": "Team A werkt aan een project: het data-dashboard is uniek, heeft een specifiek eindresultaat en een deadline (einddatum). Team B doet operations: tickets behandelen is routinematig, terugkerend en heeft geen specifieke einddatum."
   },
-
+  {
+    "id": "h01-039",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "question": "Waarom zetten bedrijven in de gedigitaliseerde wereld projecten op?",
+    "options": [
+      "Om competitief te blijven bij snelle veranderingen die een gestructureerde aanpak vragen",
+      "Omdat projecten goedkoper zijn dan dagelijks werk",
+      "Omdat de wet het verplicht",
+      "Om het dagelijks werk (operations) te vervangen"
+    ],
+    "correct": 0,
+    "explanation": "Technologie (AI, IoT…) verandert razendsnel. Die veranderingen zijn geen 'business as usual': ze vragen een gestructureerde aanpak of zijn te groot om naast het normale werk te doen."
+  },
+  {
+    "id": "h01-040",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "question": "Een wettelijke verplichting om op de website een knop 'een datalek melden' te tonen. Wat voor verandering is dit?",
+    "options": [
+      "Een externe verandering",
+      "Een interne verandering",
+      "Operations",
+      "Een roll-out"
+    ],
+    "correct": 0,
+    "explanation": "Wetgeving gebeurt buiten de organisatie en kan niet door de organisatie gecontroleerd worden → externe verandering. Ook corona was een voorbeeld."
+  },
+  {
+    "id": "h01-041",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "veranderingen",
+    "question": "Een energiebedrijf beslist om voortaan ook zonnepanelen aan te bieden. Wat voor verandering is dit?",
+    "options": [
+      "Een interne verandering",
+      "Een externe verandering",
+      "Operations",
+      "Een programma"
+    ],
+    "correct": 0,
+    "explanation": "Het is een beslissing van het management (strategisch doel) → interne verandering. Strategische doelen vragen vaak ook operationele wijzigingen."
+  },
+  {
+    "id": "h01-042",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "project-vs-operations",
+    "question": "Welke activiteit is operations bij digitale vormgeving?",
+    "options": [
+      "Stijlbewaking: checken of visuals in lijn zijn met de branding guidelines",
+      "Een website voor een klant lanceren",
+      "Nieuwe branding ontwikkelen voor een startup",
+      "Campagnevisuals maken voor een seizoenscampagne"
+    ],
+    "correct": 0,
+    "explanation": "Stijlbewaking is terugkerend werk zonder uniek eindresultaat of einddatum. Andere voorbeelden: content updates, templatebeheer, asset-beheer, ad-hoc ondersteuning."
+  },
+  {
+    "id": "h01-043",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "question": "Welke taak hoort NIET bij een programmamanager?",
+    "options": [
+      "Zelf de code van de projecten schrijven",
+      "Prioriteiten bepalen en de consistentie bewaken",
+      "Afhankelijkheden tussen projecten bewaken",
+      "Rapporteren aan het management"
+    ],
+    "correct": 0,
+    "explanation": "De programmamanager bewaakt de link met de strategie, prioriteiten/consistentie, afhankelijkheden, de methodologie en rapporteert aan het management."
+  },
+  {
+    "id": "h01-044",
+    "type": "multichoice",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "question": "Waarom heb je programma's nodig naast projecten?",
+    "options": [
+      "Projecten beïnvloeden elkaar via gedeelde resources, systemen en processen",
+      "Projecten hebben geen einddatum",
+      "Een project mag maar één teamlid hebben",
+      "Programma's vervangen het dagelijks werk"
+    ],
+    "correct": 0,
+    "explanation": "Er lopen veel projecten tegelijk die elkaar beïnvloeden (gedeelde resources, systemen, bedrijfsprocessen). Daarom worden ze gezamenlijk en gestructureerd geleid in een programma."
+  },
+  {
+    "id": "h01-045",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "sentence": "Het product bevat alle functionaliteiten en features, het ___ is de weg ernaartoe.",
+    "answer": "project",
+    "alternatives": [
+      "het project"
+    ]
+  },
+  {
+    "id": "h01-046",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "basisbegrippen",
+    "sentence": "Een tussenproduct kan een doel op zich zijn, zeker in ___ ontwikkelstrategieën.",
+    "answer": "iteratieve",
+    "alternatives": [
+      "iteratief"
+    ]
+  },
+  {
+    "id": "h01-047",
+    "type": "fillin",
+    "chapter": 1,
+    "chapterName": "Opstarten",
+    "category": "programma",
+    "sentence": "Een programma wordt geleid door een ___.",
+    "answer": "programmamanager",
+    "alternatives": [
+      "programma manager"
+    ]
+  },
   {
     "id": "h02-001",
     "type": "definition",
@@ -519,7 +696,12 @@
     "chapterName": "Faseren",
     "category": "deliverables",
     "question": "Welke van de volgende is een deliverable?",
-    "options": ["Een UX design document", "De goedkeuring van het ontwerp", "De datum waarop testen starten", "Het moment dat het project halverwege is"],
+    "options": [
+      "Een UX design document",
+      "De goedkeuring van het ontwerp",
+      "De datum waarop testen starten",
+      "Het moment dat het project halverwege is"
+    ],
     "correct": 0,
     "explanation": "Een UX design document is een tastbaar resultaat dat opgeleverd wordt. De andere opties zijn milestones (checkpoints zonder doorlooptijd)."
   },
@@ -530,7 +712,12 @@
     "chapterName": "Faseren",
     "category": "deliverables",
     "question": "Welke van de volgende is een milestone?",
-    "options": ["Ontwerp is goedgekeurd", "Wireframes", "Customer journey map", "Testrapport"],
+    "options": [
+      "Ontwerp is goedgekeurd",
+      "Wireframes",
+      "Customer journey map",
+      "Testrapport"
+    ],
     "correct": 0,
     "explanation": "'Ontwerp is goedgekeurd' is een momentopname (checkpoint) zonder doorlooptijd. Wireframes, customer journey maps en testrapporten zijn deliverables (op te leveren producten)."
   },
@@ -541,7 +728,12 @@
     "chapterName": "Faseren",
     "category": "constraints",
     "question": "Hoeveel van de 3 hoofdfactoren (tijd, geld, scope) kun je maximaal tegelijk maximaliseren?",
-    "options": ["2, ten koste van de derde", "Alle 3 als je goed plant", "1, de andere twee lijden altijd", "0, er is altijd een trade-off"],
+    "options": [
+      "2, ten koste van de derde",
+      "Alle 3 als je goed plant",
+      "1, de andere twee lijden altijd",
+      "0, er is altijd een trade-off"
+    ],
     "correct": 0,
     "explanation": "Je kunt maximaal 2 van de 3 maximaliseren ten koste van de derde. Alle drie perfect halen is 'wishful thinking'."
   },
@@ -552,7 +744,12 @@
     "chapterName": "Faseren",
     "category": "constraints",
     "question": "Wat gebeurt er met veranderingskosten naarmate het project vordert?",
-    "options": ["Ze worden hoger", "Ze blijven gelijk", "Ze worden lager", "Ze zijn alleen relevant bij agile"],
+    "options": [
+      "Ze worden hoger",
+      "Ze blijven gelijk",
+      "Ze worden lager",
+      "Ze zijn alleen relevant bij agile"
+    ],
     "correct": 0,
     "explanation": "Hoe verder het project vordert, hoe duidelijker de scope en hoe hoger de kost van wijzigingen. Het product is bijna afgewerkt, dus aanpassingen zijn ingrijpender."
   },
@@ -563,7 +760,12 @@
     "chapterName": "Faseren",
     "category": "constraints",
     "question": "Welke methodologie heeft het GROOTSTE risico op hoge veranderingskosten?",
-    "options": ["Waterfall, want er is geen feedback tussen fases", "Agile, want er wordt constant gewijzigd", "Beide even groot", "Geen van beide, het hangt af van het team"],
+    "options": [
+      "Waterfall, want er is geen feedback tussen fases",
+      "Agile, want er wordt constant gewijzigd",
+      "Beide even groot",
+      "Geen van beide, het hangt af van het team"
+    ],
     "correct": 0,
     "explanation": "Waterfall heeft het grootste risico omdat er geen feedback is tussen de fases. Agile/SCRUM lost dit op door kleine stukken op te leveren en steeds feedback te vragen."
   },
@@ -574,7 +776,12 @@
     "chapterName": "Faseren",
     "category": "execution-vs-management",
     "question": "Wat hoort bij project MANAGEMENT en niet bij project execution?",
-    "options": ["Scope, budget en risico's bewaken en bijsturen", "Software code schrijven", "UX designs uitwerken", "Testcases uitvoeren"],
+    "options": [
+      "Scope, budget en risico's bewaken en bijsturen",
+      "Software code schrijven",
+      "UX designs uitwerken",
+      "Testcases uitvoeren"
+    ],
     "correct": 0,
     "explanation": "Project management gaat over sturen en bewaken (scope, budget, planning, kwaliteit, risico's, resources). Code schrijven, designs maken en testen zijn projectuitvoering."
   },
@@ -585,7 +792,12 @@
     "chapterName": "Faseren",
     "category": "constraints",
     "question": "Waarom is het opvolgen van 6 constraints een best practice?",
-    "options": ["Je detecteert problemen vroeger en maakt betere afwegingen", "Het is verplicht volgens de wet", "Het maakt het project goedkoper", "Het versnelt de development fase"],
+    "options": [
+      "Je detecteert problemen vroeger en maakt betere afwegingen",
+      "Het is verplicht volgens de wet",
+      "Het maakt het project goedkoper",
+      "Het versnelt de development fase"
+    ],
     "correct": 0,
     "explanation": "Met 6 constraints detecteer je problemen vroeger, maak je beslissingen transparanter, kun je gevolgen van wijzigingen beter inschatten en beheer je verwachtingen van stakeholders beter."
   },
@@ -692,7 +904,12 @@
     "category": "constraints",
     "sentence": "De drie basisvariabelen van de duivelsdriehoek zijn: tijd, ___ en scope.",
     "answer": "geld",
-    "alternatives": ["budget", "kosten", "kost", "middelen"]
+    "alternatives": [
+      "budget",
+      "kosten",
+      "kost",
+      "middelen"
+    ]
   },
   {
     "id": "h02-032",
@@ -702,7 +919,10 @@
     "category": "deliverables",
     "sentence": "Een milestone heeft geen ___ — het is een momentopname op de projecttijdlijn.",
     "answer": "doorlooptijd",
-    "alternatives": ["duur", "looptijd"]
+    "alternatives": [
+      "duur",
+      "looptijd"
+    ]
   },
   {
     "id": "h02-033",
@@ -712,7 +932,10 @@
     "category": "constraints",
     "sentence": "Hoe verder het project vordert, hoe ___ de kost bij wijzigingen.",
     "answer": "hoger",
-    "alternatives": ["groter", "duurder"]
+    "alternatives": [
+      "groter",
+      "duurder"
+    ]
   },
   {
     "id": "h02-034",
@@ -722,7 +945,9 @@
     "category": "constraints",
     "sentence": "Je kunt maximaal ___ van de 3 hoofdfactoren maximaliseren ten koste van de derde.",
     "answer": "2",
-    "alternatives": ["twee"]
+    "alternatives": [
+      "twee"
+    ]
   },
   {
     "id": "h02-035",
@@ -732,7 +957,9 @@
     "category": "execution-vs-management",
     "sentence": "Project ___ gaat over het sturen van het project zodat het gewenste resultaat binnen de afgesproken randvoorwaarden bereikt wordt.",
     "answer": "management",
-    "alternatives": ["projectmanagement"]
+    "alternatives": [
+      "projectmanagement"
+    ]
   },
   {
     "id": "h02-036",
@@ -752,7 +979,9 @@
     "category": "scope",
     "sentence": "De scope wordt beschreven in het ___ (Project Initiation Document).",
     "answer": "PID",
-    "alternatives": ["project initiation document"]
+    "alternatives": [
+      "project initiation document"
+    ]
   },
   {
     "id": "h02-038",
@@ -761,8 +990,15 @@
     "chapterName": "Faseren",
     "category": "projectfases",
     "question": "Zet de projectfases in de juiste volgorde:",
-    "items": ["Initiatie", "Analyse", "Design", "Development", "Testing", "Implementatie"],
-    "explanation": "Dit is de standaard volgorde van projectfases in de watervalmethode."
+    "items": [
+      "Initiatie",
+      "Planning",
+      "Analyse (ontwerp)",
+      "Construct (implementatie)",
+      "Test",
+      "Turnover"
+    ],
+    "explanation": "Initiatie → Planning → Analyse (ontwerp) → Construct (implementatie) → Test → Turnover. De fases overlappen deels en er is terugkoppeling tussen opeenvolgende fases."
   },
   {
     "id": "h02-039",
@@ -771,7 +1007,12 @@
     "chapterName": "Faseren",
     "category": "deliverables",
     "question": "Welke van de volgende is GEEN deliverable?",
-    "options": ["Testen zijn uitgevoerd", "Wireframes", "Customer journey map", "Vergaderverslag"],
+    "options": [
+      "Testen zijn uitgevoerd",
+      "Wireframes",
+      "Customer journey map",
+      "Vergaderverslag"
+    ],
     "correct": 0,
     "explanation": "'Testen zijn uitgevoerd' is een milestone (checkpoint). Wireframes, customer journey maps en vergaderverslagen zijn deliverables (opgeleverde producten)."
   },
@@ -782,7 +1023,12 @@
     "chapterName": "Faseren",
     "category": "constraints",
     "question": "Wanneer zijn de meeste teamleden aan het werk op een project?",
-    "options": ["Tijdens design, development en testing", "Bij de start van het project", "Tijdens de implementatie", "Na de oplevering"],
+    "options": [
+      "Tijdens design, development en testing",
+      "Bij de start van het project",
+      "Tijdens de implementatie",
+      "Na de oplevering"
+    ],
     "correct": 0,
     "explanation": "De staffing curve laat zien dat er gradueel meer teamleden bijkomen met een hoogtepunt tijdens design, development en testing. Daarna neemt het af."
   },
@@ -803,5 +1049,1487 @@
     "category": "constraints",
     "question": "Beschrijf de staffing curve van een typisch project: hoe evolueert het aantal teamleden?",
     "answer": "Vanaf het begin komt er gradueel steeds meer personeel bij. Het hoogtepunt is tijdens design, development en testing — dan zijn de meeste mensen aan het werk. Nadat de oplossing positief getest is, zien we dat er minder teamleden zijn, tot iedereen van het project verdwenen is na de oplevering."
+  },
+  {
+    "id": "h02-043",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "projectfases",
+    "question": "Welke fase komt direct na de Initiatie?",
+    "options": [
+      "Planning",
+      "Analyse (ontwerp)",
+      "Construct (implementatie)",
+      "Test"
+    ],
+    "correct": 0,
+    "explanation": "Initiatie → Planning → Analyse (ontwerp) → Construct (implementatie) → Test → Turnover."
+  },
+  {
+    "id": "h02-044",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "projectfases",
+    "question": "Wat is de laatste fase van een project?",
+    "options": [
+      "Turnover",
+      "Test",
+      "Construct",
+      "Planning"
+    ],
+    "correct": 0,
+    "explanation": "Na de testfase volgt de turnover: de oplevering/overdracht van het product."
+  },
+  {
+    "id": "h02-045",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Wat is het verschil tussen projectparameters en projectfases?",
+    "options": [
+      "Parameters vertellen hoe het project ervoor staat, fases vertellen waar we zitten",
+      "Parameters vertellen waar we zitten, fases hoe het project ervoor staat",
+      "Er is geen verschil",
+      "Fases gaan over budget, parameters over planning"
+    ],
+    "correct": 0,
+    "explanation": "Projectparameters (scope, budget, planning, kwaliteit, risico's, resources) = hoe staat het ervoor. Projectfases = waar zitten we in het project."
+  },
+  {
+    "id": "h02-046",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "deliverables",
+    "question": "Welke 3 types project deliverables bestaan er?",
+    "options": [
+      "Interne, externe en planning deliverables",
+      "Kleine, middelgrote en grote deliverables",
+      "Tastbare, digitale en mondelinge deliverables",
+      "Design, development en test deliverables"
+    ],
+    "correct": 0,
+    "explanation": "Types of project deliverables: internal, external en planning deliverables."
+  },
+  {
+    "id": "h02-047",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Wat gebeurt er met de vrijheidsgraden en het risico naarmate het project vordert?",
+    "options": [
+      "Beide nemen af: meer beslissingen genomen, minder onzekerheid",
+      "Beide nemen toe",
+      "Vrijheid neemt toe, risico neemt af",
+      "Ze blijven gelijk"
+    ],
+    "correct": 0,
+    "explanation": "Hoe verder het project, hoe meer beslissingen genomen zijn en hoe minder vrijheden. Dat vermindert het risico omdat de onzekerheid afneemt."
+  },
+  {
+    "id": "h02-048",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Wat betekent 'accuraatheid van de scopedefinitie'?",
+    "options": [
+      "Hoe nauwkeurig/duidelijk de scope is",
+      "Hoeveel de scope kost",
+      "Hoe snel de scope wordt opgeleverd",
+      "Hoeveel mensen aan de scope werken"
+    ],
+    "correct": 0,
+    "explanation": "Accuraatheid = nauwkeurigheid: hoe duidelijk de scope is. Die stijgt naarmate het product meer finaal wordt."
+  },
+  {
+    "id": "h02-049",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Wat betekent 'kwaliteit' in de duivelsdriehoek?",
+    "options": [
+      "Hoe goed het uiteindelijke resultaat voldoet aan de verwachtingen",
+      "Hoeveel features er in het product zitten",
+      "Hoe snel het project klaar is",
+      "Hoeveel budget er overblijft"
+    ],
+    "correct": 0,
+    "explanation": "Tijd, geld en scope zijn de drie hoeken; kwaliteit staat in het midden: hoe goed het resultaat voldoet aan de verwachtingen."
+  },
+  {
+    "id": "h02-050",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Welke uitspraak over methodologieën zoals PMI en Prince2 klopt?",
+    "options": [
+      "De basis is gelijk, ze verschillen in terminologie en uitvoering",
+      "Ze zijn volledig verschillend",
+      "Alleen Prince2 gebruikt constraints",
+      "PMI is alleen voor agile projecten"
+    ],
+    "correct": 0,
+    "explanation": "Methodologieën zorgen voor een toolbox. De basis is gelijk, met verschillen in terminologie en uitvoering. Het boek is gebaseerd op PMI."
+  },
+  {
+    "id": "h02-051",
+    "type": "multichoice",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "De opdrachtgever wil een project dat snel klaar is, weinig kost én superveel features van topkwaliteit heeft. Wat zegt de duivelsdriehoek?",
+    "options": [
+      "Dat is 'wishful thinking': je kan nooit alle drie maximaliseren",
+      "Dat kan met een goede planning",
+      "Dat kan als het team overuren doet",
+      "Dat kan alleen met agile"
+    ],
+    "correct": 0,
+    "explanation": "Je kan maximaal 2 van de 3 maximaliseren ten koste van de derde. Bespreek wat voor de opdrachtgever het belangrijkst is."
+  },
+  {
+    "id": "h02-052",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "scope",
+    "question": "Waarom is het belangrijk om te weten hoe een project gefaseerd wordt? Noem minstens 4 redenen.",
+    "answer": "1) Het helpt verwachtingen van eindgebruikers te managen. 2) Het voorkomt verrassingen voor eindgebruikers, klanten en projectmedewerkers. 3) Het geeft inzicht in hoe scope, tijd, kosten, kwaliteit, risico's en resources elkaar beïnvloeden. 4) Je weet wat de projectmanager nodig heeft als je rapporteert en wanneer je moet escaleren. 5) Je krijgt meer grip op je eigen werk: prioriteiten stellen en inschatten hoeveel tijd iets kost."
+  },
+  {
+    "id": "h02-053",
+    "type": "open",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "question": "Noem de 5 redenen waarom het opvolgen van de 6 constraints een best practice is.",
+    "answer": "Je 1) detecteert problemen vroeger, 2) maakt beslissingen transparanter, 3) kunt gevolgen van wijzigingen beter inschatten, 4) beheert verwachtingen van stakeholders beter en 5) maakt bewuste afwegingen in plaats van ad-hoc beslissingen."
+  },
+  {
+    "id": "h02-054",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "constraints",
+    "sentence": "Het boek is gebaseerd op de principes van ___.",
+    "answer": "PMI",
+    "alternatives": [
+      "pmi"
+    ]
+  },
+  {
+    "id": "h02-055",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "projectfases",
+    "sentence": "Na de testfase volgt de ___ fase.",
+    "answer": "turnover",
+    "alternatives": [
+      "turn-over",
+      "overdracht"
+    ]
+  },
+  {
+    "id": "h02-056",
+    "type": "fillin",
+    "chapter": 2,
+    "chapterName": "Faseren",
+    "category": "execution-vs-management",
+    "sentence": "Projectmatig werken heeft 2 benaderingen: projecten uitvoeren en projecten ___.",
+    "answer": "managen",
+    "alternatives": [
+      "management",
+      "beheren"
+    ]
+  },
+  {
+    "id": "h03-001",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "term": "Mandaat van de projectmanager",
+    "definition": "De formele bevoegdheid om een project te leiden, beslissingen te nemen en de nodige acties te ondernemen om de projectdoelstellingen te bereiken. Het bepaalt wat de PM zelfstandig mag beslissen, waarvoor die verantwoordelijk is en wanneer goedkeuring van opdrachtgever of stuurgroep nodig is.",
+    "hint": "Wat mag de projectmanager zélf beslissen?"
+  },
+  {
+    "id": "h03-002",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "term": "Sponsor",
+    "definition": "Draagt de eindverantwoordelijkheid van het project, stelt de middelen (budget) ter beschikking, initieert de projectvraag, communiceert rechtstreeks met de projectmanager en zetelt meestal in de stuurgroep.",
+    "hint": "Wie betaalt en is eindverantwoordelijk?"
+  },
+  {
+    "id": "h03-003",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "term": "Stuurgroep",
+    "definition": "Het centrale rapporterings- en beslissingsorgaan van het project. Komt periodiek samen (bv. maandelijks), maar flexibel wanneer nodig. Hier wordt de status gerapporteerd en worden belangrijke beslissingen genomen waarvoor het projectteam niet bevoegd is.",
+    "hint": "Rapporteren + beslissen waar het team niet bevoegd voor is."
+  },
+  {
+    "id": "h03-004",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "term": "Functionele manager",
+    "definition": "Leidt een afdeling van het bedrijf waar het project wordt uitgevoerd. Zoekt de balans tussen dagelijks werk en projectwerk, geeft input voor scope en vereisten, is verantwoordelijk voor de bedrijfsprocessen aan de basis van de oplossing en zetelt vaak in de stuurgroep.",
+    "hint": "Afdelingshoofd: dagelijks werk vs. projectwerk."
+  },
+  {
+    "id": "h03-005",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "term": "Proceseigenaar",
+    "definition": "De expert van het business proces dat het project wil verbeteren. Geeft belangrijke input tijdens de concept- en ontwerpfase, identificeert wijzigingen en verbeteringen aan het proces en zorgt voor aanvaarding van de wijzigingen in de organisatie.",
+    "hint": "Expert van het businessproces."
+  },
+  {
+    "id": "h03-006",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "term": "PMO (Project Management Office)",
+    "definition": "Zorgt voor consistentie in methodologie, templates, tools en rapportering, ontwikkelt projectmanagement-expertise in de onderneming en stemt de staffing over projecten heen af. Doet ook administratieve taken (lokalen, computers, users). Belangrijk bij planning en projectopvolging.",
+    "hint": "Consistentie over álle projecten heen."
+  },
+  {
+    "id": "h03-007",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "term": "Change Advisory Board",
+    "definition": "Een groep personen (sponsor, architecten, functionele managers, team leads…) die samengeroepen wordt om wijzigingen te bespreken en goed te keuren, zodat scope creep onder controle blijft. De projectmanager organiseert, legt de vragen voor en verantwoordt ze.",
+    "hint": "Ook: Change Control Board. Keurt wijzigingen goed."
+  },
+  {
+    "id": "h03-008",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-business",
+    "term": "Business analist",
+    "definition": "Ondersteunt en adviseert de business over procesoptimalisatie, inventariseert wensen, vereisten en bestaande problemen (AS-IS), definieert het streefdoel (TO-BE), harmoniseert processen en procedures en schrijft mee aan de business case. Vooral actief vóór de start van het project.",
+    "hint": "AS-IS en TO-BE in kaart brengen."
+  },
+  {
+    "id": "h03-009",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-business",
+    "term": "Functionele analist",
+    "definition": "Werkt de functionele analyses uit, vertrekkend van de informatie uit de business analyse.",
+    "hint": "Bouwt verder op de business analyse."
+  },
+  {
+    "id": "h03-010",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-business",
+    "term": "Product owner",
+    "definition": "De brug tussen business en IT: verbindt het (scrum)team met de organisatie, klanten en stakeholders, prioriteert de user stories in afspraak met de eindgebruikers, geeft verduidelijking aan het technische team en feedback op demo's.",
+    "hint": "Prioriteert de user stories."
+  },
+  {
+    "id": "h03-011",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "(Data) architect",
+    "definition": "Bewaakt het 'big picture' van de IT-(data)architectuur, zorgt dat nieuwe keuzes passen in de bestaande architectuur en dat systemen op een uniforme manier communiceren. Vooral in de eerste fases betrokken, in een adviesrol.",
+    "hint": "Het grote IT-plaatje."
+  },
+  {
+    "id": "h03-012",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "UX/UI designer",
+    "definition": "Verbetert de gebruikerservaring van websites, software, apps, games… Let op de visuele look & feel en op de interactie tussen gebruiker en medium, kijkt naar de customer journey van de doelgroep en kan usability research doen.",
+    "hint": "Gebruikerservaring + look & feel."
+  },
+  {
+    "id": "h03-013",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Developer",
+    "definition": "Schrijft de applicatie en de technische specificatie, staat in voor de technische oplevering, voert de technische testen uit en lost bugs op. Vooral actief in de implementatiefase en staat mee in voor support na go-live.",
+    "hint": "Schrijft de applicatie."
+  },
+  {
+    "id": "h03-014",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Technisch expert",
+    "definition": "Hoeft geen developer te zijn. Schrijft de applicatie en/of technische specificatie en staat in voor de technische oplevering; ook configureren of data-analyse kan tot de taken behoren. Voert technische testen uit en ondersteunt na go-live.",
+    "hint": "Kan ook configureren of data-analyse doen."
+  },
+  {
+    "id": "h03-015",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Testmanager",
+    "definition": "Stelt het testplan op, kiest de testing tools (samen met de business), coördineert het uitwerken van testscenario's, volgt de testen en resultaten op en zorgt dat de acceptatiecriteria gehaald worden voordat het project live gaat.",
+    "hint": "Testplan + acceptatiecriteria."
+  },
+  {
+    "id": "h03-016",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Tester",
+    "definition": "Voert de testen uit, maar maakt in principe niet zelf de testscenario's (om objectiviteit te garanderen). Rapporteert aan de testmanager, is vooral in de testfase aanwezig en kan intern of extern zijn.",
+    "hint": "Voert uit, schrijft de scenario's niet zelf."
+  },
+  {
+    "id": "h03-017",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Transitiemanager",
+    "definition": "Bereidt het cut-over (release) plan voor en valideert het, organiseert de cut-over en waakt over de uitvoering, in nauwe samenwerking met de projectmanager. In de praktijk is dit vaak ook de rol van de projectmanager.",
+    "hint": "Cut-over / release."
+  },
+  {
+    "id": "h03-018",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Scrum master",
+    "definition": "Zorgt in scrum-projecten dat het scrumproces toegepast wordt (organiseert daily standups, sprint reviews, retrospectives…), zorgt dat het scrumteam optimaal kan werken en neemt de 'impediments' (obstakels) weg.",
+    "hint": "Ceremonies + impediments wegnemen."
+  },
+  {
+    "id": "h03-019",
+    "type": "definition",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "term": "Projectmanager",
+    "definition": "Volgt de projectactiviteiten op en evalueert ze, en zorgt dat de teamleden optimaal kunnen werken.",
+    "hint": "Opvolgen, evalueren, team laten werken."
+  },
+  {
+    "id": "h03-020",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "question": "Wie draagt de eindverantwoordelijkheid van een project?",
+    "options": [
+      "De sponsor",
+      "De projectmanager",
+      "Het PMO",
+      "De functionele manager"
+    ],
+    "correct": 0,
+    "explanation": "De sponsor draagt de eindverantwoordelijkheid, stelt het budget ter beschikking en initieert de projectvraag."
+  },
+  {
+    "id": "h03-021",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "question": "Wie neemt belangrijke beslissingen waarvoor het projectteam niet bevoegd is?",
+    "options": [
+      "De stuurgroep",
+      "Het PMO",
+      "De tester",
+      "De functionele analist"
+    ],
+    "correct": 0,
+    "explanation": "De stuurgroep is het centrale rapporterings- en beslissingsorgaan van het project."
+  },
+  {
+    "id": "h03-022",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "question": "Welke groep keurt wijzigingen goed en houdt zo scope creep onder controle?",
+    "options": [
+      "Change Advisory Board",
+      "PMO",
+      "Scrumteam",
+      "Testteam"
+    ],
+    "correct": 0,
+    "explanation": "De Change Advisory (of Control) Board bespreekt en keurt wijzigingen goed. De projectmanager organiseert en legt de vragen voor."
+  },
+  {
+    "id": "h03-023",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "question": "Welke rol zorgt voor consistentie in methodologie, templates, tools en rapportering over projecten heen?",
+    "options": [
+      "PMO",
+      "Sponsor",
+      "Scrum master",
+      "Transitiemanager"
+    ],
+    "correct": 0,
+    "explanation": "Het PMO (Project Management Office) bewaakt de consistentie en stemt ook de staffing over projecten heen af."
+  },
+  {
+    "id": "h03-024",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-business",
+    "question": "Wie brengt de huidige situatie (AS-IS) en het streefdoel (TO-BE) in kaart?",
+    "options": [
+      "De business analist",
+      "De tester",
+      "De transitiemanager",
+      "De sponsor"
+    ],
+    "correct": 0,
+    "explanation": "De business analist inventariseert wensen, vereisten en problemen (AS-IS) en definieert het streefdoel (TO-BE)."
+  },
+  {
+    "id": "h03-025",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-business",
+    "question": "Wie prioriteert de user stories in afspraak met de eindgebruikers?",
+    "options": [
+      "De product owner",
+      "De scrum master",
+      "De developer",
+      "De stuurgroep"
+    ],
+    "correct": 0,
+    "explanation": "De product owner is de brug tussen business en IT en bepaalt de prioriteiten van de user stories."
+  },
+  {
+    "id": "h03-026",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "question": "Wie neemt de 'impediments' (obstakels) weg in een scrumteam?",
+    "options": [
+      "De scrum master",
+      "De product owner",
+      "De sponsor",
+      "De tester"
+    ],
+    "correct": 0,
+    "explanation": "De scrum master zorgt dat het scrumproces gevolgd wordt en dat het team optimaal kan werken."
+  },
+  {
+    "id": "h03-027",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "question": "Welke rol maakt in principe NIET zelf de testscenario's, om objectiviteit te garanderen?",
+    "options": [
+      "De tester",
+      "De testmanager",
+      "De business analist",
+      "De product owner"
+    ],
+    "correct": 0,
+    "explanation": "De testmanager coördineert de testscenario's; de tester voert ze uit en rapporteert aan de testmanager."
+  },
+  {
+    "id": "h03-028",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "question": "Wie bereidt het cut-over (release) plan voor?",
+    "options": [
+      "De transitiemanager",
+      "De architect",
+      "De tester",
+      "De functionele manager"
+    ],
+    "correct": 0,
+    "explanation": "De transitiemanager bereidt de cut-over voor en organiseert die. In de praktijk doet de projectmanager dit vaak zelf."
+  },
+  {
+    "id": "h03-029",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "question": "Welke rol bewaakt het 'big picture' van de IT-architectuur?",
+    "options": [
+      "De (data) architect",
+      "De developer",
+      "De UX/UI designer",
+      "De tester"
+    ],
+    "correct": 0,
+    "explanation": "De architect zorgt dat nieuwe keuzes passen in de bestaande architectuur en dat systemen uniform communiceren."
+  },
+  {
+    "id": "h03-030",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "question": "Wanneer is een project een succes volgens de klant?",
+    "options": [
+      "Als voldaan is aan de verwachtingen, vereisten en voorwaarden",
+      "Als het onder budget blijft",
+      "Als de projectmanager tevreden is",
+      "Als er zoveel mogelijk features in zitten"
+    ],
+    "correct": 0,
+    "explanation": "Klantentevredenheid: verwachtingen, vereisten en voorwaarden. Een succesvolle oplevering = een 100%-match met de vereisten van de klant."
+  },
+  {
+    "id": "h03-031",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "question": "Wat vindt de projectmanager (naast de deliverables) ook belangrijk voor succes?",
+    "options": [
+      "De manier waarop het project wordt uitgevoerd, volgens het Plan van Aanpak",
+      "Dat de klant zo weinig mogelijk betrokken wordt",
+      "Dat er geen documentatie nodig is",
+      "Dat het team zo groot mogelijk is"
+    ],
+    "correct": 0,
+    "explanation": "De PM zorgt voor de deliverables, maar ook de manier van uitvoeren telt: hij volgt op of het Project Management Plan / Plan van Aanpak gevolgd wordt."
+  },
+  {
+    "id": "h03-032",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "scope-creep",
+    "question": "Wie is verantwoordelijk voor het voorkomen van scope creep?",
+    "options": [
+      "Het hele team samen, met de projectmanager in een coördinerende en bewakende rol",
+      "Alleen de opdrachtgever",
+      "Alleen de projectmanager",
+      "Alleen de developers"
+    ],
+    "correct": 0,
+    "explanation": "Scope creep voorkomen is een gedeelde verantwoordelijkheid; de PM coördineert en bewaakt."
+  },
+  {
+    "id": "h03-033",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "scope-creep",
+    "question": "Wanneer is een uitbreiding van de scope een probleem?",
+    "options": [
+      "Als de wijziging ongecontroleerd gebeurt, zonder aanpassing van planning, budget of middelen",
+      "Altijd: elke uitbreiding is slecht",
+      "Nooit: de klant heeft altijd gelijk",
+      "Alleen bij agile projecten"
+    ],
+    "correct": 0,
+    "explanation": "Niet elke uitbreiding is slecht. Het probleem ontstaat wanneer wijzigingen ongecontroleerd gebeuren."
+  },
+  {
+    "id": "h03-034",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "organisatie",
+    "question": "Hoe kan een organisatie het succes van een project hinderen?",
+    "options": [
+      "Door lange goedkeuringsprocessen en een strikte hiërarchie",
+      "Door middelen en steun te geven",
+      "Door korte lijnen",
+      "Door een duidelijk mandaat te geven"
+    ],
+    "correct": 0,
+    "explanation": "Een organisatie kan projecten ondersteunen (middelen, steun, korte lijnen) of hinderen (lange goedkeuringsprocessen, strikte hiërarchie). Ook cultuur en sector (bv. strenge kwaliteitseisen in de farma) spelen mee."
+  },
+  {
+    "id": "h03-035",
+    "type": "multichoice",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "skills-pm",
+    "question": "Welke van deze is GEEN skill van een projectmanager volgens de cursus?",
+    "options": [
+      "Zelf de code reviews doen",
+      "Conflict management",
+      "Stress management",
+      "Risicomanagement"
+    ],
+    "correct": 0,
+    "explanation": "De 8 skills: plannen, kennis van financiën, time management, risicomanagement, people management, conflict management, communicatie en stress management."
+  },
+  {
+    "id": "h03-036",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "question": "Waarom is het belangrijk om de juiste rollen op het juiste moment te betrekken? Noem minstens 4 risico's als je dat niet doet.",
+    "answer": "Een project maak je niet alleen: verschillende mensen bekijken de oplossing vanuit een ander perspectief. Zonder de juiste mensen: 1) worden belangrijke noden gemist, 2) worden problemen pas laat ontdekt, 3) worden beslissingen opnieuw genomen, 4) is er risico op weerstand bij gebruikers, 5) komen planning en budget onder druk, 6) kan de oplossing technisch werken maar toch niet bruikbaar zijn."
+  },
+  {
+    "id": "h03-037",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "question": "Vergelijk de visie van de klant en de visie van de projectmanager op een succesvol project.",
+    "answer": "Klant: klantentevredenheid = voldoen aan verwachtingen, vereisten en voorwaarden; een succesvolle oplevering is een 100%-match met de vereisten (laat de klant je deliverables goedkeuren). Projectmanager: zorgen voor de deliverables, maar ook de manier van uitvoeren is belangrijk; hij volgt op of het Project Management Plan / Plan van Aanpak gevolgd wordt."
+  },
+  {
+    "id": "h03-038",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "skills-pm",
+    "question": "Noem de 8 skills van een projectmanager.",
+    "answer": "1) Plannen (projectplan opstellen), 2) kennis van financiën (budgetten opvolgen), 3) time management (prioriteiten stellen), 4) risicomanagement (proactief risico's inschatten en reageren), 5) people management (met teams omgaan), 6) conflict management (conflicten oplossen), 7) communicatie (met alle niveaus), 8) stress management (projecten kennen pieken en dalen)."
+  },
+  {
+    "id": "h03-039",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "organisatie",
+    "question": "Welke rol speelt de organisatie in het succes van een project?",
+    "answer": "De organisatie kan het succes positief ondersteunen (middelen, steun, korte lijnen) of hinderen (lange goedkeuringsprocessen, strikte hiërarchie). De organisatiecultuur bepaalt hoe soepel projecten verlopen, en in sommige sectoren (bv. farma) zijn de kwaliteitseisen extra streng. De omgeving en cultuur zijn even belangrijk als de projectplanning zelf."
+  },
+  {
+    "id": "h03-040",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "question": "Wat is het verschil tussen een testmanager en een tester?",
+    "answer": "De testmanager stelt het testplan op, kiest de testing tools, coördineert de testscenario's, volgt de testen op en zorgt dat de acceptatiecriteria gehaald worden vóór go-live. De tester voert de testen uit, maakt de scenario's in principe niet zelf (objectiviteit), rapporteert aan de testmanager en is vooral in de testfase actief."
+  },
+  {
+    "id": "h03-041",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "question": "Wat is het verschil tussen de sponsor en de stuurgroep?",
+    "answer": "De sponsor is één persoon met de eindverantwoordelijkheid: stelt het budget ter beschikking, initieert de projectvraag en communiceert direct met de PM. De stuurgroep is het centrale rapporterings- en beslissingsorgaan dat periodiek samenkomt, waar de status gerapporteerd wordt en belangrijke beslissingen genomen worden. De sponsor zetelt meestal in de stuurgroep."
+  },
+  {
+    "id": "h03-042",
+    "type": "open",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "question": "Wat kan jij als UX/UI designer of ontwikkelaar doen om een project te laten slagen?",
+    "answer": "1) Zorg voor een doelgerichte, duidelijke rol (vermijd verwarring). 2) Reflecteer over de samenwerking: is er genoeg interactie? 3) Vraag genoeg tijd voor user research en iteratief ontwerpen (gebruikersfeedback verzamelen en ontwerpen aanpassen). 4) Zorg dat stakeholders betrokken zijn bij het ontwerpproces, anders meer onverwachte wijzigingen achteraf. 5) Bewaak dat de (ontwerp)documentatie duidelijk en volledig is en goedgekeurd door de klant."
+  },
+  {
+    "id": "h03-043",
+    "type": "case",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen",
+    "situation": "Een cultuurcentrum laat een nieuwe website ontwerpen. Het team maakt een moderne site met grote foto's en animaties; de directie is tevreden. Bij een gebruikerstest vinden oudere bezoekers hun weg niet, mensen met een schermlezer kunnen info niet bereiken en medewerkers kunnen zelf geen evenementen aanpassen zonder de developer.",
+    "question": "Welke rollen werden vergeten of te laat betrokken, en wat is het risico?",
+    "answer": "Voorbeeldantwoord: de eindgebruikers/sleutelgebruikers (oudere bezoekers, schermlezergebruikers én de medewerkers die de site beheren) werden te laat betrokken, en de UX/UI designer had usability research en toegankelijkheid vroeger moeten meenemen. Ook de proceseigenaar (beheer van evenementen) en een tester ontbraken. Risico: een website die technisch werkt maar niet bruikbaar is, problemen die pas laat ontdekt worden, extra kosten en vertraging."
+  },
+  {
+    "id": "h03-044",
+    "type": "case",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen",
+    "situation": "Een start-up ontwikkelt een app voor het mentale welzijn van jongeren. Vormgevers maken een lanceringscampagne (posts, affiches, video) die goedgekeurd wordt door marketing. Vlak voor de lancering blijkt dat beelden en slogans de indruk wekken dat de app psychologische hulp kan vervangen. Veel materiaal is al gedrukt.",
+    "question": "Welke rol werd vergeten en wat had die kunnen voorkomen?",
+    "answer": "Voorbeeldantwoord: een inhoudelijke expert / proceseigenaar (iemand met kennis van mentale gezondheid binnen de organisatie) en de sponsor/stuurgroep voor de eindgoedkeuring werden niet (tijdig) betrokken. Die hadden de misleidende boodschap vroeg kunnen opmerken. Risico: imagoschade, een misleidende campagne en extra kosten omdat drukwerk en planning opnieuw moeten."
+  },
+  {
+    "id": "h03-045",
+    "type": "case",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen",
+    "situation": "Een hogeschool laat een online leerplatform ontwerpen met een dashboard vol widgets. Bij de eerste test vinden studenten belangrijke info moeilijk terug, moeten ze op de smartphone veel scrollen en werken sommige onderdelen niet met een toetsenbord. Docenten kunnen cursusmateriaal niet eenvoudig aanpassen.",
+    "question": "Welke rollen hadden het verschil kunnen maken?",
+    "answer": "Voorbeeldantwoord: sleutelgebruikers (studenten én docenten) hadden vroeg betrokken moeten worden; de UX/UI designer had usability research, mobiel gebruik en toegankelijkheid (toetsenbord) moeten meenemen; een testmanager/tester had dit eerder kunnen vaststellen. Risico: een platform dat niet bruikbaar is, weerstand bij gebruikers, en planning en budget die onder druk komen door late aanpassingen."
+  },
+  {
+    "id": "h03-046",
+    "type": "case",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "scope-creep",
+    "situation": "Tijdens het project vraagt de opdrachtgever jou rechtstreeks om er 'nog snel' een extra functie bij te bouwen. Je projectmanager zegt dat planning en budget niet mogen veranderen.",
+    "question": "Hoe ga je hiermee om?",
+    "answer": "Je neemt de vraag ernstig, maar voert ze niet zomaar uit. Je meldt ze aan de projectmanager, die de impact op de constraints inschat en ze eventueel voorlegt aan de Change Advisory Board/stuurgroep. Alleen na afstemming en goedkeuring (met aangepaste planning/budget of een afweging in de scope) wordt ze uitgevoerd. Zo vermijd je scope creep."
+  },
+  {
+    "id": "h03-047",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "sentence": "De ___ draagt de eindverantwoordelijkheid van het project en stelt het budget ter beschikking.",
+    "answer": "sponsor",
+    "alternatives": [
+      "de sponsor"
+    ]
+  },
+  {
+    "id": "h03-048",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-sturing",
+    "sentence": "De ___ is het centrale rapporterings- en beslissingsorgaan van het project.",
+    "answer": "stuurgroep",
+    "alternatives": [
+      "de stuurgroep"
+    ]
+  },
+  {
+    "id": "h03-049",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "sentence": "Een succesvolle oplevering wordt gekenmerkt door een ___%-match met de vereisten van de klant.",
+    "answer": "100",
+    "alternatives": [
+      "honderd"
+    ]
+  },
+  {
+    "id": "h03-050",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "sentence": "Het ___ van de projectmanager is de formele bevoegdheid om het project te leiden en beslissingen te nemen.",
+    "answer": "mandaat",
+    "alternatives": [
+      "het mandaat"
+    ]
+  },
+  {
+    "id": "h03-051",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "succes",
+    "sentence": "De projectmanager volgt op of het Project Management Plan / ___ wordt opgevolgd.",
+    "answer": "Plan van Aanpak",
+    "alternatives": [
+      "plan van aanpak",
+      "pva"
+    ]
+  },
+  {
+    "id": "h03-052",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-business",
+    "sentence": "De business analist brengt de huidige situatie (___) en de gewenste situatie (TO-BE) in kaart.",
+    "answer": "AS-IS",
+    "alternatives": [
+      "as is",
+      "asis"
+    ]
+  },
+  {
+    "id": "h03-053",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "sentence": "De scrum master neemt de ___ (obstakels) weg zodat het team optimaal kan werken.",
+    "answer": "impediments",
+    "alternatives": [
+      "impediment"
+    ]
+  },
+  {
+    "id": "h03-054",
+    "type": "fillin",
+    "chapter": 3,
+    "chapterName": "Organiseren",
+    "category": "rollen-team",
+    "sentence": "De transitiemanager bereidt het ___ (release) plan voor.",
+    "answer": "cut-over",
+    "alternatives": [
+      "cutover",
+      "cut over"
+    ]
+  },
+  {
+    "id": "h04-001",
+    "type": "definition",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "proces-vs-product",
+    "term": "Process requirements",
+    "definition": "Aanpassingen (optimalisaties of verbeteringen) aan de manier van werken. Bv. de wachttijden van een attractie opzoeken, reservaties voor een concert, of de manier waarop je businfo vindt in een app.",
+    "hint": "Gaat over de manier van werken."
+  },
+  {
+    "id": "h04-002",
+    "type": "definition",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "proces-vs-product",
+    "term": "Product requirements",
+    "definition": "Requirements waarbij digitale oplossingen deel uitmaken van een product of dienst. Bv. mobile banking, fysiek speelgoed dat online een nieuwe dimensie krijgt, digitale opslag van documenten.",
+    "hint": "Digitaal deel van een product of dienst."
+  },
+  {
+    "id": "h04-003",
+    "type": "definition",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "term": "Persona",
+    "definition": "Een uitgewerkt profiel van een typische gebruiker met kenmerken, gedrag en behoeftes (bv. 'Elise, 16 jaar'). Helpt je de juiste requirements te definiëren: bij elk designelement vraag je je af hoe het deze gebruiker helpt.",
+    "hint": "Bv. Elise: kenmerken, gedrag, behoeftes."
+  },
+  {
+    "id": "h04-004",
+    "type": "definition",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "term": "Scenario (user scenario)",
+    "definition": "Beschrijving van hoe de gebruiker de app zal gebruiken om zijn doelen te bereiken, met een basisflow en alternatieve flows. Helpt om de juiste UI te bepalen.",
+    "hint": "Gedrag van users → juiste UI."
+  },
+  {
+    "id": "h04-005",
+    "type": "definition",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "term": "Moodboard",
+    "definition": "Een collage van beelden, kleuren en stijlvoorbeelden die de gewenste sfeer en look & feel van een ontwerp vastlegt.",
+    "hint": "Sfeer en look & feel in beeld."
+  },
+  {
+    "id": "h04-006",
+    "type": "definition",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "term": "TO-BE situatie",
+    "definition": "De nieuwe, gewenste toestand na het project (tegenover AS-IS: hoe het nu is).",
+    "hint": "Gewenst vs. huidig."
+  },
+  {
+    "id": "h04-007",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "proces-vs-product",
+    "question": "Welke is een voorbeeld van een product requirement?",
+    "options": [
+      "Mobile banking",
+      "De wachttijden van een attractie opzoeken",
+      "Reservaties voor een concert",
+      "De manier waarop je businfo vindt in de app"
+    ],
+    "correct": 0,
+    "explanation": "Mobile banking: een digitale oplossing die deel uitmaakt van een product/dienst. De andere zijn process requirements (manier van werken)."
+  },
+  {
+    "id": "h04-008",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "proces-vs-product",
+    "question": "Welke is een voorbeeld van een process requirement?",
+    "options": [
+      "Het reserveren van tickets voor een concert",
+      "Mobile banking",
+      "Speelgoed met een online dimensie",
+      "Digitale opslag van documenten"
+    ],
+    "correct": 0,
+    "explanation": "Process requirements gaan over de manier van werken, zoals het reserveringsproces."
+  },
+  {
+    "id": "h04-009",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "waarom-requirements",
+    "question": "Waarvoor worden requirements NIET gebruikt?",
+    "options": [
+      "Het bepalen van de lonen van het projectteam",
+      "Het opstellen van de business case",
+      "Het opstellen van het analysedocument",
+      "De testfase: wat er getest moet worden"
+    ],
+    "correct": 0,
+    "explanation": "Requirements dienen voor de business case (kosten/baten), het analysedocument (detail requirements), de testfase en het identificeren van belangrijke changes."
+  },
+  {
+    "id": "h04-010",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "aandachtspunten",
+    "question": "Een klant zegt: 'Ik heb een rode Ferrari nodig.' Wat doe je?",
+    "options": [
+      "Doorvragen: waarom? Wat is de echte behoefte?",
+      "Meteen een Ferrari bestellen",
+      "Een goedkopere auto voorstellen",
+      "Het letterlijk noteren als requirement"
+    ],
+    "correct": 0,
+    "explanation": "Bevraag de behoefte, niet de oplossing. De echte behoefte kan zijn: 'een vervoermiddel om op het werk te geraken' → fiets, bus, kleine wagen…"
+  },
+  {
+    "id": "h04-011",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "aandachtspunten",
+    "question": "Wanneer begin je met het design van een app?",
+    "options": [
+      "Pas nadat je je gebruikers begrijpt",
+      "Meteen bij de start",
+      "Na de development",
+      "Na de testfase"
+    ],
+    "correct": 0,
+    "explanation": "Begrijp eerst je gebruikers: wie zijn ze, hoe gedragen ze zich, hoe voelen ze zich? Wat motiveert hen? Daarna pas start je met het design."
+  },
+  {
+    "id": "h04-012",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "question": "Waarvoor dient een persona?",
+    "options": [
+      "Om de juiste requirements te definiëren vanuit een typische gebruiker",
+      "Om het budget te bepalen",
+      "Om de planning op te stellen",
+      "Om de testers te kiezen"
+    ],
+    "correct": 0,
+    "explanation": "Persona's helpen je de juiste requirements te definiëren. Bij elk designelement vraag je: hoe helpt dit de persona om haar behoeftes in te vullen?"
+  },
+  {
+    "id": "h04-013",
+    "type": "multichoice",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "question": "Wat beschrijf je met user scenario's?",
+    "options": [
+      "Hoe de gebruiker de app gebruikt om zijn doelen te bereiken (basis- en alternatieve flows)",
+      "Het budget van het project",
+      "De rollen in het projectteam",
+      "De kleuren en lettertypes"
+    ],
+    "correct": 0,
+    "explanation": "Scenario's beschrijven het gedrag van users. Zo kies je de juiste UI."
+  },
+  {
+    "id": "h04-014",
+    "type": "open",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "proces-vs-product",
+    "question": "Wat is het verschil tussen process requirements en product requirements? Geef van elk een voorbeeld.",
+    "answer": "Process requirements zijn aanpassingen (optimalisaties/verbeteringen) aan de manier van werken, bv. reservaties voor een concert of wachttijden opzoeken in Walibi. Product requirements gaan over digitale oplossingen die deel uitmaken van een product of dienst, bv. mobile banking of speelgoed met een online dimensie."
+  },
+  {
+    "id": "h04-015",
+    "type": "open",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "waarom-requirements",
+    "question": "Waarvoor stellen we requirements op? Noem de 4 toepassingen.",
+    "answer": "1) Het opstellen van de business case (kosten/baten). 2) Het opstellen van een analysedocument (met detail requirements). 3) De testfase (wat er getest moet worden). 4) Het identificeren van belangrijke changes (bv. wijzigingen in de manier van werken voor gebruikers)."
+  },
+  {
+    "id": "h04-016",
+    "type": "open",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "question": "Met welke technieken werk je naast het bevragen en noteren van requirements? En welke 3 vragen stel je over je gebruikers?",
+    "answer": "Technieken: persona's, user stories of scenario's en moodboards. De 3 vragen: 1) Wie zijn je users? 2) Hoe gedragen users zich? 3) Hoe voelen ze zich? (brainstorming)."
+  },
+  {
+    "id": "h04-017",
+    "type": "case",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "case",
+    "situation": "Creative studio 'Visionary Creatives' werkt nu met Trello, Google Docs en Slack, wat leidt tot inefficiëntie en verloren communicatie. Ze willen een nieuw projectmanagementsysteem: taken en deadlines beheren, concepten delen, feedback geven, samenwerken aan ontwerpen, ontwerpen uit Figma/Adobe XD integreren, en een 'Collaboration Mode' voor live feedback. Het moet zeer gebruiksvriendelijk en visueel aantrekkelijk zijn.",
+    "question": "1) Wat is het product? 2) Voor welke processen wordt het gebruikt? 3) Geef 3 gepaste requirements.",
+    "answer": "Voorbeeldantwoord: 1) Het product is het nieuwe projectmanagementsysteem voor het creatieve team. 2) Processen: het creatie-/ontwerpproces (concepten delen, feedback geven, samenwerken), en het beheren van taken en deadlines. 3) Requirements: a) in Collaboration Mode kunnen teamleden realtime commentaar, notities en wijzigingsvoorstellen toevoegen; b) ontwerpen kunnen rechtstreeks uit Figma of Adobe XD in het systeem geïmporteerd worden; c) taken en deadlines kunnen per project beheerd worden in een intuïtieve, visueel duidelijke interface."
+  },
+  {
+    "id": "h04-018",
+    "type": "case",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "aandachtspunten",
+    "situation": "Een kleine fitnessstudio zegt: 'We willen graag iets digitaals doen zodat onze klanten meer betrokken geraken.' Meer info geven ze niet.",
+    "question": "Hoe vraag je door om de echte requirements te capteren? Geef tips.",
+    "answer": "Voorbeeldantwoord: bevraag de behoefte, niet de oplossing (vraag 'waarom?'). Vraag wie de klanten zijn, hoe ze zich gedragen en wat hen motiveert. Laat de huidige werkwijze (AS-IS) uitleggen, bv. hoe klanten nu een les reserveren, en wat er misloopt. Vraag wat 'meer betrokken' concreet betekent en hoe ze succes meten. Stel open vragen, vat samen en laat bevestigen. Vertaal het reserveringsproces daarna naar een swimlane diagram (wie doet wat)."
+  },
+  {
+    "id": "h04-019",
+    "type": "order",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "question": "Zet de stappen om een app te ontwerpen in de juiste volgorde:",
+    "items": [
+      "Wie zijn je users?",
+      "Hoe gedragen users zich?",
+      "Hoe voelen ze zich?",
+      "Start met het design"
+    ],
+    "explanation": "Begrijp eerst je gebruikers (wie, gedrag, gevoel). Pas daarna start je met het design."
+  },
+  {
+    "id": "h04-020",
+    "type": "fillin",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "proces-vs-product",
+    "sentence": "Process requirements zijn aanpassingen aan de ___ van werken.",
+    "answer": "manier",
+    "alternatives": [
+      "de manier"
+    ]
+  },
+  {
+    "id": "h04-021",
+    "type": "fillin",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "aandachtspunten",
+    "sentence": "Bevraag de ___, niet de oplossing.",
+    "answer": "behoefte",
+    "alternatives": [
+      "behoeftes",
+      "nood"
+    ]
+  },
+  {
+    "id": "h04-022",
+    "type": "fillin",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "sentence": "Naast requirements werkt men vaak met persona's, user stories of scenario's en ___.",
+    "answer": "moodboards",
+    "alternatives": [
+      "moodboard",
+      "mood boards",
+      "mood board"
+    ]
+  },
+  {
+    "id": "h04-023",
+    "type": "fillin",
+    "chapter": 4,
+    "chapterName": "Requirements",
+    "category": "technieken",
+    "sentence": "Een scenario beschrijft een basisflow en ___ flows.",
+    "answer": "alternatieve",
+    "alternatives": [
+      "alternatief"
+    ]
+  },
+  {
+    "id": "h05-001",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "term": "Process owner",
+    "definition": "Is verantwoordelijk voor een proces of subproces, geeft de initiële input over het proces en neemt de eindbeslissingen bij mogelijke wijzigingen.",
+    "hint": "Neemt de eindbeslissing."
+  },
+  {
+    "id": "h05-002",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "term": "Business analist (requirements)",
+    "definition": "Maakt de procesbeschrijving op en formuleert adviezen ter verbetering. Haalt informatie uit interviews met gebruikers en bestaande documenten en past eventueel best practices toe.",
+    "hint": "Procesbeschrijving + verbeteradvies."
+  },
+  {
+    "id": "h05-003",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "term": "Eindgebruiker (end user)",
+    "definition": "Voert de taken in het proces uit. Kan vaak meer detail geven dan de process owner, want de uitgevoerde taken verschillen vaak van wat er beschreven staat.",
+    "hint": "Weet hoe het écht gebeurt."
+  },
+  {
+    "id": "h05-004",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "term": "Sleutelgebruiker (key user)",
+    "definition": "Een specifieke groep eindgebruikers met een zeer goede kennis van het proces, die als vertegenwoordigers van de eindgebruikers deelnemen aan het project.",
+    "hint": "Vertegenwoordigt de eindgebruikers."
+  },
+  {
+    "id": "h05-005",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "best-practice",
+    "term": "Best practice",
+    "definition": "Een manier van werken of opzet van een applicatie die op basis van verschillende eerdere implementaties tot stand is gekomen en de beste manier van werken identificeert binnen een domein, taak of applicatie.",
+    "hint": "Bewezen beste aanpak uit eerdere implementaties."
+  },
+  {
+    "id": "h05-006",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "term": "Process flowchart",
+    "definition": "Deliverable die de stappen van een proces beschrijft, welke gegevens doorgegeven worden, welke output gegenereerd wordt, de afhankelijkheden met andere processen en (via swimlanes) de verschillende rollen.",
+    "hint": "Stappen, gegevens, output, afhankelijkheden, rollen."
+  },
+  {
+    "id": "h05-007",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "term": "Swimlane diagram",
+    "definition": "Een processtroomdiagram waarbij het proces onderverdeeld wordt in categorieën (banen). Anders dan een gewone flowchart toont het precies wie wat moet doen: elke baan bevat de activiteiten van één afdeling of entiteit.",
+    "hint": "Zoals de banen in een zwembad."
+  },
+  {
+    "id": "h05-008",
+    "type": "definition",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "term": "Business case",
+    "definition": "Bepaalt de return on investment (ROI) van een project. Op basis van de business case wordt beslist of het project al dan niet doorgaat.",
+    "hint": "ROI → go / no go."
+  },
+  {
+    "id": "h05-009",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "question": "Welke 3 partijen helpen mee bij het opstellen van (process) requirements?",
+    "options": [
+      "Business analist, process owner en (key) users",
+      "Sponsor, PMO en tester",
+      "Developer, architect en scrum master",
+      "Stuurgroep, sponsor en transitiemanager"
+    ],
+    "correct": 0,
+    "explanation": "1) De business analist, 2) de process owner, 3) de eindgebruikers en sleutelgebruikers."
+  },
+  {
+    "id": "h05-010",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "question": "Wie neemt de eindbeslissing bij mogelijke wijzigingen aan een proces?",
+    "options": [
+      "De process owner",
+      "De business analist",
+      "De eindgebruiker",
+      "De developer"
+    ],
+    "correct": 0,
+    "explanation": "De process owner is verantwoordelijk voor het (sub)proces, geeft initiële input en neemt de eindbeslissingen."
+  },
+  {
+    "id": "h05-011",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "question": "Wie kan vaak MEER detail geven over een proces dan de process owner?",
+    "options": [
+      "De eindgebruikers",
+      "De sponsor",
+      "Het PMO",
+      "De architect"
+    ],
+    "correct": 0,
+    "explanation": "Eindgebruikers voeren de taken uit. Vaak verschilt wat ze echt doen van wat er beschreven staat."
+  },
+  {
+    "id": "h05-012",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "question": "Wat is het verschil tussen een swimlane diagram en een gewone flowchart?",
+    "options": [
+      "Een swimlane diagram toont precies wie wat moet doen",
+      "Een swimlane diagram heeft geen stappen",
+      "Een flowchart toont altijd de rollen",
+      "Er is geen verschil"
+    ],
+    "correct": 0,
+    "explanation": "Een swimlane diagram verdeelt het proces in banen per afdeling/entiteit, zodat je ziet wie wat doet."
+  },
+  {
+    "id": "h05-013",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "question": "In het swimlane-voorbeeld 'online bestelling': in welke baan gebeurt 'Review – goedkeuring betaling'?",
+    "options": [
+      "Kredietkaartcontrole",
+      "Bediende",
+      "Verpakking",
+      "Klant"
+    ],
+    "correct": 0,
+    "explanation": "Banen: Klant, Bediende, Verpakking, Verzending, Kredietkaartcontrole. De betaling wordt goedgekeurd door de kredietkaartcontrole."
+  },
+  {
+    "id": "h05-014",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "question": "Hoe kunnen process requirements de ROI in de business case verhogen?",
+    "options": [
+      "Door een duidelijke winst in de processen aan te tonen",
+      "Door het budget te verlagen",
+      "Door minder te testen",
+      "Door de scope te verkleinen"
+    ],
+    "correct": 0,
+    "explanation": "Een duidelijke winst in de processen kan de ROI verhogen. Daarvoor moet je de huidige processen en de gewenste veranderingen goed in kaart brengen."
+  },
+  {
+    "id": "h05-015",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "question": "Waarom helpen swimlanes bij change management?",
+    "options": [
+      "Je ziet wie welke rol uitvoert in het nieuwe proces en waar grote veranderingen voor gebruikers zitten",
+      "Ze vervangen de training van gebruikers",
+      "Ze maken het proces sneller",
+      "Ze tonen het budget per afdeling"
+    ],
+    "correct": 0,
+    "explanation": "Door de nieuwe swimlanes te vergelijken met de huidige processen zie je snel waar grote veranderingen optreden. Sommige rollen worden misschien geautomatiseerd → input voor training of zelfs een andere jobinhoud."
+  },
+  {
+    "id": "h05-016",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "question": "Welke is GEEN voordeel van process requirements?",
+    "options": [
+      "Ze maken de testfase overbodig",
+      "Input voor de business case",
+      "Input voor het analysedocument",
+      "Input voor change management"
+    ],
+    "correct": 0,
+    "explanation": "Process requirements zijn juist input voor de testfase: testscenario's kunnen gebaseerd worden op de business flow."
+  },
+  {
+    "id": "h05-017",
+    "type": "multichoice",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "question": "Wat hoef je voor DVO NIET te kennen uit dit hoofdstuk van het boek?",
+    "options": [
+      "Niveaus van deelprocessen en BPMN",
+      "Swimlanes",
+      "Process flowcharts",
+      "Process owner en key users"
+    ],
+    "correct": 0,
+    "explanation": "Volgens de slides: niet kennen uit het boek: niveaus van deelprocessen en BPMN."
+  },
+  {
+    "id": "h05-018",
+    "type": "open",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "question": "Voor welke 4 zaken zijn process requirements input? Leg elk kort uit.",
+    "answer": "1) Business case: bepaalt de ROI en of het project doorgaat; een duidelijke winst in de processen kan de ROI verhogen. 2) Analysedocument: wordt gevalideerd door de klant, maakt huidige en gewenste situatie duidelijk en helpt developers omdat de flow duidelijker is (minder input nodig van sleutelgebruikers). 3) Testfase: testscenario's baseren op de business flow; met swimlanes zijn de verantwoordelijkheden duidelijk en vergeet je geen delen van het proces. 4) Change management: swimlanes tonen wie welke rol uitvoert, waar grote veranderingen zitten en welke rollen geautomatiseerd worden → training of andere jobinhoud; tijdig inspelen verlaagt de weerstand."
+  },
+  {
+    "id": "h05-019",
+    "type": "open",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "question": "Wat beschrijft een process flowchart? Noem de 5 elementen.",
+    "answer": "1) De verschillende stappen van een proces, 2) welke gegevens er worden doorgegeven, 3) welke output er gegenereerd wordt, 4) de afhankelijkheden met andere processen, 5) de verschillende rollen (aan de hand van swimlanes)."
+  },
+  {
+    "id": "h05-020",
+    "type": "open",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "question": "Waarom helpen process flows en swimlanes bij het testen?",
+    "answer": "Testscenario's kunnen zich baseren op de business flow. Met swimlanes zijn de verantwoordelijkheden duidelijk en zie je wat automatisch gebeurt en waar nog een actie nodig is. Je vermijdt dat delen van het proces vergeten worden, en de scenario's zijn herkenbaarder voor de eindgebruikers."
+  },
+  {
+    "id": "h05-021",
+    "type": "open",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "best-practice",
+    "question": "Wat is een best practice en waarom gebruikt de business analist die bij process requirements?",
+    "answer": "Een best practice is een manier van werken of opzet van een applicatie die uit verschillende eerdere implementaties is ontstaan en de beste manier van werken identificeert binnen een domein, taak of applicatie. De business analist past ze toe om niet opnieuw het wiel uit te vinden en processen te verbeteren op een bewezen manier."
+  },
+  {
+    "id": "h05-022",
+    "type": "case",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "situation": "Na de invoering van een nieuw systeem wordt het manueel inboeken van facturen volledig geautomatiseerd. Twee medewerkers deden dat tot nu toe elke dag.",
+    "question": "Hoe helpen process requirements hier, en wat moet het project doen?",
+    "answer": "Door de nieuwe swimlanes te vergelijken met de huidige processen zie je vroeg dat deze rol verdwijnt (automatisering). Dat is input voor change management: tijdig communiceren, training voorzien of de jobinhoud van de medewerkers aanpassen. Tijdig inspelen op deze wijzigingen verlaagt de weerstand tegen de verandering."
+  },
+  {
+    "id": "h05-023",
+    "type": "order",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "question": "Zet de stappen uit het swimlane-voorbeeld 'online bestelling' in de juiste volgorde (zonder wijziging):",
+    "items": [
+      "Klant plaatst bestelling",
+      "Bediende ontvangt bestelling",
+      "Bediende reviewt bestelling",
+      "Verpakking stelt bestelling samen",
+      "Verzending verzendt bestelling",
+      "Bediende sluit bestelling af"
+    ],
+    "explanation": "Plaats → ontvang → review (met goedkeuring betaling door kredietkaartcontrole) → samenstellen → verzenden → afsluiten. Moet de bestelling gewijzigd worden, dan gaat ze terug naar de klant."
+  },
+  {
+    "id": "h05-024",
+    "type": "fillin",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "flowchart",
+    "sentence": "Een swim lane diagram laat precies zien ___ wat moet doen in een proces.",
+    "answer": "wie",
+    "alternatives": []
+  },
+  {
+    "id": "h05-025",
+    "type": "fillin",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "sentence": "De business case bepaalt de ___ van een project.",
+    "answer": "ROI",
+    "alternatives": [
+      "return on investment",
+      "roi"
+    ]
+  },
+  {
+    "id": "h05-026",
+    "type": "fillin",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "rollen-requirements",
+    "sentence": "___ zijn eindgebruikers met een zeer goede kennis van het proces die hen vertegenwoordigen in het project.",
+    "answer": "Sleutelgebruikers",
+    "alternatives": [
+      "key users",
+      "keyusers",
+      "sleutelgebruiker",
+      "key user"
+    ]
+  },
+  {
+    "id": "h05-027",
+    "type": "fillin",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "sentence": "Tijdig inspelen op procesveranderingen verlaagt de ___ tegen verandering.",
+    "answer": "weerstand",
+    "alternatives": []
+  },
+  {
+    "id": "h05-028",
+    "type": "fillin",
+    "chapter": 5,
+    "chapterName": "Processen",
+    "category": "voordelen",
+    "sentence": "Als de process flow goed gedocumenteerd is, is er meestal minder input nodig van de ___.",
+    "answer": "sleutelgebruikers",
+    "alternatives": [
+      "key users",
+      "keyusers",
+      "sleutelgebruiker"
+    ]
   }
 ]

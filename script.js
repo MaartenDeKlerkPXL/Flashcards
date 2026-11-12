@@ -1193,12 +1193,10 @@ function continueAfterWrong(override) {
 function checkFillinAnswer(state) {
   const card = queue[currentIndex];
   if (!card) return;
-  const input = $("fillinInput").value.trim().toLowerCase();
-  const correct = card.answer.toLowerCase();
-  const alts = (card.alternatives || []).map((a) => a.toLowerCase());
+  const result = checkAnswer($("fillinInput").value, [card.answer, ...(card.alternatives || [])], ARTICLES_NL);
   const fb = $("fillinFeedback");
-  if (input === correct || alts.includes(input)) {
-    fb.textContent = "Correct!"; fb.className = "quiz-feedback correct";
+  if (result) {
+    fb.textContent = answerFeedback(result, card.answer); fb.className = "quiz-feedback correct";
     document.querySelectorAll(".pm-fillin-blank").forEach((el) => el.textContent = card.answer);
     setTimeout(() => rateWord("easy", loadState()), 800);
   } else {
